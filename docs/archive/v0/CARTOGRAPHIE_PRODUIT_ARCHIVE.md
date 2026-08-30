@@ -1,3 +1,29 @@
+> **STATUS: SUPERSEDED / ARCHIVED**
+>
+> This document is preserved for historical and contextual reference.
+> It is **NOT** the current source of truth.
+>
+> When this document conflicts with the current documentation,
+> **the current documentation takes precedence.**
+>
+> **Superseded on:** 2026-08-30
+> **Superseded by:** the ZeroCorp v1 documentation set —
+> [`PRODUCT_VISION.md`](../../PRODUCT_VISION.md),
+> [`PRODUCT_SPEC.md`](../../PRODUCT_SPEC.md),
+> [`ARCHITECTURE.md`](../../ARCHITECTURE.md),
+> [`DATABASE.md`](../../DATABASE.md),
+> [`DESIGN_SYSTEM.md`](../../DESIGN_SYSTEM.md),
+> [`CLAUDE_CODE_RULES.md`](../../CLAUDE_CODE_RULES.md).
+>
+> **Do not** use this document to justify a product, architecture, database,
+> pricing or engineering decision.
+>
+> Content below is preserved verbatim (original language: French).
+> Decisions that were reversed, and knowledge that still exists only here,
+> are tracked in [`docs/OPEN_DECISIONS.md`](../../OPEN_DECISIONS.md).
+
+---
+
 # ZeroCorp — Cartographie produit et architecture
 
 Document de référence technique. Décrit le produit complet, ses composants, l'architecture multi-tenant, et pour chaque brique les projets open source à récupérer plutôt qu'à recoder.

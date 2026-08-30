@@ -1,3 +1,16 @@
+> **STATUS: CURRENT**
+>
+> This document is part of the current ZeroCorp source of truth.
+>
+> **Owns:** vision, positioning, business model, pricing strategy, ARR milestones, roadmap phases, moat, success metrics. For architecture, database, design-system or engineering detail, the specialized documents below take precedence.
+>
+> When this document conflicts with anything under `docs/archive/`, **this document wins**.
+> See [`docs/README.md`](./README.md) for the full documentation hierarchy and topic ownership map.
+>
+> Last reorganized: 2026-08-30
+
+---
+
 # ZeroCorp — Product Vision, Business Model, Architecture & Design Blueprint
 
 **Document type:** Master product blueprint for product, design, architecture and Claude Code implementation

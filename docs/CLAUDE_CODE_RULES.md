@@ -1,3 +1,16 @@
+> **STATUS: CURRENT**
+>
+> This document is part of the current ZeroCorp source of truth.
+>
+> **Owns:** engineering constitution for Claude Code: process, guardrails, regression strategy, decision protocol.
+>
+> When this document conflicts with anything under `docs/archive/`, **this document wins**.
+> See [`docs/README.md`](./README.md) for the full documentation hierarchy and topic ownership map.
+>
+> Last reorganized: 2026-08-30
+
+---
+
 # ZeroCorp — Claude Code Rules v1
 
 > This document is the engineering constitution for Claude Code working on ZeroCorp.
@@ -843,7 +856,131 @@ no unintended regressions
 
 ---
 
-## 39. Golden Rules
+## 39. Documentation Hierarchy — CURRENT vs ARCHIVED
+
+The repository contains two classes of documentation. They are not equal.
+
+```text
+CURRENT DOCUMENTATION          →  source of truth  →  implement this
+ARCHIVED DOCUMENTATION         →  history only     →  never implement this
+```
+
+### Current source of truth
+
+```text
+docs/PRODUCT_VISION.md
+docs/PRODUCT_SPEC.md
+docs/ARCHITECTURE.md
+docs/DATABASE.md
+docs/DESIGN_SYSTEM.md
+docs/CLAUDE_CODE_RULES.md
+```
+
+### Archived
+
+```text
+docs/archive/**
+```
+
+### Non-negotiable rules
+
+> **Archived documentation must never be treated as current product, architecture,
+> database or engineering specifications.**
+
+> **When current documentation conflicts with archived documentation,
+> current documentation always wins.**
+
+Archived documents may be read to understand *why* a past decision was made.
+They may **never** be cited to justify what to build.
+
+Every document declares its status in a banner on line 1:
+
+```text
+> **STATUS: CURRENT**                 → authoritative
+> **STATUS: SUPERSEDED / ARCHIVED**   → historical only
+```
+
+A file with no status banner is **not authoritative**. Ask before relying on it.
+
+### Topic ownership
+
+Each current document owns specific topics, and the owning document wins on its own
+topic — even against `PRODUCT_VISION.md`. The ownership map is in `docs/README.md`.
+
+### Disputed decisions
+
+`docs/OPEN_DECISIONS.md` records contradictions between current documents, decisions
+reversed since v0, and knowledge that exists only in the archive.
+
+> **Before making a structural decision, check `docs/OPEN_DECISIONS.md`.
+> If the topic is listed as unresolved in Part A, stop and ask. Do not pick a side.**
+
+---
+
+## 40. Documentation Maintenance — the docs are living, not frozen
+
+Preserving content does **not** mean freezing it. Out-of-date documentation is worse
+than no documentation, because Claude Code will implement it.
+
+The archive is frozen. **The current documents are maintained.**
+
+### When a documented decision changes
+
+Whenever a decision changes — in conversation, in code, or because reality proved the
+document wrong — the owning document must be updated. Never leave a current document
+describing a decision that is no longer true (`CLAUDE_CODE_RULES.md` §31).
+
+### Detection duty
+
+Claude Code must actively notice drift, not wait to be told. Raise it when:
+
+- an implementation decision differs from what the owning document says;
+- the human approves something in conversation that contradicts a current document;
+- code is written that a current document does not describe;
+- a Part A contradiction in `OPEN_DECISIONS.md` gets resolved;
+- a Part C item is promoted out of the archive;
+- a vendor fact in `PRODUCT_VISION.md` §76 turns out to be stale.
+
+### Update protocol
+
+```text
+1. Detect the drift.
+2. Report it: what the document says, what is now true, why it changed.
+3. Propose the exact edit — quote the current text and the replacement.
+4. Ask for approval.
+5. On approval, edit ONLY that section. Nothing else in the file.
+6. Record the change in the document's change log where one exists,
+   and in docs/OPEN_DECISIONS.md when it resolves or creates a decision.
+7. Show the diff.
+```
+
+### Rules for the edit itself
+
+- **Surgical only.** Change the section that is wrong. Never rewrite or reflow a
+  document to apply one decision.
+- **Never silently.** No documentation edit without explicit approval, with one
+  exception below.
+- **Never destructive.** Superseded reasoning that still has value moves to
+  `docs/archive/` or `docs/OPEN_DECISIONS.md` Part B. It is not deleted.
+- **Propagate.** If the change affects more than one document, list every affected
+  document in the same proposal. Do not fix one and leave the others contradicting it.
+
+### The one exception — no approval needed
+
+Purely mechanical corrections that change no decision: a broken relative link, a wrong
+section number in a cross-reference, a typo, a stale file path after a move. Make these
+directly and mention them in the summary.
+
+### Documentation and code evolve together
+
+```text
+code  +  docs  +  tests
+```
+
+A feature that contradicts its own specification is not done.
+
+---
+## 41. Golden Rules
 
 > **Build the system we designed, not the system you imagine.**
 
@@ -862,4 +999,8 @@ no unintended regressions
 > **Never trade security for speed without an explicit decision.**
 
 > **A green build is necessary, not sufficient.**
+
+> **Current documentation wins. Archived documentation is history, never a spec.**
+
+> **Keep the documentation true — propose the update, never let it drift silently.**
 

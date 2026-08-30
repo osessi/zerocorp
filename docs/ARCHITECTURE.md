@@ -1,3 +1,16 @@
+> **STATUS: CURRENT**
+>
+> This document is part of the current ZeroCorp source of truth.
+>
+> **Owns:** runtime topology, monorepo layout, domain boundaries, API style, provider abstractions, events, CI/CD, deployment.
+>
+> When this document conflicts with anything under `docs/archive/`, **this document wins**.
+> See [`docs/README.md`](./README.md) for the full documentation hierarchy and topic ownership map.
+>
+> Last reorganized: 2026-08-30
+
+---
+
 # ZeroCorp — Architecture Blueprint v1
 
 > Status: Proposed architecture

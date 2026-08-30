@@ -1,3 +1,16 @@
+> **STATUS: CURRENT**
+>
+> This document is part of the current ZeroCorp source of truth.
+>
+> **Owns:** product scope, plan contents, customer journeys, module behaviour, V1 boundary, product metrics.
+>
+> When this document conflicts with anything under `docs/archive/`, **this document wins**.
+> See [`docs/README.md`](./README.md) for the full documentation hierarchy and topic ownership map.
+>
+> Last reorganized: 2026-08-30
+
+---
+
 # ZeroCorp — Product Specification v1
 
 > Status: Proposed

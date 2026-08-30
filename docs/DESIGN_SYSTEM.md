@@ -1,3 +1,16 @@
+> **STATUS: CURRENT**
+>
+> This document is part of the current ZeroCorp source of truth.
+>
+> **Owns:** design tokens, foundations, product components, layout patterns, website block and variant system, AI visual restrictions.
+>
+> When this document conflicts with anything under `docs/archive/`, **this document wins**.
+> See [`docs/README.md`](./README.md) for the full documentation hierarchy and topic ownership map.
+>
+> Last reorganized: 2026-08-30
+
+---
+
 # ZeroCorp — Design System Framework v1
 
 > Status: Framework / co-design document
