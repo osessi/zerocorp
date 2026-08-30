@@ -3,101 +3,104 @@
 > Architecture diagrams. The `.json` specifications are the source of truth;
 > the `.html` artifacts are generated and git-ignored.
 >
-> Governed by [`../CLAUDE_CODE_RULES.md`](../CLAUDE_CODE_RULES.md) §41.
+> Governed by [`../CLAUDE_CODE_RULES.md`](../CLAUDE_CODE_RULES.md) §42.
 
 ---
 
 # ZeroCorp — Architecture Diagrams
 
-Rendered with [Archify](https://github.com/tt-a1i/archify) v2.16.0 (MIT), installed at
+Rendered with [Archify](https://github.com/tt-a1i/archify) v2.16.0 (MIT), vendored at
 `.claude/skills/archify/`.
 
 **Archify does not decide the architecture.** It renders and verifies the architecture
-that the current documentation decides. If a diagram disagrees with a current document,
-the document is right and the diagram is stale.
+the current documentation decides. If a diagram disagrees with a current document, the
+document is right and the diagram is stale.
 
 ---
 
-## Diagrams
+## Specifications
 
-| Specification | Renders | Source documents |
+| File | Renders | Status |
 |---|---|---|
-| `zerocorp-runtime.architecture.json` | Runtime topology **as documented today** | `ARCHITECTURE.md` §2, §7, §15, §23 · `DATABASE.md` §1 |
-| `zerocorp-runtime.base.architecture.json` | The alternative topology in `PRODUCT_VISION.md` §34 | `PRODUCT_VISION.md` §34 |
+| `zerocorp-runtime.architecture.json` | **The decided topology** — `apps/sites` + `apps/app` + `apps/worker` over a framework-free core | **CURRENT** |
+| `adr-0001-rejected-option-a.architecture.json` | Option A — `web` + NestJS `api` + `worker` | Rejected, kept for comparison |
+| `adr-0001-rejected-option-b.architecture.json` | Option B — `web` + `worker` | Rejected, kept for comparison |
 
-Both exist because the runtime topology is **disputed** — see
-[`../OPEN_DECISIONS.md`](../OPEN_DECISIONS.md) **D1**. Neither diagram resolves it.
+All three validate at showcase quality (9/9 artifact checks, 0 errors, 0 warnings). The
+rejected options are preserved so the trade-off in
+[ADR 0001](../adr/0001-runtime-topology.md) stays inspectable rather than being an
+assertion in prose.
 
 ---
 
 ## Regenerate
 
-Everything below is generated. Nothing here is hand-edited.
-
 ```bash
 cd .claude/skills/archify
 
-# 1. Validate the specification (must be 9/9 checks, 0 errors, 0 warnings)
 node bin/archify.mjs validate architecture \
   ../../../docs/diagrams/zerocorp-runtime.architecture.json --quality showcase --json
 
-# 2. Deliver the artifact (freezes the spec, renders, checks, reports SHA-256)
 node bin/archify.mjs deliver architecture \
   ../../../docs/diagrams/zerocorp-runtime.architecture.json \
   ../../../docs/diagrams/zerocorp-runtime.architecture.html --quality showcase --json
 
-# 3. Collect desktop containment evidence (needs Chrome)
 node bin/archify.mjs visual-check \
   ../../../docs/diagrams/zerocorp-runtime.architecture.html --json
 ```
 
-Open `docs/diagrams/zerocorp-runtime.architecture.html` in a browser. It is a
-self-contained page: theme switch, pan/zoom, search, focus, relationship tracing,
-guided views, and PNG/SVG/WebM export.
+Open the HTML in a browser: theme switch, pan/zoom, search, focus, relationship tracing,
+three guided views, and PNG/SVG/WebM export.
+
+CI validates every `*.architecture.json` on each push — a diagram that no longer
+validates is stale documentation and fails the build.
 
 ---
 
 ## Architecture Delta — verify a structural change
 
-This is the reason Archify is in the repository. It compares two validated snapshots and
-emits a machine receipt of exactly what changed.
+The reason Archify is in this repository. It compares two validated snapshots and emits
+a machine receipt of exactly what changed.
 
 ```bash
-cd .claude/skills/archify
 node bin/archify.mjs compare architecture \
-  ../../../docs/diagrams/zerocorp-runtime.base.architecture.json \
+  ../../../docs/diagrams/adr-0001-rejected-option-b.architecture.json \
   ../../../docs/diagrams/zerocorp-runtime.architecture.json \
-  ../../../docs/diagrams/D1-runtime-topology.delta.html \
-  --quality showcase --json
+  ../../../docs/diagrams/topology.delta.html --quality showcase --json
 ```
 
-It reports added / removed / changed / moved / rerouted facts. It infers **no** impact,
-risk or merge safety — that judgement stays with the human.
+Reports added / removed / changed / moved / rerouted facts. It infers **no** impact, risk
+or merge safety — that judgement stays with the human.
 
-Per `CLAUDE_CODE_RULES.md` §41, any structural proposal under §8 ships with a delta.
+Per `CLAUDE_CODE_RULES.md` §42, any structural proposal under §8 ships with a delta.
 
 ---
 
 ## Authoring a new diagram
 
 ```bash
-cd .claude/skills/archify
-node bin/archify.mjs guide "<describe the scenario>" --json   # pick the type
-node bin/archify.mjs examples                                  # see reference specs
+node bin/archify.mjs guide "<describe the scenario>" --json
+node bin/archify.mjs examples
 ```
 
 Types: `architecture`, `workflow`, `sequence`, `dataflow`, `lifecycle`.
 
-Read `.claude/skills/archify/SKILL.md` before authoring. Write the specification to
+Read `.claude/skills/archify/SKILL.md` first. Write to
 `docs/diagrams/<name>.<type>.json`, then validate → deliver → visual-check.
+
+Useful next diagrams, none of which exist yet:
+
+- `lifecycle` — the company-formation state machine (blocked on `OPEN_DECISIONS.md` D2,
+  which still has three conflicting versions)
+- `dataflow` — the content pipeline from Business Brain to published article
+- `sequence` — voice onboarding: capture → transcription → extraction → approval
+- `workflow` — publish a website version, with the revalidation path
 
 ---
 
 ## Known limitation
 
 Archify's **repository evidence** feature — clickable, revision-pinned links from a node
-to the exact source lines — requires `meta.repository` with a public GitHub URL and a
-40-character commit SHA. ZeroCorp has no GitHub remote yet, and the repository is
-intended to be private, so `sources` are currently omitted from every specification.
-
-Revisit if a public mirror ever exists.
+to exact source lines — requires `meta.repository` with a **public** GitHub URL and a
+40-character commit SHA. `osessi/zerocorp` is private and stays private, so `sources` are
+omitted from every specification.

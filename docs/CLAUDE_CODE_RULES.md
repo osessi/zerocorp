@@ -192,8 +192,10 @@ A regression in these flows is release-blocking.
 Do not silently:
 
 - introduce microservices;
-- replace NestJS;
+- add or remove an application under `apps/`;
+- change the domain / application / infrastructure layering;
 - replace Next.js;
+- replace the worker runtime;
 - replace Drizzle;
 - replace the database model;
 - bypass provider abstractions;
@@ -980,7 +982,77 @@ code  +  docs  +  tests
 A feature that contradicts its own specification is not done.
 
 ---
-## 41. Architecture Visualization — Archify
+## 41. Layer Discipline
+
+Decided in [ADR 0001](./adr/0001-runtime-topology.md). These six rules are what make the
+architecture survive to V2/V3 without a structural rewrite. **None of them relies on you
+remembering.** Each is enforced by the compiler, by module resolution, or by CI.
+
+### The layering
+
+```text
+apps/sites · apps/app · apps/worker        thin adapters, framework-bound
+        ↓
+packages/application                        use cases, ports, transactions
+        ↓
+packages/domain                             entities, invariants, state machines
+        ↑
+packages/db · ai · integrations · storage · …   implement the ports
+```
+
+Dependencies point inward. Infrastructure depends on application; application never
+depends on infrastructure.
+
+### NN-1 — domain and application are framework-free
+
+`packages/domain` and `packages/application` import no framework, no Node built-in and no
+infrastructure package. Anything non-deterministic — a clock, an id, a repository, an
+HTTP call — is injected as a port.
+
+Enforced by: pnpm isolated `node_modules` · `tsconfig` `lib: ["ES2022"]`, `types: []` ·
+`dependency-cruiser` · ESLint · `tests/architecture/framework-freedom.test.ts`.
+
+### NN-2 — one door to tenant data
+
+`packages/db` exposes only `withTenant()`. The raw Drizzle client never leaves the
+package. An application reaches it only from `src/server/container.ts`.
+
+Enforced by: package.json `exports` mapping only `"."` · `dependency-cruiser` · ESLint.
+
+### NN-3 — cross-tenant isolation is release-blocking
+
+Every tenant-owned table gets a case proving tenant A cannot read, update or delete
+tenant B's rows, and that a read-only context cannot write. The suite announces loudly
+when it is skipped rather than passing silently.
+
+### NN-4 — HTTP handlers stay thin
+
+> **HTTP handlers must remain thin: parse, authenticate, authorize, invoke a use case,
+> and serialize the result. Business logic must never live in HTTP handlers.**
+
+This applies equally to route handlers, Server Components and Server Actions.
+
+### NN-5 — contracts first
+
+Everything crossing a boundary is typed in `packages/contracts`. This is what allows
+`apps/api` to be generated later without reinventing a single contract.
+
+### NN-6 — `apps/api` is the public API
+
+When it arrives it serves mobile, partners and enterprise contracts, versioned and
+rate-limited. It is **never** a BFF for `apps/app`, which calls `packages/application`
+directly, for life.
+
+### Before changing a boundary rule
+
+Editing `.dependency-cruiser.cjs`, `eslint.config.mjs`, a package's `exports` field, or a
+`tsconfig` `lib`/`types` entry is a structural change. It requires an ADR and human
+approval — and afterwards, re-run the deliberate-violation check documented in
+`ARCHITECTURE.md` §29. A guardrail nobody has seen fail is a guardrail nobody knows works.
+
+---
+
+## 42. Architecture Visualization — Archify
 
 Archify is the official tool for **representing and verifying** ZeroCorp's architecture.
 
@@ -1040,7 +1112,7 @@ Types: `architecture`, `workflow`, `sequence`, `dataflow`, `lifecycle`.
 
 ---
 
-## 42. Golden Rules
+## 43. Golden Rules
 
 > **Build the system we designed, not the system you imagine.**
 

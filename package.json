@@ -1,0 +1,31 @@
+{
+  "name": "zerocorp",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.33.2",
+  "engines": {
+    "node": ">=20.11"
+  },
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "typecheck": "turbo run typecheck",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "test:tenant-isolation": "vitest run --project tenant-isolation",
+    "boundaries": "depcruise --config .dependency-cruiser.cjs apps packages",
+    "boundaries:graph": "depcruise --config .dependency-cruiser.cjs --output-type dot apps packages",
+    "verify": "pnpm typecheck && pnpm lint && pnpm boundaries && pnpm test",
+    "diagrams:verify": "node .claude/skills/archify/bin/archify.mjs validate architecture docs/diagrams/zerocorp-runtime.architecture.json --quality showcase --json"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.5",
+    "@types/node": "^22.10.2",
+    "dependency-cruiser": "^16.9.0",
+    "eslint": "^9.17.0",
+    "turbo": "^2.3.3",
+    "typescript": "^5.7.2",
+    "typescript-eslint": "^8.18.1",
+    "vitest": "^2.1.8"
+  }
+}

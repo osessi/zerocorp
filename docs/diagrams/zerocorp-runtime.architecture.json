@@ -2,41 +2,41 @@
   "schema_version": 1,
   "diagram_type": "architecture",
   "meta": {
-    "title": "ZeroCorp Runtime Architecture (as documented)",
+    "title": "ZeroCorp Runtime Architecture",
     "quality_profile": "showcase",
     "views": [
       {
-        "id": "request-path",
-        "label": "Primary request path",
+        "id": "three-apps",
+        "label": "Three applications",
         "focus": [
-          "customers",
           "cloudflare",
-          "web",
-          "api",
-          "postgres"
+          "sites",
+          "app",
+          "worker"
         ],
-        "note": "One shared application resolves a custom hostname to a tenant, then reads tenant-scoped data."
+        "note": "Split by trust boundary and traffic profile. A failed back-office release cannot take customer sites down."
       },
       {
-        "id": "tenant-isolation",
-        "label": "Tenant isolation",
+        "id": "one-core",
+        "label": "One shared core",
         "focus": [
-          "auth",
-          "api",
-          "postgres",
-          "storage"
-        ],
-        "note": "Tenant context is resolved at the request boundary; RLS is the second barrier, never the only one."
-      },
-      {
-        "id": "async-work",
-        "label": "Asynchronous work",
-        "focus": [
-          "api",
+          "sites",
+          "app",
           "worker",
+          "application",
+          "domain"
+        ],
+        "note": "Every application calls the same use cases. That is what makes apps/api an addition, not a rewrite."
+      },
+      {
+        "id": "tenant-data",
+        "label": "Tenant data path",
+        "focus": [
+          "application",
+          "postgres",
           "providers"
         ],
-        "note": "Domain events drive durable workflows; vendor SDK calls stay inside provider implementations."
+        "note": "withTenant() pins the tenant for RLS and marks read-only transactions at the database."
       }
     ]
   },
@@ -44,11 +44,11 @@
     {
       "id": "customers",
       "type": "external",
-      "label": "Tenant Customers",
-      "sublabel": "browser · own domain",
+      "label": "Visitors & Founders",
+      "sublabel": "browser",
       "pos": [
         40,
-        290
+        310
       ],
       "size": [
         150,
@@ -59,10 +59,10 @@
       "id": "cloudflare",
       "type": "cloud",
       "label": "Cloudflare for SaaS",
-      "sublabel": "custom hostnames · SSL",
+      "sublabel": "hostnames · SSL",
       "pos": [
-        270,
-        290
+        280,
+        310
       ],
       "size": [
         160,
@@ -70,88 +70,31 @@
       ]
     },
     {
-      "id": "auth",
-      "type": "security",
-      "label": "Supabase Auth",
-      "sublabel": "session · admin MFA",
-      "pos": [
-        540,
-        100
-      ],
-      "size": [
-        150,
-        64
-      ]
-    },
-    {
-      "id": "web",
+      "id": "sites",
       "type": "frontend",
-      "label": "apps/web",
-      "sublabel": "Next.js App Router",
-      "tag": "multi-tenant renderer",
+      "label": "apps/sites",
+      "sublabel": "tenant websites",
+      "tag": "DB read-only",
       "pos": [
-        540,
-        290
+        560,
+        120
       ],
       "size": [
-        150,
+        160,
         64
       ]
     },
     {
-      "id": "redis",
-      "type": "database",
-      "label": "Redis",
-      "sublabel": "cache · rate limiting",
+      "id": "app",
+      "type": "frontend",
+      "label": "apps/app",
+      "sublabel": "back-office · admin",
       "pos": [
-        820,
-        100
+        560,
+        310
       ],
       "size": [
-        150,
-        64
-      ]
-    },
-    {
-      "id": "api",
-      "type": "backend",
-      "label": "apps/api",
-      "sublabel": "NestJS + Fastify",
-      "tag": "topology disputed",
-      "pos": [
-        820,
-        290
-      ],
-      "size": [
-        150,
-        64
-      ]
-    },
-    {
-      "id": "storage",
-      "type": "cloud",
-      "label": "Private Storage",
-      "sublabel": "identity documents",
-      "pos": [
-        1100,
-        100
-      ],
-      "size": [
-        170,
-        64
-      ]
-    },
-    {
-      "id": "postgres",
-      "type": "database",
-      "label": "PostgreSQL",
-      "sublabel": "tenant_id + RLS",
-      "pos": [
-        1100,
-        290
-      ],
-      "size": [
-        170,
+        160,
         64
       ]
     },
@@ -161,22 +104,64 @@
       "label": "apps/worker",
       "sublabel": "Inngest workflows",
       "pos": [
-        820,
-        480
+        560,
+        500
       ],
       "size": [
-        150,
+        160,
+        64
+      ]
+    },
+    {
+      "id": "postgres",
+      "type": "database",
+      "label": "PostgreSQL",
+      "sublabel": "tenant_id + RLS",
+      "pos": [
+        1120,
+        120
+      ],
+      "size": [
+        160,
+        64
+      ]
+    },
+    {
+      "id": "application",
+      "type": "backend",
+      "label": "packages/application",
+      "sublabel": "use cases · ports",
+      "pos": [
+        840,
+        310
+      ],
+      "size": [
+        170,
         64
       ]
     },
     {
       "id": "providers",
       "type": "external",
-      "label": "Provider Abstractions",
-      "sublabel": "external SDK boundary",
+      "label": "Provider Adapters",
+      "sublabel": "SDK boundary",
       "pos": [
-        1100,
-        480
+        1120,
+        500
+      ],
+      "size": [
+        160,
+        64
+      ]
+    },
+    {
+      "id": "domain",
+      "type": "backend",
+      "label": "packages/domain",
+      "sublabel": "pure · no framework",
+      "pos": [
+        1120,
+        310
       ],
       "size": [
         170,
@@ -187,19 +172,19 @@
   "boundaries": [
     {
       "kind": "region",
-      "label": "ZeroCorp modular monolith",
+      "label": "Initial deployment — apps/api not deployed",
       "wraps": [
-        "web",
-        "api",
+        "sites",
+        "app",
         "worker"
       ]
     },
     {
       "kind": "security-group",
-      "label": "Tenant-isolated data",
+      "label": "Framework-free core",
       "wraps": [
-        "postgres",
-        "storage"
+        "application",
+        "domain"
       ]
     }
   ],
@@ -212,93 +197,99 @@
       "variant": "emphasis"
     },
     {
-      "id": "edge-to-web",
+      "id": "edge-to-sites",
       "from": "cloudflare",
-      "to": "web",
+      "to": "sites",
       "label": "host → tenant",
-      "variant": "emphasis"
-    },
-    {
-      "id": "auth-session",
-      "from": "auth",
-      "to": "web",
-      "label": "session",
-      "variant": "security",
-      "fromSide": "bottom",
-      "toSide": "top",
-      "labelDy": 24
-    },
-    {
-      "id": "web-to-api",
-      "from": "web",
-      "to": "api",
-      "label": "REST + OpenAPI",
-      "variant": "emphasis"
-    },
-    {
-      "id": "api-cache",
-      "from": "api",
-      "to": "redis",
-      "label": "cache · rate limit",
       "fromSide": "top",
+      "toSide": "left"
+    },
+    {
+      "id": "edge-to-app",
+      "from": "cloudflare",
+      "to": "app",
+      "label": "authenticated",
+      "variant": "emphasis",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "sites-uses",
+      "from": "sites",
+      "to": "application",
+      "label": "read-only",
+      "variant": "security",
+      "fromSide": "right",
+      "toSide": "top"
+    },
+    {
+      "id": "app-uses",
+      "from": "app",
+      "to": "application",
+      "label": "use cases",
+      "variant": "emphasis",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "worker-uses",
+      "from": "worker",
+      "to": "application",
+      "label": "same use cases",
+      "fromSide": "right",
       "toSide": "bottom"
     },
     {
-      "id": "api-sql",
-      "from": "api",
-      "to": "postgres",
-      "label": "tenant-scoped",
+      "id": "core",
+      "from": "application",
+      "to": "domain",
+      "label": "invariants",
       "variant": "emphasis",
-      "labelDy": 30
+      "fromSide": "right",
+      "toSide": "left"
     },
     {
-      "id": "api-documents",
-      "from": "api",
-      "to": "storage",
-      "label": "signed URLs",
-      "variant": "security"
+      "id": "tenant-data",
+      "from": "application",
+      "to": "postgres",
+      "label": "withTenant",
+      "variant": "security",
+      "fromSide": "top",
+      "toSide": "left"
     },
     {
-      "id": "api-events",
-      "from": "api",
-      "to": "worker",
-      "label": "domain events",
+      "id": "outbound",
+      "from": "application",
+      "to": "providers",
+      "label": "ports",
       "variant": "dashed",
       "fromSide": "bottom",
-      "toSide": "top",
-      "labelDy": 24
-    },
-    {
-      "id": "worker-outbound",
-      "from": "worker",
-      "to": "providers",
-      "label": "outbound calls",
-      "variant": "dashed"
+      "toSide": "left"
     }
   ],
   "cards": [
     {
       "dot": "cyan",
-      "title": "Edge and rendering",
+      "title": "Three applications, three blast radii",
       "items": [
-        "One shared application serves every tenant",
-        "Sites are data, not per-customer code"
+        "apps/sites is anonymous, edge-cached and read-only",
+        "A back-office release cannot take customer sites down"
       ]
     },
     {
       "dot": "emerald",
-      "title": "Tenant isolation",
+      "title": "One framework-free core",
       "items": [
-        "Every tenant-owned row carries tenant_id",
-        "Application queries are tenant-scoped by construction"
+        "All three apps call the same use cases",
+        "domain and application import no framework"
       ]
     },
     {
-      "dot": "amber",
-      "title": "Unresolved: OPEN_DECISIONS D1",
+      "dot": "violet",
+      "title": "ADR 0001 — apps/api on trigger",
       "items": [
-        "ARCHITECTURE.md specifies apps/api on NestJS",
-        "PRODUCT_VISION.md section 34 specifies web + worker only"
+        "Added when mobile, a public API or a partner arrives",
+        "Public API, never a BFF for apps/app"
       ]
     }
   ]

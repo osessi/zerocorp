@@ -1,0 +1,25 @@
+{
+  "//": "Solution file. Build order is derived from project references, which mirror the architectural layers.",
+  "files": [],
+  "references": [
+    { "path": "packages/contracts" },
+    { "path": "packages/config" },
+    { "path": "packages/design-system" },
+    { "path": "packages/domain" },
+    { "path": "packages/application" },
+    { "path": "packages/db" },
+    { "path": "packages/tenancy" },
+    { "path": "packages/auth" },
+    { "path": "packages/billing" },
+    { "path": "packages/ai" },
+    { "path": "packages/integrations" },
+    { "path": "packages/storage" },
+    { "path": "packages/notifications" },
+    { "path": "packages/security" },
+    { "path": "packages/ui" },
+    { "path": "packages/site-renderer" },
+    { "path": "apps/sites" },
+    { "path": "apps/app" },
+    { "path": "apps/worker" }
+  ]
+}

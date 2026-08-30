@@ -46,83 +46,106 @@ Core principle:
 
 ---
 
-## 2. Proposed Runtime Architecture
+## 2. Runtime Architecture
+
+> Decided in [ADR 0001](./adr/0001-runtime-topology.md) (Accepted, 2026-08-30), which
+> resolves `OPEN_DECISIONS.md` D1. The earlier NestJS `apps/api` proposal was never a
+> decision; it is preserved in the ADR with the reasoning for and against.
+
+### Target Architecture
+
+The end state. Its boundaries exist in the repository today.
 
 ```text
-                           ZERO CORP
-                               |
-            +------------------+------------------+
-            |                  |                  |
-         Next.js            NestJS API          Worker
-        Web + SSR           Business API       Async jobs
-            |                  |                  |
-            +------------------+------------------+
-                               |
-                         Shared packages
-                               |
-        +----------+------------+------------+-------------+
-        |          |            |            |             |
-      Postgres   Redis        Storage      AI layer     Integrations
-      + RLS                   private      providers      providers
-                               |
-                         Supabase / S3-like
+                    customer domains  /  zerocorp app
+                                 |
+                 +---------------+---------------+---------------+
+                 |               |               |               |
+            apps/sites       apps/app       apps/worker      apps/api
+            tenant sites     back-office    jobs, agents     public API
+            anonymous        + admin        workflows        mobile / partners
+            edge-cached      authenticated                   ADDED ON TRIGGER
+            DB read-only
+                 |               |               |               |
+                 +---------------+---------------+---------------+
+                                 |
+                        packages/application         use cases, ports
+                                 |
+                        packages/domain              rules, invariants
+                                 |
+        +--------+--------+------+------+--------+--------+---------+
+        |        |        |             |        |        |         |
+       db     tenancy   auth        billing     ai   integrations storage
+     + RLS                                                     notifications
+                                                                  security
 ```
+
+### Initial Deployment / Current Topology
+
+What is actually deployed today.
+
+```text
+apps/sites   ·   apps/app   ·   apps/worker
+
+apps/api     NOT DEPLOYED — no extraction trigger has fired
+```
+
+**This distinction is binding across all ZeroCorp documentation.** The boundaries of the
+target architecture exist now; components that carry no value yet are not built now. Any
+component absent from the current topology must remain reachable by **addition**, never
+by rewrite.
 
 ### Application responsibilities
 
-#### `apps/web`
-Next.js App Router.
+#### `apps/sites`
+Next.js App Router. The public multi-tenant website renderer.
+
+Owns:
+
+- host-based tenant resolution at the edge;
+- rendering published page versions through `@zerocorp/site-renderer`;
+- ISR with tag-based revalidation on publish;
+- sitemaps, robots and the per-tenant SEO surface.
+
+Runs against a **read-only** PostgreSQL role, and `withTenant()` additionally issues
+`SET LOCAL TRANSACTION READ ONLY`. A write from this application fails at the database
+regardless of what the code attempts.
+
+Deployed independently: a failed back-office release cannot take customer websites down.
+
+#### `apps/app`
+Next.js App Router. Everything authenticated.
 
 Owns:
 
 - marketing site;
-- authenticated customer application;
 - onboarding UI;
-- client back-office;
+- customer back-office;
 - block editor;
-- public multi-tenant website rendering;
-- notification center UI.
+- admin console;
+- notification center UI;
+- HTTP entry points (route handlers) and webhook ingestion.
 
-Next.js is the frontend framework. It is not the NestJS API.
-
-#### `apps/api`
-NestJS + TypeScript, preferably using the Fastify adapter.
-
-Owns:
-
-- authentication integration;
-- authorization;
-- tenant resolution;
-- business-domain logic;
-- CRUD and commands;
-- provider orchestration;
-- webhook ingestion;
-- API validation;
-- audit logging;
-- billing/credit operations;
-- generation requests;
-- admin operations.
-
-NestJS is explicitly a server-side application framework and is designed around modules, providers, guards, pipes, interceptors and testing. The official documentation supports Express and Fastify adapters.
+Read-write. Calls `packages/application` directly — never through an HTTP API of our own.
 
 #### `apps/worker`
-Dedicated asynchronous execution process.
+Dedicated asynchronous execution process. Inngest is the workflow control plane.
 
 Owns:
 
-- long-running jobs;
-- scheduled workflows;
-- AI generation;
-- content generation;
-- social publishing;
-- email workflows;
-- domain provisioning;
-- website generation;
+- long-running jobs and scheduled workflows;
+- AI and content generation;
+- social publishing, email workflows, domain provisioning;
 - agent execution;
-- retries and backoff;
-- reconciliation jobs.
+- retries, backoff and reconciliation.
 
-Use Inngest as the workflow/job control plane rather than building a custom queue system first.
+#### `apps/api` — not deployed
+The **public** API: mobile, partners, enterprise contracts. Versioned, rate-limited,
+key-authenticated.
+
+**Never a BFF for `apps/app`** (ADR 0001, NN-6). Extraction triggers T1–T5 are in the
+ADR. Its controllers will invoke the same use cases the route handlers invoke, which is
+what makes it an addition rather than a migration.
 
 ---
 
@@ -160,44 +183,58 @@ Playwright
 ```text
 /
 ├── apps/
-│   ├── web/
-│   ├── api/
-│   └── worker/
+│   ├── sites/                    tenant websites — anonymous, DB read-only
+│   ├── app/                      back-office + admin — authenticated
+│   ├── worker/                   jobs, workflows, agents
+│   └── (api/)                    public API — added on trigger, NOT present
 │
 ├── packages/
-│   ├── ui/
-│   ├── design-system/
-│   ├── db/
-│   ├── auth/
-│   ├── config/
-│   ├── contracts/
-│   ├── i18n/
-│   ├── domain/
-│   ├── ai/
-│   ├── billing/
-│   ├── tenancy/
-│   ├── observability/
-│   ├── security/
-│   ├── storage/
-│   └── integrations/
+│   ├── contracts/                L0  Zod schemas for everything crossing a boundary
+│   ├── config/                   L0  validated runtime configuration
+│   ├── design-system/            L0  tokens and primitives
+│   ├── domain/                   L1  entities, invariants, state machines
+│   ├── application/              L2  use cases, ports, transaction boundaries
+│   ├── db/                       L3  Drizzle, RLS, withTenant — the tenant choke point
+│   ├── tenancy/                  L3  host → tenant resolution, context propagation
+│   ├── auth/                     L3  sessions, identity, authorization policies
+│   ├── billing/                  L3  subscriptions, credit ledger, entitlements
+│   ├── ai/                       L3  LLM / image / transcription providers, routing
+│   ├── integrations/             L3  formation, email, social, domains, payments
+│   ├── storage/                  L3  private buckets, signed URLs
+│   ├── notifications/            L3  in-app, email, Telegram dispatch
+│   ├── security/                 L3  encryption, webhook signatures, rate limiting
+│   ├── ui/                       L4  authenticated product components
+│   └── site-renderer/            L4  block registry and tenant page renderer
 │
 ├── docs/
+│   ├── README.md                 documentation index and ownership map
+│   ├── OPEN_DECISIONS.md         contradictions, reversals, gaps
 │   ├── PRODUCT_VISION.md
 │   ├── PRODUCT_SPEC.md
 │   ├── ARCHITECTURE.md
 │   ├── DATABASE.md
 │   ├── DESIGN_SYSTEM.md
-│   └── CLAUDE_CODE_RULES.md
+│   ├── CLAUDE_CODE_RULES.md
+│   ├── adr/                      architecture decision records
+│   ├── diagrams/                 Archify specifications (JSON IR)
+│   └── archive/                  historical only, never a specification
 │
-├── tooling/
-│   ├── scripts/
-│   └── generators/
+├── tests/
+│   ├── architecture/             NN-1, NN-2, NN-6 asserted structurally
+│   └── tenant-isolation/         NN-3 — release-blocking
 │
+├── .dependency-cruiser.cjs       the executable form of the boundary rules
+├── eslint.config.mjs
+├── tsconfig.base.json            per-layer lib/types lockdown
+├── tsconfig.json                 solution file — references mirror the layers
 ├── pnpm-workspace.yaml
 ├── turbo.json
 ├── package.json
 └── pnpm-lock.yaml
 ```
+
+`observability/` and `i18n/` appeared in the earlier layout and are **not** created yet.
+They have no home today — tracked in `OPEN_DECISIONS.md`.
 
 ### Boundary rule
 
@@ -231,86 +268,80 @@ worker → web internals
 
 ## 4. Domain Boundaries
 
-Proposed domain modules:
+Business capabilities are modules inside `packages/domain` and `packages/application`,
+not modules inside a web framework. An application never owns a domain; it adapts to one.
 
 ```text
-Identity
-Tenancy
-Business
-CompanyFormation
-Brand
-Website
-Content
-Leads
-Email
-Social
-CRM
-Agents
-Notifications
-Billing
-Credits
-Domains
-Documents
-Admin
-Analytics
+identity · tenancy · business · formation · brand · website · content
+leads · email · social · crm · agents · notifications · billing · credits
+domains · documents · admin · analytics
 ```
 
-The NestJS application should be structured with feature modules.
-
-Example:
+Each capability appears twice, with a strict division of labour:
 
 ```text
-apps/api/src/
-├── app.module.ts
-├── common/
-├── modules/
-│   ├── auth/
-│   ├── tenants/
-│   ├── business/
-│   ├── formation/
-│   ├── websites/
-│   ├── content/
-│   ├── leads/
-│   ├── email/
-│   ├── social/
-│   ├── agents/
-│   ├── notifications/
-│   ├── billing/
-│   ├── credits/
-│   ├── domains/
-│   ├── documents/
-│   └── admin/
-└── main.ts
+packages/domain/<capability>/          entities, value objects, invariants,
+                                       state machines, domain events
+                                       pure — no IO, no framework, no clock
+
+packages/application/<capability>/     use cases, ports, transaction boundaries
+                                       depends on domain and contracts only
 ```
 
-NestJS recommends multiple modules to encapsulate related capabilities; each module should expose a deliberate public interface.
+Infrastructure implements the ports the application declares. Dependencies point inward:
+`db`, `ai`, `integrations` and the other Layer 3 packages depend on `application`, never
+the reverse.
+
+```text
+apps/*                    thin adapters
+   ↓
+packages/application      use cases + ports
+   ↓
+packages/domain           rules and invariants
+   ↑
+packages/db · ai · integrations · storage · …    implement the ports
+```
+
+Composition happens in each application's `src/server/container.ts`. That file is the
+only place in an application allowed to import `@zerocorp/db`, and it is where
+`apps/sites` receives a read-only unit of work while `apps/app` and `apps/worker`
+receive a read-write one.
 
 ---
 
 ## 5. API Style
 
-Use **REST + OpenAPI** for the initial API.
+### Internal — `apps/app` and `apps/worker`
 
-Reasons:
+There is no internal HTTP API. `apps/app` route handlers and `apps/worker` jobs invoke
+use cases from `packages/application` directly, in process.
 
-- clear contracts;
-- easy debugging;
-- external integration friendliness;
-- strong tooling;
-- simple browser/server boundary;
-- easier future public API.
+An HTTP handler stays thin: **parse, authenticate, authorize, invoke a use case, and
+serialize the result. Business logic must never live in an HTTP handler, a Server
+Component or a Server Action.**
 
-Every endpoint must define:
+Every entry point must define:
 
 - authentication requirements;
 - tenant scope;
-- role/permission requirements;
-- request schema;
+- role and permission requirements;
+- request schema (Zod, from `packages/contracts`);
 - response schema;
 - error contract;
 - idempotency expectations where applicable.
 
-Use DTOs and runtime validation at API boundaries.
+### External — webhooks
+
+Inbound provider webhooks are route handlers in `apps/app`. They verify the signature,
+enforce idempotency on the provider event id, and hand off to a use case. They never
+process inline.
+
+### Public — `apps/api`, when a trigger fires
+
+**REST + OpenAPI, versioned from its first release**, generated from
+`packages/contracts`. It is a product with a stability contract, a deprecation policy,
+rate limiting and key-based authentication — deliberately not the same surface as the
+internal use-case layer (ADR 0001, NN-6).
 
 ---
 
@@ -866,36 +897,47 @@ Preview environments should use isolated data.
 
 ## 23. Deployment Topology
 
-Suggested bootstrap topology:
+### Initial Deployment / Current Topology
 
 ```text
-Cloudflare
-   ↓
-public domains / DNS / edge
-
-Next.js
-   ↓
-web runtime
-
-NestJS
-   ↓
-API runtime
-
-Worker
-   ↓
-Inngest workflows
-
-Supabase
-   ├── Postgres
-   ├── Auth
-   └── Storage
-
-Redis
-   ↓
-cache / rate limiting / ephemeral coordination
+Cloudflare for SaaS          custom hostnames, SSL, CDN
+        ↓
+   +----+--------------------+
+   |                         |
+apps/sites              apps/app                apps/worker
+tenant websites         back-office + admin     Inngest workflows
+anonymous               authenticated           bursty
+edge-cached (ISR)       no cache                long-running
+DB role: READ-ONLY      DB role: read-write     DB role: read-write
+   |                         |                        |
+   +-------------+-----------+------------------------+
+                 |
+          Supabase Postgres + RLS   ·   Redis   ·   private object storage
 ```
 
-The exact hosting provider should remain a deployment decision, not a domain-architecture dependency.
+Three deployments, three blast radii, three cache strategies. A failed `apps/app`
+release cannot take customer websites down.
+
+### Target Architecture adds
+
+```text
+apps/api    public API — added when an extraction trigger fires (ADR 0001, T1–T5)
+```
+
+### Database roles — a security boundary, not a convention
+
+```sql
+-- apps/sites
+CREATE ROLE zerocorp_sites LOGIN;
+GRANT SELECT ON ALL TABLES IN SCHEMA public TO zerocorp_sites;
+```
+
+`apps/sites` receives `SITES_DATABASE_URL` and never `DATABASE_URL`, and `withTenant()`
+issues `SET LOCAL TRANSACTION READ ONLY`. A write from the public renderer fails at the
+database with SQLSTATE 25006. Asserted in `tests/architecture/framework-freedom.test.ts`.
+
+The exact hosting provider remains a deployment decision, not a domain-architecture
+dependency.
 
 ---
 
@@ -982,19 +1024,64 @@ Each ADR should contain:
 
 ## 28. Open Decisions To Validate
 
-Before implementation, explicitly review:
+Resolved since the first draft:
 
-- hosting topology;
-- exact Redis provider;
-- exact Supabase deployment model;
-- whether web/API domains are separated;
-- REST client generation strategy;
-- Fastify vs Express adapter;
-- exact email infrastructure;
-- exact company-formation provider;
-- exact agent runtime;
+- **runtime topology and web/API separation** — [ADR 0001](./adr/0001-runtime-topology.md);
+- **Fastify vs Express adapter** — moot; no NestJS application is deployed.
+
+Still open, tracked in `OPEN_DECISIONS.md`:
+
+- hosting topology and the exact Redis provider;
+- the exact Supabase deployment model;
+- the exact email infrastructure;
+- the exact company-formation provider (and a mandatory second one);
+- the exact agent runtime;
 - identity verification strategy;
-- data retention periods;
-- backup/recovery policy;
-- final production observability stack.
+- data retention periods and backup/recovery policy;
+- final production observability stack — and whether it needs a `packages/observability`;
+- where i18n lives, given that all user-facing strings must be localizable;
+- design-system token values, which block all UI work.
 
+---
+
+## 29. Boundary Enforcement
+
+The non-negotiables from [ADR 0001](./adr/0001-runtime-topology.md), and the mechanism
+that enforces each. **None of these relies on review.** They are the reason Option C
+survives to V2/V3 without a structural rewrite.
+
+| | Rule | Mechanism |
+|---|---|---|
+| **NN-1** | `packages/domain` and `packages/application` import no framework, no Node built-in, no infrastructure package | pnpm isolated `node_modules` — an undeclared dependency is unresolvable · `tsconfig` `lib: ["ES2022"]`, `types: []` · `dependency-cruiser` · ESLint `no-restricted-imports` · `tests/architecture` |
+| **NN-2** | `packages/db` exposes only `withTenant()`. Apps reach it only from `src/server/container.ts` | package.json `exports` maps only `"."`, so subpaths are unresolvable · `dependency-cruiser` `db-is-reached-only-from-composition-roots` · ESLint |
+| **NN-3** | Cross-tenant isolation tests are release-blocking | `pnpm test` in CI; the suite prints a loud warning when `TEST_DATABASE_URL` is absent rather than passing silently |
+| **NN-4** | HTTP handlers stay thin: parse, authenticate, authorize, invoke a use case, serialize. Business logic never lives in an HTTP handler, a Server Component or a Server Action | `dependency-cruiser` · ESLint · review |
+| **NN-5** | `packages/contracts` types everything crossing a boundary | present since the scaffold commit |
+| **NN-6** | `apps/api` is the public API, never a BFF for `apps/app` | `dependency-cruiser` `apps-never-import-each-other` · ADR 0001 |
+
+### Commands
+
+```bash
+pnpm typecheck     # 19 projects, layered via tsconfig references
+pnpm lint          # ESLint, second net over the module graph
+pnpm boundaries    # dependency-cruiser — the executable form of NN-1, NN-2, NN-6
+pnpm test          # includes the tenant-isolation gate (NN-3)
+pnpm verify        # all four, in order — what CI runs
+```
+
+### Verifying the guardrails themselves
+
+The rules were validated by introducing four deliberate violations and confirming each
+was rejected:
+
+| Violation | Rejected by |
+|---|---|
+| `packages/domain` imports `next/server` | TypeScript (unresolvable) · dependency-cruiser · ESLint |
+| `packages/application` imports `@zerocorp/db` | pnpm (undeclared) · dependency-cruiser · ESLint |
+| `apps/app/src/app/*` imports `@zerocorp/db` | dependency-cruiser · ESLint |
+| any module imports `@zerocorp/db/internal/client` | package `exports` (unresolvable) · dependency-cruiser |
+
+Re-run that check whenever a boundary rule is edited. A guardrail nobody has seen fail is
+a guardrail nobody knows works.
+
+---

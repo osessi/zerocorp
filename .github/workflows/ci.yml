@@ -1,0 +1,62 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Typecheck · Lint · Boundaries · Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.33.2
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install (frozen lockfile)
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Lint
+        run: pnpm lint
+
+      # Release-blocking. Enforces NN-1, NN-2 and NN-6 on the module graph.
+      - name: Architecture boundaries
+        run: pnpm boundaries
+
+      # Release-blocking. NN-3.
+      - name: Tests (incl. tenant isolation)
+        run: pnpm test
+
+      - name: Build
+        run: pnpm build
+
+  diagrams:
+    name: Architecture diagrams stay valid
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+      # A diagram that no longer validates is stale documentation.
+      - name: Validate Archify specifications
+        run: |
+          for spec in docs/diagrams/*.architecture.json; do
+            echo "-- $spec"
+            node .claude/skills/archify/bin/archify.mjs validate architecture "$spec" --quality showcase --json
+          done

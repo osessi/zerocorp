@@ -31,40 +31,21 @@ These must be decided before the corresponding code is written.
 
 ---
 
-## D1 — Runtime topology: NestJS API or Next.js-only? 🔴 BLOCKING
+## D1 — Runtime topology ✅ RESOLVED
 
-**Severity:** highest. This decides the shape of the entire repository.
+**Resolved 2026-08-30 by [ADR 0001](./adr/0001-runtime-topology.md) (Accepted).**
 
-| Source | Says |
-|---|---|
-| `archive/v0/CARTOGRAPHIE_PRODUIT_ARCHIVE.md` §4 | "Front + API — **Next.js (App Router) + TypeScript** — un seul repo" |
-| `PRODUCT_VISION.md` §34 | Modular monolith: `apps/web/` + `apps/worker/`. **No `apps/api`. NestJS is never mentioned in the entire 3 177-line master blueprint.** |
-| `ARCHITECTURE.md` §2, §3, §23 | Three runtimes: `apps/web` (Next.js) + **`apps/api` (NestJS + Fastify)** + `apps/worker` |
-| `CLAUDE_CODE_RULES.md` §8 | "Do not silently … **replace NestJS**" — treats NestJS as a locked decision |
+Neither of the two documented options was chosen. The contradiction exposed a third
+risk that both left open — tenant websites and the authenticated back-office sharing one
+deployment, so a failed back-office release would take 500 customer sites down.
 
-**The problem:** NestJS appears for the first time in `ARCHITECTURE.md`, is not derived
-from `PRODUCT_VISION.md`, and is then hardened into an unchangeable rule in
-`CLAUDE_CODE_RULES.md` §8 — without ever having been an explicit decision.
+**Decision: `apps/sites` + `apps/app` + `apps/worker`**, split by trust boundary and
+traffic profile rather than by frontend/backend. `apps/api` is added only when an
+extraction trigger fires, and is the **public** API — never an internal BFF.
 
-**Consequences of each path:**
-
-| | Next.js only (web + worker) | Next.js + NestJS API + worker |
-|---|---|---|
-| Runtimes to deploy | 2 | 3 |
-| Auth / validation / tenant context | one implementation | duplicated across boundaries |
-| Ops burden for a solo bootstrapper | lower | materially higher |
-| Public API later | needs extraction work | ready out of the box |
-| Domain-logic discipline | requires convention | enforced by framework structure |
-| Fit with `PRODUCT_VISION.md` §65 ("do not over-engineer infrastructure") | aligned | tension |
-
-**Recommendation (not applied):** given a solo bootstrapped founder and
-`PRODUCT_VISION.md` §65 / §34, start with **Next.js `apps/web` + `apps/worker`**, and
-keep domain logic in `packages/domain/*` so it can be lifted into a NestJS service
-later without a rewrite. Extract `apps/api` only when a stated trigger fires
-(public API, separate scaling, team boundary).
-
-**Required before scaffolding.** Whichever way this goes, `ARCHITECTURE.md`,
-`PRODUCT_VISION.md` §34 and `CLAUDE_CODE_RULES.md` §8 must be made to agree.
+The full analysis, the rejected options, the negative consequences, the six
+non-negotiables and the migration path are in the ADR. See also `ARCHITECTURE.md` §2,
+§23 and §29.
 
 ---
 
@@ -186,7 +167,9 @@ nobody re-litigates them from the archive.
 | B7 | **Content volume** | "N articles/day", publication automatic | High volume is **generation capacity, not a publishing target**; quality gates decide publication | `PRODUCT_VISION.md` §19 · `PRODUCT_SPEC.md` §14 |
 | B8 | **`leads` tenancy** | `leads` keyed by `list_id` only | `leads` carries `tenant_id` directly | `DATABASE.md` §10 *(already documented in-place)* |
 | B9 | **Website publishing** | `pages.content_json` mutated in place | Draft + **immutable published versions** (`page_versions`) with rollback | `ARCHITECTURE.md` §10 · `DATABASE.md` §6 |
-| B10 | **Repository shape** | Single Next.js repo | **pnpm + Turborepo monorepo**, `apps/*` + `packages/*` | `ARCHITECTURE.md` §3 *(but see D1)* |
+| B10 | **Repository shape** | Single Next.js repo | **pnpm + Turborepo monorepo**, `apps/*` + `packages/*` | `ARCHITECTURE.md` §3 |
+| B11 | **Runtime topology** | `apps/web` + `apps/worker` (v0) · then `apps/api` NestJS (never decided) | **`apps/sites` + `apps/app` + `apps/worker`**; `apps/api` is the public API, added on trigger | [ADR 0001](./adr/0001-runtime-topology.md) |
+| B12 | **Business capability packages** | one top-level package per capability | capabilities are **modules inside** `packages/domain` and `packages/application` | `ARCHITECTURE.md` §4 |
 
 ---
 
@@ -441,3 +424,4 @@ Several Part C items above have no home until these exist.
 | Date | Change |
 |---|---|
 | 2026-08-30 | Register created during documentation reorganization. 7 unresolved contradictions (Part A), 10 recorded reversals (Part B), 9 archive-only knowledge items (Part C), 7 gaps (Part D). No decision was changed. |
+| 2026-08-30 | **D1 resolved** by ADR 0001 (Option C). Part A now holds 6 open contradictions. Part B gains B11 and B12. D-G6 (design-system token values) becomes the top remaining blocker. |

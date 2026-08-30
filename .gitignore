@@ -28,3 +28,11 @@ docs/diagrams/*.png
 docs/diagrams/*.receipt.json
 docs/diagrams/*.visual-check.json
 !docs/diagrams/README.md
+
+# Monorepo build output
+.turbo/
+**/.turbo/
+**/dist/
+**/.next/
+**/*.tsbuildinfo
+next-env.d.ts

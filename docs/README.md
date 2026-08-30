@@ -68,7 +68,15 @@ Example: `PRODUCT_VISION.md` and `ARCHITECTURE.md` describe the runtime differen
 
 | Document | Purpose |
 |---|---|
+| [`adr/`](./adr/README.md) | **Architecture Decision Records.** A structural decision is only official once it is an ADR. |
 | [`OPEN_DECISIONS.md`](./OPEN_DECISIONS.md) | Contradictions between documents, decisions reversed since v0, and knowledge that still exists only in the archive. **Read before making a structural decision.** |
+| [`diagrams/`](./diagrams/README.md) | Archify specifications. The `.json` is the source; HTML is generated. |
+
+Accepted ADRs:
+
+| # | Decision |
+|---|---|
+| [0001](./adr/0001-runtime-topology.md) | Runtime topology — `sites` + `app` + `worker`; `api` is the public API, added on trigger |
 
 ---
 
@@ -108,7 +116,6 @@ docs/BILLING_AND_USAGE.md
 docs/I18N.md
 docs/CONTENT_ENGINE.md
 docs/LICENSING.md
-docs/adr/            (architecture decision records — see ARCHITECTURE.md §26)
 ```
 
 Until a document exists, its topic is owned by the closest current document,

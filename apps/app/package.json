@@ -1,0 +1,34 @@
+{
+  "name": "@zerocorp/app",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "next": "^15.1.3",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "@zerocorp/ui": "workspace:*",
+    "@zerocorp/design-system": "workspace:*",
+    "@zerocorp/application": "workspace:*",
+    "@zerocorp/contracts": "workspace:*",
+    "@zerocorp/config": "workspace:*",
+    "@zerocorp/tenancy": "workspace:*",
+    "@zerocorp/auth": "workspace:*",
+    "@zerocorp/billing": "workspace:*",
+    "@zerocorp/notifications": "workspace:*",
+    "@zerocorp/security": "workspace:*",
+    "@zerocorp/db": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.2",
+    "@types/node": "^22.10.2",
+    "@types/react": "^19.0.2",
+    "@types/react-dom": "^19.0.2"
+  }
+}

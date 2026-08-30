@@ -132,30 +132,43 @@ Only then write code.
 
 ---
 
-## 4. Current repository state
+## 4. Repository state
 
-This repository currently contains **documentation only**. No application code exists yet.
+Documentation **and** the architecture scaffold. **No business features exist yet** —
+that is deliberate (ADR 0001 step). Do not add product behaviour without an explicit ask.
 
 ```text
-CLAUDE.md
-docs/
-├── README.md
-├── OPEN_DECISIONS.md
-├── PRODUCT_VISION.md
-├── PRODUCT_SPEC.md
-├── ARCHITECTURE.md
-├── DATABASE.md
-├── DESIGN_SYSTEM.md
-├── CLAUDE_CODE_RULES.md
-└── archive/
-    └── v0/
-        └── CARTOGRAPHIE_PRODUIT_ARCHIVE.md
+apps/sites · apps/app · apps/worker          the deployed topology
+packages/  16 packages, layered L0 → L4      see ARCHITECTURE.md §3
+tests/architecture · tests/tenant-isolation  NN-1, NN-2, NN-3, NN-6
+docs/  README · OPEN_DECISIONS · adr/ · diagrams/ · archive/
 ```
 
-The target application layout is specified in
-[`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md) §3 — but note that the runtime
-topology is currently **disputed** (see `OPEN_DECISIONS.md` D1) and must be resolved
-before scaffolding.
+### Layering — the short version
+
+```text
+apps/*                    thin adapters. Parse, authenticate, authorize,
+                          invoke a use case, serialize. No business logic.
+    ↓
+packages/application      use cases, ports, transaction boundaries
+    ↓
+packages/domain           entities, invariants, state machines. Pure.
+    ↑
+packages/db · ai · integrations · storage · …    implement the ports
+```
+
+The six non-negotiables (NN-1 to NN-6) are in `docs/CLAUDE_CODE_RULES.md` §41 and
+`docs/ARCHITECTURE.md` §29. They are enforced by the compiler, by module resolution and
+by CI — not by review.
+
+### Before claiming anything works
+
+```bash
+pnpm verify     # typecheck + lint + boundaries + tests, in that order
+```
+
+`apps/sites` is read-only against the database. `apps/api` is **not** deployed and, when
+it arrives, is the public API — never a BFF for `apps/app`.
 
 ---
 

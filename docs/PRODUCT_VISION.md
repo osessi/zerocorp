@@ -1774,39 +1774,43 @@ ZeroCorp should start as a **modular monolith**, not a microservice maze.
 
 Recommended structure:
 
+> Refined by [ADR 0001](./adr/0001-runtime-topology.md). The instinct here was right —
+> modular monolith, not microservices — but `apps/web` was split in two, because tenant
+> websites and the authenticated back-office have opposite traffic profiles, cache
+> strategies and blast radii. Business capabilities became modules inside
+> `packages/domain` and `packages/application` rather than top-level packages.
+> `ARCHITECTURE.md` §3 owns the current layout.
+
+**Initial Deployment / Current Topology**
+
 ```text
 apps/
-  web/
-  worker/
-
-packages/
-  ui/
-  design-system/
-  db/
-  auth/
-  tenants/
-  business/
-  formation/
-  brand/
-  websites/
-  content/
-  social/
-  leads/
-  crm/
-  email/
-  agents/
-  workflows/
-  billing/
-  usage/
-  notifications/
-  integrations/
-  storage/
-  domains/
-  analytics/
-  observability/
-  i18n/
-  contracts/
+  sites/          tenant websites — anonymous, edge-cached, DB read-only
+  app/            back-office + admin console — authenticated
+  worker/         jobs, workflows, agents
 ```
+
+**Target Architecture** adds, on trigger:
+
+```text
+apps/
+  api/            public API — mobile, partners, enterprise. Never an internal BFF.
+```
+
+```text
+packages/
+  contracts/      config/      design-system/         L0
+  domain/                                             L1
+  application/                                        L2
+  db/  tenancy/  auth/  billing/  ai/                 L3
+  integrations/  storage/  notifications/  security/
+  ui/  site-renderer/                                 L4
+```
+
+Business capabilities — formation, brand, website, content, social, leads, crm, email,
+agents, workflows, usage, analytics, domains — are modules **inside** `domain/` and
+`application/`, not separate packages. `observability/` and `i18n/` still have no home;
+tracked in `OPEN_DECISIONS.md`.
 
 Do not split these into networked microservices until scale or team structure clearly requires it.
 

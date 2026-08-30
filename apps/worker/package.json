@@ -1,0 +1,27 @@
+{
+  "name": "@zerocorp/worker",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node --watch src/index.ts",
+    "build": "tsc --noEmit",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "inngest": "^3.27.5",
+    "@zerocorp/application": "workspace:*",
+    "@zerocorp/contracts": "workspace:*",
+    "@zerocorp/config": "workspace:*",
+    "@zerocorp/integrations": "workspace:*",
+    "@zerocorp/ai": "workspace:*",
+    "@zerocorp/storage": "workspace:*",
+    "@zerocorp/notifications": "workspace:*",
+    "@zerocorp/billing": "workspace:*",
+    "@zerocorp/db": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.2",
+    "@types/node": "^22.10.2"
+  }
+}
