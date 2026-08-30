@@ -21,3 +21,10 @@ build/
 *.log
 npm-debug.log*
 pnpm-debug.log*
+
+# Archify — generated artifacts (regenerate from docs/diagrams/*.json)
+docs/diagrams/*.html
+docs/diagrams/*.png
+docs/diagrams/*.receipt.json
+docs/diagrams/*.visual-check.json
+!docs/diagrams/README.md

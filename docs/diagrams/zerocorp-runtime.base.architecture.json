@@ -1,0 +1,270 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "ZeroCorp Runtime — PRODUCT_VISION 34 (web + worker)",
+    "quality_profile": "showcase",
+    "views": [
+      {
+        "id": "request-path",
+        "label": "Primary request path",
+        "focus": [
+          "customers",
+          "cloudflare",
+          "web",
+          "postgres"
+        ],
+        "note": "One shared application resolves a custom hostname to a tenant, then reads tenant-scoped data."
+      },
+      {
+        "id": "tenant-isolation",
+        "label": "Tenant isolation",
+        "focus": [
+          "auth",
+          "postgres",
+          "storage",
+          "web"
+        ],
+        "note": "Tenant context is resolved at the request boundary; RLS is the second barrier, never the only one."
+      }
+    ]
+  },
+  "components": [
+    {
+      "id": "customers",
+      "type": "external",
+      "label": "Tenant Customers",
+      "sublabel": "browser · own domain",
+      "pos": [
+        40,
+        290
+      ],
+      "size": [
+        150,
+        64
+      ]
+    },
+    {
+      "id": "cloudflare",
+      "type": "cloud",
+      "label": "Cloudflare for SaaS",
+      "sublabel": "custom hostnames · SSL",
+      "pos": [
+        270,
+        290
+      ],
+      "size": [
+        160,
+        64
+      ]
+    },
+    {
+      "id": "auth",
+      "type": "security",
+      "label": "Supabase Auth",
+      "sublabel": "session · admin MFA",
+      "pos": [
+        540,
+        100
+      ],
+      "size": [
+        150,
+        64
+      ]
+    },
+    {
+      "id": "web",
+      "type": "frontend",
+      "label": "apps/web",
+      "sublabel": "Next.js · route handlers",
+      "pos": [
+        820,
+        290
+      ],
+      "size": [
+        150,
+        64
+      ]
+    },
+    {
+      "id": "redis",
+      "type": "database",
+      "label": "Redis",
+      "sublabel": "cache · rate limiting",
+      "pos": [
+        820,
+        100
+      ],
+      "size": [
+        150,
+        64
+      ]
+    },
+    {
+      "id": "storage",
+      "type": "cloud",
+      "label": "Private Storage",
+      "sublabel": "identity documents",
+      "pos": [
+        1100,
+        100
+      ],
+      "size": [
+        170,
+        64
+      ]
+    },
+    {
+      "id": "postgres",
+      "type": "database",
+      "label": "PostgreSQL",
+      "sublabel": "tenant_id + RLS",
+      "pos": [
+        1100,
+        290
+      ],
+      "size": [
+        170,
+        64
+      ]
+    },
+    {
+      "id": "worker",
+      "type": "backend",
+      "label": "apps/worker",
+      "sublabel": "Inngest workflows",
+      "pos": [
+        820,
+        480
+      ],
+      "size": [
+        150,
+        64
+      ]
+    },
+    {
+      "id": "providers",
+      "type": "external",
+      "label": "Provider Abstractions",
+      "sublabel": "external SDK boundary",
+      "pos": [
+        1100,
+        480
+      ],
+      "size": [
+        170,
+        64
+      ]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "ZeroCorp modular monolith",
+      "wraps": [
+        "web",
+        "worker"
+      ]
+    },
+    {
+      "kind": "security-group",
+      "label": "Tenant-isolated data",
+      "wraps": [
+        "postgres",
+        "storage"
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "customers-to-edge",
+      "from": "customers",
+      "to": "cloudflare",
+      "label": "HTTPS",
+      "variant": "emphasis"
+    },
+    {
+      "id": "edge-to-web",
+      "from": "cloudflare",
+      "to": "web",
+      "label": "host → tenant",
+      "variant": "emphasis"
+    },
+    {
+      "id": "auth-session",
+      "from": "auth",
+      "to": "web",
+      "label": "session",
+      "variant": "security",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "api-cache",
+      "from": "web",
+      "to": "redis",
+      "label": "cache · rate limit",
+      "fromSide": "top",
+      "toSide": "bottom",
+      "labelDy": -30
+    },
+    {
+      "id": "api-sql",
+      "from": "web",
+      "to": "postgres",
+      "label": "tenant-scoped",
+      "variant": "emphasis",
+      "labelDy": 30
+    },
+    {
+      "id": "api-documents",
+      "from": "web",
+      "to": "storage",
+      "label": "signed URLs",
+      "variant": "security"
+    },
+    {
+      "id": "api-events",
+      "from": "web",
+      "to": "worker",
+      "label": "domain events",
+      "variant": "dashed",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "labelDy": 24
+    },
+    {
+      "id": "worker-outbound",
+      "from": "worker",
+      "to": "providers",
+      "label": "outbound calls",
+      "variant": "dashed"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Two runtimes",
+      "items": [
+        "apps/web owns UI and route handlers",
+        "apps/worker owns durable workflows"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Tenant isolation",
+      "items": [
+        "Every tenant-owned row carries tenant_id",
+        "RLS is the second barrier, never the only one"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "OPEN_DECISIONS D1 — base",
+      "items": [
+        "PRODUCT_VISION.md section 34 topology",
+        "No separate NestJS API runtime"
+      ]
+    }
+  ]
+}

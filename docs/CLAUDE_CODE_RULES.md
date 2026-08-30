@@ -980,7 +980,67 @@ code  +  docs  +  tests
 A feature that contradicts its own specification is not done.
 
 ---
-## 41. Golden Rules
+## 41. Architecture Visualization — Archify
+
+Archify is the official tool for **representing and verifying** ZeroCorp's architecture.
+
+> **Archify never decides the architecture. It renders the architecture the current
+> documentation decides.**
+
+If a diagram and a current document disagree, the document is right and the diagram is
+stale. Fix the diagram, never the decision.
+
+### Where it lives
+
+```text
+.claude/skills/archify/     the skill (v2.16.0, MIT, project-level, committed)
+docs/diagrams/*.json        typed JSON IR — the source of truth, committed
+docs/diagrams/*.html        generated artifacts — git-ignored, regenerate on demand
+```
+
+### Rules
+
+1. **The JSON IR is the source.** Never hand-edit generated HTML, and never commit it.
+2. **A diagram is derived, never authoritative.** Every node, edge and boundary must
+   trace to a current document. Do not draw a component that no document specifies.
+3. **Mark disputed topology.** When a diagram renders something listed in
+   `docs/OPEN_DECISIONS.md` Part A, say so on the artifact — a `tag` on the node and a
+   card naming the decision ID.
+4. **Structural proposals ship with a delta.** Before proposing a change covered by
+   `CLAUDE_CODE_RULES.md` §8, produce an Architecture Delta so the human sees exactly
+   what is added, removed, changed, moved and rerouted:
+
+   ```bash
+   node .claude/skills/archify/bin/archify.mjs compare architecture \
+     docs/diagrams/<base>.json docs/diagrams/<head>.json \
+     docs/diagrams/<name>.delta.html --quality showcase --json
+   ```
+
+5. **Showcase acceptance or nothing.** A delivered diagram must report 9/9 artifact
+   checks, 0 composition errors and 0 warnings. Never describe a non-zero exit as success.
+6. **Repair by diagnosis.** Fix only the diagnosed `subject` using `supportedFixes`.
+   Prefer spacing and copy repairs over geometry overrides. Never delete a meaningful
+   relationship label to satisfy geometry.
+7. **Keep diagrams current.** When an architecture decision changes, the affected
+   diagram is stale work — update it in the same change as the document
+   (see §40).
+
+### Commands
+
+```bash
+cd .claude/skills/archify
+node bin/archify.mjs doctor                                   # health check
+node bin/archify.mjs validate architecture <spec.json> --quality showcase --json
+node bin/archify.mjs deliver  architecture <spec.json> <out.html> --quality showcase --json
+node bin/archify.mjs visual-check <out.html> --json           # desktop containment evidence
+node bin/archify.mjs guide "<scenario>" --json                # pick the diagram type
+```
+
+Types: `architecture`, `workflow`, `sequence`, `dataflow`, `lifecycle`.
+
+---
+
+## 42. Golden Rules
 
 > **Build the system we designed, not the system you imagine.**
 
