@@ -18,7 +18,7 @@
  * synced folder, or to turn Documents sync off.
  */
 import { execFileSync } from "node:child_process";
-import { existsSync, mkdirSync, readdirSync, rmSync } from "node:fs";
+import { existsSync, readdirSync, rmSync } from "node:fs";
 import { join } from "node:path";
 
 const ROOT = process.cwd();
@@ -50,7 +50,10 @@ function sweep(dir, depth = 0) {
 }
 
 function markIgnored(dir) {
-  if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
+  // Never CREATE the directory. Pre-creating .next before Next boots leaves it with a
+  // half-initialised tree: the CSS directory exists, the stylesheet is never written,
+  // and the page renders as unstyled HTML with a 404 on layout.css. Found 2026-08-31.
+  if (!existsSync(dir)) return false;
   try {
     execFileSync("xattr", ["-w", "com.apple.fileprovider.ignore#P", "1", dir], {
       stdio: "ignore",
@@ -72,10 +75,7 @@ if (process.platform === "darwin") {
   for (const app of ["apps/app", "apps/sites", "apps/worker"]) {
     if (!existsSync(join(ROOT, app))) continue;
     for (const name of IGNORED) {
-      const dir = join(ROOT, app, name);
-      if (existsSync(dir) || name === ".next") {
-        if (markIgnored(dir)) marked += 1;
-      }
+      if (markIgnored(join(ROOT, app, name))) marked += 1;
     }
   }
 }
