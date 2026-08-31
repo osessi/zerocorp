@@ -42,7 +42,7 @@ export function Radio({ className, ...props }: RadioProps) {
         CONTROL_FOCUS,
         field.invalid ? "border-destructive" : "border-input hover:border-input-hover",
         "data-checked:border-primary",
-        "data-disabled:bg-muted data-disabled:border-border data-disabled:cursor-not-allowed",
+        "data-disabled:border-border data-disabled:cursor-not-allowed data-disabled:opacity-60",
         "mt-0.5",
         className,
       )}

@@ -63,7 +63,7 @@ export function Switch({
         SWITCH_TRACK,
         CONTROL_FOCUS,
         field.invalid ? "border-destructive" : "border-input hover:border-input-hover",
-        "data-disabled:bg-muted data-disabled:border-border data-disabled:cursor-not-allowed",
+        "data-disabled:border-border data-disabled:cursor-not-allowed data-disabled:opacity-60",
         className,
       )}
       aria-invalid={field.invalid || undefined}

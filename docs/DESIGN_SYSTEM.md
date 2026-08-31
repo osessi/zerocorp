@@ -984,7 +984,8 @@ Checkbox                       square, --radius-none
 → VALIDATED — implemented and visually reviewed 2026-08-31
 → MIT · reviewed 2026-08-31
    Supports indeterminate. Border uses --input, so it inherits the same WCAG 1.4.11
-   guarantee as a text field.
+   guarantee as a text field. Unchecked fill is --muted, never --background: a control
+   filled with the page colour reads as a hole on a dark ground (review, 2026-08-31).
 
 Radio · RadioGroup             circle — the one deliberate exception to --radius-none
 → packages/ui/src/field/Radio.tsx  ·  Base UI Radio + RadioGroup
@@ -1017,6 +1018,8 @@ control-styles.ts              the shared visual contract
 → VALIDATED — extracted 2026-08-31 when Textarea arrived
    CONTROL_BASE · CONTROL_NEUTRAL · CONTROL_FOCUS · CONTROL_DISABLED
    CONTROL_INVALID · CONTROL_VALID · CONTROL_HEIGHT · controlTone()
+   CHOICE_BOX · CHOICE_CHECKED · CHOICE_CIRCLE · SWITCH_TRACK · SWITCH_THUMB
+   SWITCH_LABEL — the choice controls compose these the same way.
    Select, Combobox, DatePicker and FileUpload compose these. A control that
    restyles itself instead of composing them is a defect.
 
@@ -1617,19 +1620,27 @@ Measured, not assumed, during the comparison:
 
 Reviewed at 1440px and 375px, both themes. Geometry measured in Chrome: checkbox 16×16
 radius 0, radio 16×16 round, switch 36×20 radius 0, control border `#949494` light and
-`#6B6B6B` dark — the same boundary token as every text control.
+`#6B6B6B` dark — the same boundary token as every text control. The switch was later
+widened to 56×20 by the variant review above; the rest of this record still holds.
 
-**Three findings.**
+**Four findings — the fourth from a second pass in dark mode.**
 
 | | Finding | Fix |
 |---|---|---|
 | 1 | **The click target was 20px tall, under the WCAG 2.5.8 minimum of 24×24.** Wrapping the label gave the target its width, not its height: a 14px/20px line box is a 20px row | `py-1` on the label row takes it to 28px. All 19 rows now measure ≥24px. Load-bearing padding, commented as such |
 | 2 | **A group's description rendered after its options.** It explains the choice, so it has to arrive before the choices do | In group mode the description sits under the legend; the error still comes last |
 | 3 | **happy-dom reported that no key toggles a checkbox.** Space, Enter, every variant — all false | **Not a defect.** Chrome confirms Space toggles false → true → false, the switch toggles, and ArrowDown moves the radio selection. happy-dom does not run Base UI's key handling on a `span[role=checkbox]`. The unit test now asserts what happy-dom can observe — Tab reachability — and records that actuation is browser-verified |
+| 4 | **In dark mode an unchecked checkbox and radio were unreadable.** `CHOICE_BOX` filled the control with `--background` — the page colour. On white that is invisible-by-accident and harmless; on `#0A0A0A` the control became a hole, and only a thin `#6B6B6B` border said anything was there at all | `bg-background` → `bg-muted`. The control now sits on `#262626` in dark and `#F5F5F5` in light, so it reads as a surface to hit in both. The Switch already used `--muted` for its off track and never had the problem — the fix also makes all three choice controls agree |
 
 Finding 3 is the one worth keeping. **A simulated DOM reporting a missing behaviour is
 not evidence that the behaviour is missing.** Asserting the negative would have recorded
 an accessibility bug that does not exist, and someone would have "fixed" it later.
+
+Finding 4 is the reason the review is done twice. Every contrast rule in §4 was satisfied:
+the border cleared WCAG 1.4.11 at 3.72:1 in dark, and 1.4.11 says nothing about the fill.
+The control was compliant and still unusable, because what a user looks for is not a
+boundary but *something to hit*. **A rule can pass while the thing it exists to protect
+fails.** Only a dark screen and a real cursor showed it.
 
 ---
 

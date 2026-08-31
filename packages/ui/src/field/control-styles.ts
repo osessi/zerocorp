@@ -84,7 +84,11 @@ export function cx(...parts: Array<string | false | undefined>): string {
  */
 export const CHOICE_BOX = [
   "relative inline-flex size-4 shrink-0 items-center justify-center",
-  "border bg-background",
+  // --muted, not --background. On a dark page a control filled with the page colour
+  // reads as a hole rather than as something to hit; only the border says it exists.
+  // The Switch already used --muted for its off track and never had the problem, so
+  // this also makes all three choice controls agree. Reported in review 2026-08-31.
+  "border bg-muted",
   "transition-colors duration-normal ease-out",
 ].join(" ");
 

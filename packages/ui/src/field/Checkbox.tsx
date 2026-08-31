@@ -42,7 +42,7 @@ export function Checkbox({ className, indeterminate, ...props }: CheckboxProps) 
         CONTROL_FOCUS,
         // Same boundary token as a text field: a control border must clear 3:1.
         field.invalid ? "border-destructive" : "border-input hover:border-input-hover",
-        "data-disabled:bg-muted data-disabled:border-border data-disabled:cursor-not-allowed",
+        "data-disabled:border-border data-disabled:cursor-not-allowed data-disabled:opacity-60",
         // The row is what the eye follows; nudge the box onto the label's first line.
         "mt-0.5",
         className,
