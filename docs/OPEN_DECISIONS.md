@@ -409,7 +409,7 @@ exist.
 - **Semantic status colours** — `success #15803D · warning #B45309 · info #2563EB ·
   processing #00786F · destructive #DC2626`. All five measure 4.83–5.36:1 on white.
   One status system for the whole product.
-- **Form control boundaries** — `--border #E5E5E5` stays decorative, `--input #959595`
+- **Form control boundaries** — `--border #E5E5E5` stays decorative, `--input #949494` (3.03:1)
   identifies controls, `--ring #00786F` is the focus indicator.
 - **Primitive layer** — Base UI. Not a conflict with shadcn: since July 2026 Base UI is
   shadcn/ui's default, Radix is not deprecated, and Shadcn Studio ships for both.
@@ -418,12 +418,11 @@ exist.
 
 | | Item | Blocks |
 |---|---|---|
-| 1 | **`--input` measures 2.995:1** — misses WCAG 1.4.11's 3:1 by 0.005. `#949494` clears it at 3.033:1 and is visually identical | An audit report, not the work. Recommendation on record |
-| 2 | **Dark mode values** — PROPOSED, need one review pass. Includes the four dark status variants | Dark mode |
-| 3 | **Customer website art directions** — 6–8 curated directions do not exist | Every customer site. The remaining half of D-G6 |
-| 4 | **Flaticon licence** — stock-licensed, not open source | Animated icons. Motion + Phosphor approved meanwhile |
-| 5 | **Border hover in dark mode** — no value | Dark mode components |
-| 6 | **`dashboard columns` and `editor widths`** — carried from v1, still without values | Dashboard grid, block editor |
+| 1 | **Dark mode values** — PROPOSED, need one review pass. Includes the four dark status variants | Dark mode |
+| 2 | **Customer website art directions** — 6–8 curated directions do not exist | Every customer site. The remaining half of D-G6 |
+| 3 | **Flaticon licence** — stock-licensed, not open source | Animated icons. Motion + Phosphor approved meanwhile |
+| 4 | **Border hover in dark mode** — no value | Dark mode components |
+| 5 | **`dashboard columns` and `editor widths`** — carried from v1, still without values | Dashboard grid, block editor |
 
 ---
 

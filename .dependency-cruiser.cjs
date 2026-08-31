@@ -126,7 +126,7 @@ module.exports = {
           "(^|/)src/server/container\\.ts$",
           "(^|/)(layout|page|route|middleware|error|loading|not-found)\\.tsx?$",
           "\\.(test|spec)\\.tsx?$",
-          "(^|/)(next|eslint|vitest|turbo)\\.config\\.",
+          "(^|/)(next|eslint|vitest|turbo|postcss|tailwind)\\.config\\.",
         ],
       },
       to: {},

@@ -1,0 +1,12 @@
+/**
+ * apps/app — ZeroCorp Product UI.
+ *
+ * Tokens come from @zerocorp/design-system. This file adds nothing of its own: it
+ * imports the token layer and tells Tailwind where the shared components live so their
+ * utilities are generated.
+ */
+@import "@zerocorp/design-system/tokens.css";
+
+/* packages/ui resolves through a workspace symlink, which Tailwind does not scan by
+   default. Without this, every utility used only inside @zerocorp/ui is dropped. */
+@source "../../../../packages/ui/src";

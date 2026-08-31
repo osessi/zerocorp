@@ -16,12 +16,14 @@
     "clean": "rm -rf dist *.tsbuildinfo"
   },
   "dependencies": {
-    "@zerocorp/design-system": "workspace:*",
+    "@base-ui/react": "^1.7.0",
+    "@phosphor-icons/react": "^2.1.10",
     "@zerocorp/contracts": "workspace:*",
+    "@zerocorp/design-system": "workspace:*",
     "react": "^19.0.0"
   },
   "devDependencies": {
-    "typescript": "^5.7.2",
-    "@types/react": "^19.0.2"
+    "@types/react": "^19.0.2",
+    "typescript": "^5.7.2"
   }
 }

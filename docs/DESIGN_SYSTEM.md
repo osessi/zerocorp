@@ -127,7 +127,7 @@ They share the token *architecture*, never the token *values*. See §15 and §16
 | `--muted-foreground` | `#737373` | Low-emphasis text, help, placeholders |
 | `--accent` | `#F5F5F5` | Hover surfaces, selected rows |
 | `--border` | `#E5E5E5` | Dividers, card edges |
-| `--input` | `#959595` | Form control borders — see §4.4 |
+| `--input` | `#949494` | Form control borders — see §4.4 |
 | `--ring` | `#00786F` | Focus ring |
 | `--destructive` | `#DC2626` | Destructive actions, errors |
 | `--success` | `#15803D` | Completed, healthy, verified |
@@ -207,7 +207,7 @@ Computed against WCAG 2.1. Recorded so nobody re-derives them.
 | `#B45309` warning | **5.02:1** | AA text ✓ |
 | `#DC2626` destructive | **4.83:1** | AA text ✓ |
 | `#737373` muted-foreground | **4.74:1** | AA text ✓ (narrow margin) |
-| `#959595` input border | **2.995:1** | see the finding below |
+| `#949494` input border | **3.03:1** | non-text contrast ✓ |
 | `#E5E5E5` border | **1.26:1** | dividers and card edges ✓ · never a control boundary |
 
 #### Dark mode — on `#0A0A0A`
@@ -227,7 +227,7 @@ Computed against WCAG 2.1. Recorded so nobody re-derives them.
 
 ```text
 --border   #E5E5E5     dividers, card edges, table rules — decorative
---input    #959595     the boundary that identifies a form control
+--input    #949494     the boundary that identifies a form control
 --ring     #00786F     focus indicator
 ```
 
@@ -235,18 +235,14 @@ Splitting `--border` from `--input` is the right call: it keeps the light Lyra l
 every decorative line while giving controls a boundary that can actually be perceived.
 `--ring` at 5.36:1 against white is a strong focus indicator.
 
-> #### ⚠️ Residual finding — `#959595` measures **2.995:1**
->
-> WCAG 2.1 SC 1.4.11 requires **at least 3:1**. `#959595` misses by **0.005**, so an
-> automated audit will report it as a failure even though a human cannot see the
-> difference.
->
-> **`#949494` — one hex step darker — measures 3.033:1 and passes.** It is visually
-> indistinguishable from `#959595`.
->
-> **Recommendation: change `--input` to `#949494`.** Zero visual cost, and it turns a
-> reported failure into a pass. One word from you and it is done. Until then `#959595`
-> stands as validated, with this deviation on record.
+`--input` at **3.03:1** clears WCAG 2.1 SC 1.4.11 (3:1 for the boundary that identifies a
+user interface component).
+
+`#959595` was measured at **2.995:1** and rejected: 0.005 below the threshold is a
+reported failure that no human can see, and one hex step fixes it at zero visual cost.
+Recorded so the near-miss is not reintroduced later.
+
+---
 
 ## 5. Typography — VALIDATED
 
@@ -679,7 +675,36 @@ The decision is reversible and scoped: if a specific screen genuinely needs repe
 fields, cross-field dependencies or multi-step state that Base UI cannot carry, propose
 react-hook-form **for that screen**, with the reason. Do not adopt it globally by default.
 
-#### The field shell
+#### The field shell — IMPLEMENTED, the reference for every form control
+
+```text
+packages/design-system/src/tokens.css    every validated value, nowhere else
+packages/ui/src/field/Field.tsx          the shell
+packages/ui/src/field/Input.tsx          the text control
+packages/ui/src/field/field-state.ts     the context controls read
+```
+
+Usage — the whole point is that a form needs no wiring:
+
+```tsx
+<Field label="Business name" description="Shown on your invoices" error={errors.name}>
+  <Input placeholder="Acme LLC" />
+</Field>
+```
+
+`Field` publishes `{ invalid, valid, loading, describedBy }` through React context;
+`Input` reads it. **Textarea, Select, Combobox, DatePicker and FileUpload consume the same
+context** rather than reimplementing labels, help text, error handling and aria wiring.
+That is what makes the second control cheap and the sixth identical to the first.
+
+Three decisions worth keeping:
+
+- **`label` is a required prop.** A placeholder is not a label — it disappears on focus
+  and is invisible to some assistive technology. The type system enforces it.
+- **`loading` is not `disabled`.** Loading is busy but readable and focusable
+  (`aria-busy`); disabled is inert. Conflating them traps keyboard users.
+- **Type is 16px on mobile, 14px from `sm` up.** Below 16px, iOS Safari zooms the
+  viewport on focus and the layout breaks.
 
 Every form control in ZeroCorp is composed, never bare:
 
@@ -828,13 +853,22 @@ Format:
 ### Current registry
 
 ```text
-Field                          label · description · error · required · validity wiring
-→ Base UI · Field.Root / Label / Description / Error / Control
-→ Approved
+Field                          the form shell — THE REFERENCE IMPLEMENTATION
+→ packages/ui/src/field/Field.tsx  ·  built on Base UI Field (@base-ui/react 1.7.0)
+→ VALIDATED — implemented 2026-08-31
 → MIT · reviewed 2026-08-31
+   label (required) · description · error · success · required · disabled · loading
+   aria-describedby wired · role=alert on error · role=status on success
 
-Input                          text · password · search
-→ Base UI · Input
+Input                          the text control
+→ packages/ui/src/field/Input.tsx  ·  Base UI Field.Control
+→ VALIDATED — implemented 2026-08-31
+→ MIT · reviewed 2026-08-31
+   default · hover · focus · loading · disabled · error · success
+   16px type on mobile, 14px from sm — below 16px iOS Safari zooms on focus
+
+Phosphor icons                 CircleNotch used for the loading state
+→ @phosphor-icons/react 2.1.10
 → Approved
 → MIT · reviewed 2026-08-31
 
@@ -1030,18 +1064,19 @@ problem, the current value, the proposal, the alternatives, the trade-offs and t
 
 ## 24. Open items
 
-Resolved 2026-08-31: semantic status colours (§4.3), form control boundaries (§4.4),
+Resolved 2026-08-31: semantic status colours (§4.3), form control boundaries (§4.4, now `#949494` at 3.03:1),
 and the primitive layer (§2 — Base UI, now the shadcn/ui default).
 
 | # | Item | Blocks |
 |---|---|---|
-| 1 | **`--input` at 2.995:1** (§4.4) — `#949494` clears 3:1 at zero visual cost | An accessibility audit report, not the work |
-| 2 | **Dark mode values** (§4.2) — PROPOSED, need one review pass | Dark mode |
-| 3 | **Block taxonomy and hero variants** (§20) — D3 / D4 | The block registry |
-| 4 | **Customer art directions** (§16) — 6–8 curated directions | Every customer site |
-| 5 | **Flaticon licence** (§11) | Animated icons |
-| 6 | **Border hover in dark mode** (§9) | Dark mode components |
-| 7 | **`dashboard columns` and `editor widths`** (§12) | Dashboard grid, block editor |
+| 1 | **Styling engine — Tailwind v4** — adopted during the Field implementation because Shadcn Studio, the declared primary source (§18), ships Tailwind. Structural: it is not trivially reversible | Recorded for confirmation, not blocking |
+| 2 | **`--input-hover: #737373`** (§9) — PROPOSED. `--border-hover #D4D4D4` is lighter than `--input`, so it cannot serve a control | Hover on every form control |
+| 3 | **Dark mode values** (§4.2) — PROPOSED, need one review pass | Dark mode |
+| 4 | **Block taxonomy and hero variants** (§20) — D3 / D4 | The block registry |
+| 5 | **Customer art directions** (§16) — 6–8 curated directions | Every customer site |
+| 6 | **Flaticon licence** (§11) | Animated icons |
+| 7 | **Border hover in dark mode** (§9) | Dark mode components |
+| 8 | **`dashboard columns` and `editor widths`** (§12) | Dashboard grid, block editor |
 
 ---
 

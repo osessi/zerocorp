@@ -1137,7 +1137,7 @@ Radius     0px default · 2–4px only where a control genuinely needs it
 Primary    #00786F
 Status     success #15803D · warning #B45309 · info #2563EB
            processing #00786F · destructive #DC2626
-Borders    --border #E5E5E5 decorative · --input #959595 controls · --ring #00786F
+Borders    --border #E5E5E5 decorative · --input #949494 controls · --ring #00786F
 Spacing    4px scale, 16px central
 Motion     100 / 150 / 200 / 250ms · no decorative bounce
 ```

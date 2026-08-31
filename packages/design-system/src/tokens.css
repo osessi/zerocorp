@@ -1,0 +1,258 @@
+/**
+ * @zerocorp/design-system — the ZeroCorp Product UI token layer.
+ *
+ * Every value here is decided in docs/DESIGN_SYSTEM.md. Nothing is invented at this
+ * layer, and nothing outside this file may hard-code a colour, size, radius, duration
+ * or spacing value.
+ *
+ * This is the ZeroCorp PRODUCT identity. Customer website themes are a separate system
+ * (packages/site-renderer) and never read these tokens — DESIGN_SYSTEM.md §15 and §16.
+ */
+
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ---------------------------------------------------------------------------
+   Semantic colours — light. DESIGN_SYSTEM.md §4.1, VALIDATED.
+   --------------------------------------------------------------------------- */
+:root {
+  --background: #ffffff;
+  --foreground: #0a0a0a;
+
+  --primary: #00786f;
+  --primary-foreground: #f0fdfa;
+
+  --secondary: #f4f4f5;
+  --secondary-foreground: #18181b;
+
+  --muted: #f5f5f5;
+  --muted-foreground: #737373;
+
+  --accent: #f5f5f5;
+  --accent-foreground: #18181b;
+
+  --surface: #ffffff;
+  --surface-elevated: #ffffff;
+
+  /* --border is decorative: dividers, card edges, table rules.
+     --input identifies a form control and must clear WCAG 1.4.11 (3:1).
+     They are NOT interchangeable. */
+  --border: #e5e5e5;
+  --border-hover: #d4d4d4;
+  --input: #949494; /* 3.03:1 on white */
+  --input-hover: #737373; /* PROPOSED — DESIGN_SYSTEM.md §24 */
+  --ring: #00786f;
+
+  /* Status — one system for the whole product. §4.3, VALIDATED. */
+  --success: #15803d;
+  --warning: #b45309;
+  --info: #2563eb;
+  --processing: #00786f;
+  --destructive: #dc2626;
+  --destructive-foreground: #ffffff;
+}
+
+/* ---------------------------------------------------------------------------
+   Semantic colours — dark. DESIGN_SYSTEM.md §4.2.
+   Only tokens that change are redefined. PROPOSED, pending one review pass.
+   --------------------------------------------------------------------------- */
+.dark {
+  --background: #0a0a0a;
+  --foreground: #fafafa;
+
+  --secondary: #262626;
+  --secondary-foreground: #fafafa;
+
+  --muted: #262626;
+  --muted-foreground: #a3a3a3;
+
+  --accent: #262626;
+  --accent-foreground: #fafafa;
+
+  --surface: #141414;
+  --surface-elevated: #1c1c1c;
+
+  --border: #262626;
+  --input: #2e2e2e;
+
+  /* Light-mode status colours reach only 3.69–4.10:1 on #0A0A0A: enough for a filled
+     badge, not for status text. These lighter values are required on dark. */
+  --success: #22c55e;
+  --warning: #f59e0b;
+  --info: #3b82f6;
+  --processing: #2dd4bf;
+  --destructive: #ef4444;
+  --destructive-foreground: #0a0a0a;
+}
+
+/* ---------------------------------------------------------------------------
+   Token → Tailwind utility mapping.
+   `@theme inline` keeps utilities pointing at the custom properties above, so a
+   theme switch changes colour and nothing else.
+   --------------------------------------------------------------------------- */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-surface: var(--surface);
+  --color-surface-elevated: var(--surface-elevated);
+  --color-border: var(--border);
+  --color-border-hover: var(--border-hover);
+  --color-input: var(--input);
+  --color-input-hover: var(--input-hover);
+  --color-ring: var(--ring);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-info: var(--info);
+  --color-processing: var(--processing);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+}
+
+@theme {
+  /* -------------------------------------------------------------------------
+     Typography — §5, VALIDATED.
+     Geist Sans for UI. Geist Mono is mandatory for any number a user compares.
+     ------------------------------------------------------------------------- */
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, "SF Mono", monospace;
+
+  --text-display-xl: 48px;
+  --text-display-xl--line-height: 56px;
+  --text-display-xl--font-weight: 700;
+  --text-display-xl--letter-spacing: -0.02em;
+
+  --text-display-l: 40px;
+  --text-display-l--line-height: 48px;
+  --text-display-l--font-weight: 700;
+  --text-display-l--letter-spacing: -0.02em;
+
+  --text-h1: 36px;
+  --text-h1--line-height: 44px;
+  --text-h1--font-weight: 700;
+  --text-h1--letter-spacing: -0.02em;
+
+  --text-h2: 30px;
+  --text-h2--line-height: 38px;
+  --text-h2--font-weight: 600;
+  --text-h2--letter-spacing: -0.015em;
+
+  --text-h3: 24px;
+  --text-h3--line-height: 32px;
+  --text-h3--font-weight: 600;
+  --text-h3--letter-spacing: -0.015em;
+
+  --text-h4: 20px;
+  --text-h4--line-height: 28px;
+  --text-h4--font-weight: 600;
+
+  --text-body-lg: 18px;
+  --text-body-lg--line-height: 28px;
+  --text-body-lg--font-weight: 400;
+
+  --text-body: 16px;
+  --text-body--line-height: 24px;
+  --text-body--font-weight: 400;
+
+  --text-body-sm: 14px;
+  --text-body-sm--line-height: 20px;
+  --text-body-sm--font-weight: 400;
+
+  --text-label: 14px;
+  --text-label--line-height: 20px;
+  --text-label--font-weight: 500;
+
+  --text-caption: 12px;
+  --text-caption--line-height: 16px;
+  --text-caption--font-weight: 500;
+
+  --text-overline: 11px;
+  --text-overline--line-height: 14px;
+  --text-overline--font-weight: 600;
+  --text-overline--letter-spacing: 0.04em;
+
+  /* -------------------------------------------------------------------------
+     Spacing — §6, VALIDATED. 4px based, 16px central.
+     ------------------------------------------------------------------------- */
+  --spacing: 4px;
+
+  /* -------------------------------------------------------------------------
+     Radius — §7, VALIDATED. 0px is the signature. There is no md/lg/pill/full.
+     ------------------------------------------------------------------------- */
+  --radius-none: 0px;
+  --radius-xs: 2px;
+  --radius-sm: 4px;
+
+  /* -------------------------------------------------------------------------
+     Elevation — §8, VALIDATED. Two levels. Hierarchy comes from borders,
+     spacing and typography, not from shadows.
+     ------------------------------------------------------------------------- */
+  --shadow-floating: 0 1px 3px rgb(0 0 0 / 0.1);
+
+  /* -------------------------------------------------------------------------
+     Motion — §10, VALIDATED.
+     ------------------------------------------------------------------------- */
+  --duration-fast: 100ms;
+  --duration-normal: 150ms;
+  --duration-emphasis: 200ms;
+  --duration-modal: 250ms;
+
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* -------------------------------------------------------------------------
+     Layout and breakpoints — §12, VALIDATED.
+     ------------------------------------------------------------------------- */
+  --container-content: 1280px;
+  --spacing-gutter-mobile: 16px;
+  --spacing-gutter-tablet: 24px;
+  --spacing-gutter-desktop: 32px;
+  --spacing-sidebar: 240px;
+
+  --breakpoint-sm: 640px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+}
+
+/* ---------------------------------------------------------------------------
+   Base layer. Radius 0 is the default for every element — §7.
+   --------------------------------------------------------------------------- */
+@layer base {
+  * {
+    border-radius: var(--radius-none);
+  }
+
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    font-size: var(--text-body);
+    line-height: var(--text-body--line-height);
+  }
+
+  /* Focus is never removed. §14. */
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+
+  /* §10 — motion is honoured, never imposed. */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
