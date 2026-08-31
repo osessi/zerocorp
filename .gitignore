@@ -37,3 +37,7 @@ docs/diagrams/*.visual-check.json
 **/*.tsbuildinfo
 next-env.d.ts
 docs/diagrams/*visual-check*
+
+# Playwright MCP artefacts
+.playwright-mcp/
+docs/design-review/*.png

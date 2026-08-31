@@ -3,7 +3,7 @@
 import { Field as BaseField } from "@base-ui/react/field";
 import { CircleNotchIcon } from "@phosphor-icons/react/dist/ssr";
 import type { ComponentPropsWithoutRef } from "react";
-import { useFieldState } from "./field-state.js";
+import { useFieldState } from "./field-state";
 
 /**
  * Input — the ZeroCorp text control.
@@ -43,7 +43,9 @@ const BASE = [
   "text-body sm:text-body-sm text-foreground",
   "placeholder:text-muted-foreground",
   "transition-colors duration-normal ease-out",
-  "outline-none",
+  // NEVER add `outline-none` here. It sets outline-style: none, which leaves the focus
+  // ring with a width and a colour but no style — invisible. The indicator disappears
+  // and nothing reports it. Guarded by tests/architecture/design-tokens.test.ts.
 ].join(" ");
 
 /** Default · hover. --input identifies the control boundary and clears WCAG 1.4.11. */

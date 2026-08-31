@@ -1,8 +1,8 @@
 /** @vitest-environment happy-dom */
 import { describe, it, expect, afterEach } from "vitest";
 import { render, screen, cleanup } from "@testing-library/react";
-import { Field } from "./Field.js";
-import { Input } from "./Input.js";
+import { Field } from "./Field";
+import { Input } from "./Input";
 
 afterEach(cleanup);
 

@@ -2,7 +2,7 @@
 
 import { Field as BaseField } from "@base-ui/react/field";
 import { useId, type ReactNode } from "react";
-import { FieldStateContext, type FieldState } from "./field-state.js";
+import { FieldStateContext, type FieldState } from "./field-state";
 
 /**
  * Field — the ZeroCorp form shell.

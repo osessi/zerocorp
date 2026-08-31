@@ -70,6 +70,17 @@ describe("design tokens — no arbitrary visual values", () => {
     expect(offenders).toEqual([]);
   });
 
+  it("never uses outline-none, which silently removes the focus indicator", () => {
+    // Found by visual review on 2026-08-31: `outline-none` sets outline-style: none, so
+    // `focus-visible:outline-2 outline-ring` produced a ring with width and colour but
+    // no style. The indicator was invisible and no unit test could see it.
+    const offenders: string[] = [];
+    for (const file of UI_SOURCES) {
+      if (/\boutline-none\b/.test(code(file))) offenders.push(relative(ROOT, file));
+    }
+    expect(offenders).toEqual([]);
+  });
+
   it("sets no inline pixel style", () => {
     const offenders: string[] = [];
     for (const file of UI_SOURCES) {

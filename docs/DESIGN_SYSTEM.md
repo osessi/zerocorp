@@ -154,7 +154,8 @@ They share the token *architecture*, never the token *values*. See §15 and §16
 | `--muted` | `#262626` | **PROPOSED** |
 | `--muted-foreground` | `#A3A3A3` | **PROPOSED** |
 | `--accent` | `#262626` | **PROPOSED** |
-| `--input` | `#2E2E2E` | **PROPOSED** |
+| `--input` | `#6B6B6B` | **PROPOSED** — 3.72:1. `#2E2E2E` reached only 1.46:1 |
+| `--input-hover` | `#8F8F8F` | **PROPOSED** — 6.12:1. In dark, hover *lightens* |
 | `--primary` | `#00786F` | **PROPOSED** — unchanged; see the contrast finding below |
 | `--primary-foreground` | `#F0FDFA` | **PROPOSED** — unchanged |
 | `--primary-emphasis` | `#2DD4BF` | **PROPOSED** — teal **text**, links and icons on dark only |
@@ -341,12 +342,32 @@ Default shadow:
 
 ## 9. Borders — VALIDATED
 
+**Decorative borders** — dividers, card edges, table rules:
+
 | State | Light | Dark |
 |---|---|---|
-| Default | `#E5E5E5` | `#262626` |
-| Hover | `#D4D4D4` | **TO VALIDATE** |
-| Focus | `#00786F` | `#00786F` |
-| Destructive | `#DC2626` | `#EF4444` (PROPOSED) |
+| Default | `--border` `#E5E5E5` | `#262626` |
+| Hover | `--border-hover` `#D4D4D4` | **TO VALIDATE** |
+
+**Form control boundaries** — VALIDATED:
+
+| State | Light | Ratio |
+|---|---|---|
+| Default | `--input` `#949494` | 3.03:1 ✓ |
+| Hover | `--input-hover` `#737373` | 4.74:1 ✓ |
+| Focus | `--ring` `#00786F` | 5.36:1 ✓ |
+| Error | `--destructive` `#DC2626` | 4.83:1 ✓ |
+| Success | `--success` `#15803D` | 5.02:1 ✓ |
+
+> **Hover always strengthens the boundary; the direction depends on the ground.**
+> In light mode that means darkening (`#949494` → `#737373`). In dark mode it means
+> lightening (`#6B6B6B` → `#8F8F8F`), because contrast against a dark ground grows as the
+> border gets lighter. `--border-hover #D4D4D4` is lighter than `--input #949494` and so
+> can never serve a control in light mode — that is why `--input-hover` exists.
+>
+> **A control boundary must clear 3:1 in every theme.** The dark palette initially
+> proposed `#2E2E2E`, which measured **1.46:1** — the same failure as `#E5E5E5` on white.
+> Caught by visual review, not by a test.
 
 ```text
 Width  1px
@@ -674,6 +695,22 @@ This also means shadcn/ui's `Form` component — which is built on react-hook-fo
 The decision is reversible and scoped: if a specific screen genuinely needs repeatable
 fields, cross-field dependencies or multi-step state that Base UI cannot carry, propose
 react-hook-form **for that screen**, with the reason. Do not adopt it globally by default.
+
+#### Visual review — 2026-08-31
+
+Reviewed in Chrome at 1440px, light and dark, all states. `apps/app/src/app/design-system`
+is the review surface: the real components, not a mockup. Screenshots in
+`docs/design-review/` (git-ignored — regenerate by running the route).
+
+**Two defects the unit tests could not see:**
+
+| | Defect | Cause | Fix |
+|---|---|---|---|
+| 1 | **The focus ring was invisible.** Width 2px and colour `#00786F` were applied, but nothing rendered | `outline-none` in the base class set `outline-style: none`. Tailwind's `outline-2` restores width, not style | `outline-none` removed and now **forbidden** in `packages/ui`, guarded by `tests/architecture/design-tokens.test.ts` |
+| 2 | **Dark-mode control borders failed WCAG 1.4.11.** `--input: #2E2E2E` measured **1.46:1** on `#0A0A0A` | The same failure as `#E5E5E5` on white, reintroduced in the dark palette | `--input: #6B6B6B` (3.72:1), `--input-hover: #8F8F8F` (6.12:1) |
+
+Both were invisible to typecheck, lint, boundaries and 41 unit tests. **A design system
+needs a human looking at it.** Every component added to the registry gets this pass.
 
 #### The field shell — IMPLEMENTED, the reference for every form control
 
@@ -1070,13 +1107,12 @@ and the primitive layer (§2 — Base UI, now the shadcn/ui default).
 | # | Item | Blocks |
 |---|---|---|
 | 1 | **Styling engine — Tailwind v4** — adopted during the Field implementation because Shadcn Studio, the declared primary source (§18), ships Tailwind. Structural: it is not trivially reversible | Recorded for confirmation, not blocking |
-| 2 | **`--input-hover: #737373`** (§9) — PROPOSED. `--border-hover #D4D4D4` is lighter than `--input`, so it cannot serve a control | Hover on every form control |
-| 3 | **Dark mode values** (§4.2) — PROPOSED, need one review pass | Dark mode |
-| 4 | **Block taxonomy and hero variants** (§20) — D3 / D4 | The block registry |
-| 5 | **Customer art directions** (§16) — 6–8 curated directions | Every customer site |
-| 6 | **Flaticon licence** (§11) | Animated icons |
-| 7 | **Border hover in dark mode** (§9) | Dark mode components |
-| 8 | **`dashboard columns` and `editor widths`** (§12) | Dashboard grid, block editor |
+| 2 | **Dark mode values** (§4.2) — PROPOSED, need one review pass | Dark mode |
+| 3 | **Block taxonomy and hero variants** (§20) — D3 / D4 | The block registry |
+| 4 | **Customer art directions** (§16) — 6–8 curated directions | Every customer site |
+| 5 | **Flaticon licence** (§11) | Animated icons |
+| 6 | **Border hover in dark mode** (§9) | Dark mode components |
+| 7 | **`dashboard columns` and `editor widths`** (§12) | Dashboard grid, block editor |
 
 ---
 

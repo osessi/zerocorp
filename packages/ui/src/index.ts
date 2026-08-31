@@ -11,4 +11,4 @@
  * Approved components are registered in docs/DESIGN_SYSTEM.md §19. Nothing lands here
  * without a licence review and adaptation to ZeroCorp tokens.
  */
-export * from "./field/index.js";
+export * from "./field/index";

@@ -41,7 +41,7 @@
   --border: #e5e5e5;
   --border-hover: #d4d4d4;
   --input: #949494; /* 3.03:1 on white */
-  --input-hover: #737373; /* PROPOSED — DESIGN_SYSTEM.md §24 */
+  --input-hover: #737373; /* 4.74:1 — hover must darken a control, never lighten it */
   --ring: #00786f;
 
   /* Status — one system for the whole product. §4.3, VALIDATED. */
@@ -74,7 +74,11 @@
   --surface-elevated: #1c1c1c;
 
   --border: #262626;
-  --input: #2e2e2e;
+  /* A control boundary must clear 3:1 in EVERY theme. #2e2e2e reached only 1.46:1 on
+     #0a0a0a — the same failure as #e5e5e5 on white. In dark, hover LIGHTENS the border:
+     contrast against a dark ground grows as the border gets lighter. */
+  --input: #6b6b6b; /* 3.72:1 */
+  --input-hover: #8f8f8f; /* 6.12:1 */
 
   /* Light-mode status colours reach only 3.69–4.10:1 on #0A0A0A: enough for a filled
      badge, not for status text. These lighter values are required on dark. */
