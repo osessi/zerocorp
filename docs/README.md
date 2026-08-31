@@ -40,7 +40,7 @@ These six documents are the authoritative specification of ZeroCorp.
 | [`PRODUCT_SPEC.md`](./PRODUCT_SPEC.md) | Product scope, plan contents, customer journeys, module behaviour, V1 boundary, product metrics |
 | [`ARCHITECTURE.md`](./ARCHITECTURE.md) | Runtime topology, monorepo layout, domain boundaries, API style, provider abstractions, events, CI/CD, deployment |
 | [`DATABASE.md`](./DATABASE.md) | Schema, tenancy and RLS, identifiers, indexing, migrations, retention |
-| [`DESIGN_SYSTEM.md`](./DESIGN_SYSTEM.md) | Design tokens, foundations, product components, layout patterns, website block and variant system, AI visual restrictions |
+| [`DESIGN_SYSTEM.md`](./DESIGN_SYSTEM.md) | Design tokens, foundations, product components, layout patterns, website block and variant system, **component selection policy**, approved component registry, AI visual restrictions |
 | [`CLAUDE_CODE_RULES.md`](./CLAUDE_CODE_RULES.md) | Engineering constitution for Claude Code: process, guardrails, regression strategy, decision protocol |
 
 ### Precedence between current documents

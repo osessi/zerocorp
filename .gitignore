@@ -36,3 +36,4 @@ docs/diagrams/*.visual-check.json
 **/.next/
 **/*.tsbuildinfo
 next-env.d.ts
+docs/diagrams/*visual-check*

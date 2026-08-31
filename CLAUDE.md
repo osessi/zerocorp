@@ -106,8 +106,9 @@ Prefer simple, maintainable code over premature abstraction.
 2. docs/OPEN_DECISIONS.md       (is this topic disputed?)
 3. docs/README.md               (which document owns this topic?)
 4. the owning document
-5. docs/CLAUDE_CODE_RULES.md
-6. existing code and tests for the affected modules
+5. docs/DESIGN_SYSTEM.md       (any UI work — always)
+6. docs/CLAUDE_CODE_RULES.md
+7. existing code and tests for the affected modules
 ```
 
 Only then write code.
@@ -132,7 +133,53 @@ Only then write code.
 
 ---
 
-## 4. Repository state
+## 4. Design system — read before writing any UI
+
+The full rules are in [`docs/DESIGN_SYSTEM.md`](./docs/DESIGN_SYSTEM.md) and
+[`docs/CLAUDE_CODE_RULES.md`](./docs/CLAUDE_CODE_RULES.md) §43. Operational summary:
+
+```text
+Read DESIGN_SYSTEM.md before implementing UI.
+
+Use ZeroCorp Design System tokens.
+Never invent arbitrary colors, typography, spacing, radius or shadows.
+
+Prefer Shadcn Studio. Compare alternatives when necessary.
+Ask the product/design owner when the decision is genuinely ambiguous.
+
+Reuse approved components. Do not create competing implementations.
+
+Customer websites and ZeroCorp UI have separate theme systems.
+```
+
+### The locked identity
+
+```text
+Style    Lyra              Base    Base UI
+Icons    Phosphor · 20px standard · Regular
+Type     Geist Sans · Geist Mono for every comparable number
+Radius   0px default · 2–4px only where a control truly needs it
+Primary  #00786F           Spacing  4px scale, 16px central
+Motion   100 / 150 / 200 / 250ms · no decorative bounce
+```
+
+Hierarchy comes from **borders, spacing and typography** — not shadows or gradients.
+
+### Status markers
+
+`DESIGN_SYSTEM.md` marks every value **VALIDATED**, **PROPOSED** or **TO VALIDATE**.
+A **TO VALIDATE** value is not a gap to fill with a guess — stop and ask. Eight items
+are still open; they are listed in `DESIGN_SYSTEM.md` §24.
+
+### Licence gate
+
+Nothing is copied into the repository before its licence is read and recorded. MIT and
+Apache-2.0 are fine. Shadcn Studio is freemium — verify each block. Flaticon is **not**
+open source. Never assume "open source" means "safe to embed in a resold SaaS".
+
+---
+
+## 5. Repository state
 
 Documentation **and** the architecture scaffold. **No business features exist yet** —
 that is deliberate (ADR 0001 step). Do not add product behaviour without an explicit ask.
@@ -172,7 +219,7 @@ it arrives, is the public API — never a BFF for `apps/app`.
 
 ---
 
-## 5. Git discipline
+## 6. Git discipline
 
 ```text
 Before meaningful modifications:  git status

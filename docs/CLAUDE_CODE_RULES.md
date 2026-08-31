@@ -243,7 +243,9 @@ Never introduce arbitrary:
 - icons;
 - animations.
 
-The Design System is the visual source of truth.
+The Design System is the visual source of truth. See §43 for the full
+discipline: locked identity, component selection policy, licence gate, and the
+separation between the ZeroCorp product UI and customer website themes.
 
 ---
 
@@ -1112,7 +1114,127 @@ Types: `architecture`, `workflow`, `sequence`, `dataflow`, `lifecycle`.
 
 ---
 
-## 43. Golden Rules
+## 43. Design System Discipline
+
+`DESIGN_SYSTEM.md` owns every visual decision. This section is how Claude Code applies it.
+
+> **Claude Code must never invent a visual language.**
+
+### Read before writing UI
+
+No component, screen or style is written before reading `DESIGN_SYSTEM.md`. Every value
+there carries a status — **VALIDATED**, **PROPOSED** or **TO VALIDATE**. A **TO VALIDATE**
+value is not a gap to fill with a guess. Stop and ask.
+
+### The locked identity
+
+```text
+Style      Lyra
+Base       Base UI
+Icons      Phosphor · 20px standard · Regular weight
+Type       Geist Sans · Geist Mono for all comparable numbers
+Radius     0px default · 2–4px only where a control genuinely needs it
+Primary    #00786F
+Spacing    4px scale, 16px central
+Motion     100 / 150 / 200 / 250ms · no decorative bounce
+```
+
+Never introduce an arbitrary colour, font size, spacing value, radius, shadow, icon set or
+animation duration. If the value is not a token, it is a defect.
+
+### Component selection — choose, do not obey a fixed list
+
+The rule is not "always use component X". It is:
+
+> **Choose the most appropriate implementation among the best available sources, while
+> strictly respecting ZeroCorp's identity and constraints.**
+
+Search order: **Shadcn Studio** → shadcn/ui official → a high-quality specialised registry
+→ another serious source → a custom ZeroCorp component, only if nothing existing is good
+enough.
+
+**Search the approved sources before creating a new component.** Writing a bespoke
+component when a good one exists is the failure this rule prevents.
+
+Compare against the criteria in `DESIGN_SYSTEM.md` §18 before choosing: design quality,
+accessibility, responsive behaviour, API ergonomics, customizability, performance, project
+health, licence, stack compatibility, and consistency with Lyra and this system.
+
+The chosen component may come from any registry, **but it must be adapted to ZeroCorp
+tokens, spacing, typography, radius, iconography and motion before it is registered.**
+
+### Licence gate — hard, before any code enters the repository
+
+Record `name · source · version · licence · attribution requirement · modifications ·
+owner · review date` (`PRODUCT_VISION.md` §12).
+
+MIT and Apache-2.0 may be copied. Shadcn Studio is freemium — verify each block, not the
+platform. Unverified registries stay unverified until read. Flaticon is **not** open
+source; see `DESIGN_SYSTEM.md` §11. Never assume "open source" means "safe to embed in a
+resold SaaS".
+
+### No competing implementations
+
+**Do not silently introduce a second implementation of an approved component.** If a
+`StatusBadge` exists, every status uses it. If an approved component is genuinely
+inadequate, say so and propose replacing it — do not add a rival beside it.
+
+Repeated patterns get promoted into the shared component, not copied.
+
+### Ask when the decision is genuinely ambiguous
+
+Claude Code decides alone when one option is clearly superior. It **stops and asks** when
+two or more options are genuinely equivalent, when the choice materially affects the
+visual identity, when it creates a new important pattern, when nothing available is good
+enough, when the component is exceptionally visible or structural, or when torn between
+custom and third-party.
+
+Format: `Option A / Option B / Option C`, then `Pros`, `Cons`, `Recommendation` — then wait.
+
+### Pages are compositions, never copies
+
+Full pages and dashboards are **not** lifted from a component library. References inspire;
+the result is assembled from ZeroCorp layout, ZeroCorp tokens and approved components.
+Copying another product's design mechanically is forbidden.
+
+### Two systems, never merged
+
+```text
+ZeroCorp Product UI          apps/app  · packages/ui
+Customer Website System      apps/sites · packages/site-renderer
+```
+
+**A customer website theme must never alter the ZeroCorp product UI design system.** The
+customer never chooses ZeroCorp's interface colours. A tenant's brand appears in the
+product only as content — a logo preview, a swatch, a site preview — never as chrome.
+
+Conversely, `--radius: 0px` is a ZeroCorp signature, not a customer constraint. Customer
+sites may be rounded.
+
+The separation is enforced by the layer boundaries in `ARCHITECTURE.md` §29: `ui` and
+`site-renderer` are separate packages and neither imports the other.
+
+### Every component ships complete
+
+```text
+loading · empty · error · success · partial
+desktop · tablet · mobile
+visible focus · keyboard operation · accessible name · AA contrast
+prefers-reduced-motion honoured
+```
+
+A component missing a state or a breakpoint is not done. Accessibility regressions are
+release-blocking.
+
+### Changing a VALIDATED value
+
+Treated like an architecture change: problem, current value, proposal, alternatives,
+trade-offs, impact — then approval. Never silently. §40 governs how the document is kept
+current.
+
+---
+
+## 44. Golden Rules
 
 > **Build the system we designed, not the system you imagine.**
 
@@ -1135,4 +1257,8 @@ Types: `architecture`, `workflow`, `sequence`, `dataflow`, `lifecycle`.
 > **Current documentation wins. Archived documentation is history, never a spec.**
 
 > **Keep the documentation true — propose the update, never let it drift silently.**
+
+> **Never invent a visual language. Compose the approved one.**
+
+> **Search the approved sources before writing a new component.**
 
