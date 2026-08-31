@@ -109,19 +109,26 @@ describe("StatusBadge — contrast", () => {
 });
 
 describe("StatusBadge — i18n and layout", () => {
-  it("lets a long label wrap instead of overflowing its column", () => {
-    // §5: no layout may depend on a specific string length, and French runs ~25% longer.
-    // "Renews in 14 days" becomes "Renouvellement dans 14 jours".
+  it("stays on one line", () => {
+    // A status that wraps to three lines reads as a paragraph in a box, not a status.
+    // Reported in review 2026-08-31.
     render(<StatusBadge tone="warning">Renouvellement dans 14 jours</StatusBadge>);
     const badge = screen.getByText("Renouvellement dans 14 jours").closest("span");
-    expect(badge?.className).not.toContain("whitespace-nowrap");
+    expect(badge?.className).toContain("whitespace-nowrap");
   });
 
-  it("keeps the icon on the first line when the label wraps", () => {
+  it("never clips or truncates the label, in any language", () => {
+    // One line is a constraint on how short a status label must be. It is not a licence
+    // to hide text: a status the reader cannot finish is worse than a wide badge.
     render(<StatusBadge tone="warning">Renouvellement dans 14 jours</StatusBadge>);
     const badge = screen.getByText("Renouvellement dans 14 jours").closest("span");
-    expect(badge?.className).toContain("items-start");
-    const { container } = render(<StatusBadge tone="warning">Wraps</StatusBadge>);
+    expect(badge?.className).not.toContain("truncate");
+    expect(badge?.className).not.toContain("overflow-hidden");
+    expect(badge?.className).not.toMatch(/\bw-\d/);
+  });
+
+  it("keeps the icon from being squeezed by a long label", () => {
+    const { container } = render(<StatusBadge tone="warning">Renouvellement</StatusBadge>);
     expect(container.querySelector("svg")?.getAttribute("class")).toContain("shrink-0");
   });
 

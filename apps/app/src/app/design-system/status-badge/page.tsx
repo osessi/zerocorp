@@ -11,13 +11,23 @@ import { StatusBadge, type StatusTone, type StatusEmphasis } from "@zerocorp/ui"
  * with two emphases. The third candidate (bare icon + label) was not built.
  *
  * What this page has to prove before the registry entry: light + dark, greyscale, a
- * dense table, a detail header, 375px, and a French label 60% longer than its English
- * original. docs/DESIGN_SYSTEM.md §19.
+ * dense table, a detail header, 375px, and the six statuses in French — every badge on
+ * one line at both widths. docs/DESIGN_SYSTEM.md §19.
  */
 
 const cx = (...p: Array<string | false | undefined>) => p.filter(Boolean).join(" ");
 
 const TONES: StatusTone[] = ["success", "processing", "warning", "danger", "info", "neutral"];
+
+/** The same six statuses in French — the longest is 44% longer than its English original. */
+const TONE_LABEL_FR: Record<StatusTone, string> = {
+  success: "Active",
+  processing: "Dépôt en cours",
+  warning: "Renouvellement sous 14 j",
+  danger: "Rejetée",
+  info: "EIN enregistré",
+  neutral: "Brouillon",
+};
 
 const TONE_LABEL: Record<StatusTone, string> = {
   success: "Active",
@@ -219,25 +229,29 @@ export default function StatusBadgeReviewPage() {
         </Section>
 
         <Section
-          title="i18n — a label that grew 60%"
-          note="§5: no layout may depend on a string length. The English label wraps rather than pushing the badge out of its column."
+          title="i18n — the same six statuses in French"
+          note="A badge is always one line. French runs ~25% longer, so the badge widens; it never wraps, never truncates, and never gets a fixed width."
         >
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
             {EMPHASES.map(({ key, name }) => (
-              <div key={key} className="border-border flex flex-col gap-3 border p-4">
-                <span className="text-caption text-muted-foreground">{name}</span>
-                <StatusBadge tone="warning" emphasis={key}>
-                  Renouvellement du rapport annuel dans 14 jours
-                </StatusBadge>
+              <div key={key} className="border-border flex flex-col gap-4 border p-4">
+                <span className="text-label text-foreground">{name}</span>
+                <div className="flex flex-col items-start gap-3">
+                  {TONES.map((tone) => (
+                    <StatusBadge key={tone} tone={tone} emphasis={key}>
+                      {TONE_LABEL_FR[tone]}
+                    </StatusBadge>
+                  ))}
+                </div>
               </div>
             ))}
-            <div className="border-border flex flex-col gap-3 border p-4">
-              <span className="text-caption text-muted-foreground">in a narrow column</span>
-              <div className="w-32">
-                <StatusBadge tone="danger">Demande rejetée par l&rsquo;État</StatusBadge>
-              </div>
-            </div>
           </div>
+          <p className="text-body-sm text-muted-foreground">
+            A label long enough to need a second line is not a status — it is a message, and
+            it belongs in a description or a row of its own. The longest real one here,
+            &ldquo;Renouvellement sous 14 j&rdquo;, is 44% longer than its English original and
+            still one line.
+          </p>
         </Section>
 
         <Section

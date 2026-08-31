@@ -1038,7 +1038,12 @@ StatusBadge                    one status system for the whole product
    prominent inks with --background, which flips with the theme exactly as the status
    colours do. A theme-stable near-white measured 1.78:1–3.61:1 on the dark tones.
    neutral outlines with --muted-foreground, never --border (1.26:1 / 1.31:1).
-   The label wraps; no whitespace-nowrap. §5 — no layout may depend on a string length.
+   Always ONE line. A status that wraps reads as a paragraph in a box, not a status.
+   This constrains the LABEL, not the layout: nothing truncates, nothing has a fixed
+   width, and the badge widens with its text in every language. A label long enough to
+   need a second line is not a status — it is a message, and belongs in a description,
+   a tooltip or a row of its own. §5 is satisfied because the badge has no fixed width
+   and no fixed height; the surfaces around it absorb the growth.
 
 control-styles.ts              the shared visual contract
 → packages/ui/src/field/control-styles.ts
@@ -1861,11 +1866,27 @@ now outlines with `--muted-foreground` (4.74:1 / 7.85:1), which also makes it co
 with the other five, where border and label are the same colour.
 
 **Verified in Chrome.** 24 combinations — 2 emphases × 6 tones × 2 themes — all clear
-4.5:1 for the label and 3:1 for the border. At 375px the page has no horizontal overflow.
-A French label 60% longer than its English original wraps to three lines in a 128px
-column with the icon held on the first line; badge height goes 22px → 54px, so nothing is
-a fixed-height container holding translatable text (§5). No badge is focusable, none
-claims a role, every icon is `aria-hidden`, and a table cell reads "Status: Active".
+4.5:1 for the label and 3:1 for the border. At 1280px and at 375px every badge measures
+22px — one line — and the page has no horizontal overflow at either width. No badge is
+focusable, none claims a role, every icon is `aria-hidden`, and a table cell reads
+"Status: Active".
+
+**A follow-up correction, same day.** The first build let the label wrap, reasoning from
+§5 that a badge must never overflow a narrow column. Review rejected it on sight: a
+status on three lines stops reading as a status. The reasoning had been checked against
+the wrong thing — the demo that "proved" the wrap worked used a 128px column invented for
+the purpose and a whole sentence as a label, neither of which occurs in the product.
+
+The rule is now the other way round, and it is a rule about labels: **a badge is one
+line, and a status label is one to three words.** Nothing truncates and nothing has a
+fixed width, so no text is ever hidden; the badge simply widens, and the surfaces around
+it absorb that — `DataTableLayout` scrolls horizontally, a detail row uses `flex-wrap` so
+whole badges move down instead of breaking inside one. Re-checked with the six statuses
+in French, the longest 44% longer than its English original: 22px, one line, at 375px.
+
+**The lesson worth keeping: a demo built to prove a behaviour will prove it.** The 128px
+column and the sentence-as-label were chosen because they made the wrap visible, which is
+exactly why they were not evidence of anything.
 
 ---
 

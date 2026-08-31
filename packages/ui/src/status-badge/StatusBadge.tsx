@@ -118,17 +118,25 @@ const SOLID: Record<StatusTone, string> = {
 };
 
 /**
- * The label wraps rather than overflowing.
+ * A badge is always one line.
  *
- * §5 is explicit: no layout may depend on a specific string length, and French runs
- * roughly 25% longer than English. "Renews in 14 days" becomes "Renouvellement dans
- * 14 jours". `whitespace-nowrap` would push the badge out of a narrow column instead.
+ * A status that wraps to three lines stops reading as a status and starts reading as a
+ * paragraph in a box. Reported in review 2026-08-31.
  *
- * `items-start` keeps the icon on the first line when the label does wrap. With a 16px
- * icon and a 16px line box, single-line badges are unaffected.
+ * This is a constraint on the LABEL, not a licence to clip: nothing here truncates, and
+ * the badge grows with its text in every language. What it means is that a status label
+ * is one to three words — "Active", "Filing", "Renews in 14 days". If a label is long
+ * enough to need wrapping, it is not a status; it is a message, and it belongs in a
+ * description, a tooltip or a row of its own.
+ *
+ * §5 is still satisfied. The rule there is that no layout may depend on a string length
+ * and no fixed-height container may hold translatable text. The badge has neither a
+ * fixed width nor a fixed height — it widens as the text does, and the surfaces around
+ * it absorb that: a DataTableLayout scrolls horizontally, a detail row uses flex-wrap so
+ * whole badges move to the next line instead of breaking inside one.
  */
 const BASE = [
-  "text-caption inline-flex items-start gap-1.5",
+  "text-caption inline-flex items-center gap-1.5 whitespace-nowrap",
   "border px-2 py-0.5",
   "rounded-none",
 ].join(" ");
