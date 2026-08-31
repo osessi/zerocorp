@@ -22,6 +22,15 @@ export interface FieldState {
   loading: boolean;
   /** id of the element describing the control, for aria-describedby. */
   describedBy: string | undefined;
+  /**
+   * id of the Field's label.
+   *
+   * Input and Textarea are Field.Control, so Base UI associates them with the label
+   * natively. Select's trigger is a <button>, which `<label for>` cannot address — it
+   * uses aria-labelledby instead. Publishing the id here keeps Select on the same shell
+   * rather than growing a parallel one.
+   */
+  labelId: string;
 }
 
 const EMPTY: FieldState = {
@@ -29,6 +38,7 @@ const EMPTY: FieldState = {
   valid: false,
   loading: false,
   describedBy: undefined,
+  labelId: "",
 };
 
 export const FieldStateContext = createContext<FieldState>(EMPTY);

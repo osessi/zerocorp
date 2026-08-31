@@ -55,6 +55,7 @@ export function Field({
   const id = useId();
   const descriptionId = `${id}-description`;
   const messageId = `${id}-message`;
+  const labelId = `${id}-label`;
 
   const invalid = error !== undefined && error !== "";
   const valid = !invalid && success !== undefined && success !== "";
@@ -64,6 +65,7 @@ export function Field({
     invalid,
     valid,
     loading,
+    labelId,
     describedBy:
       [invalid || valid ? messageId : undefined, showDescription ? descriptionId : undefined]
         .filter(Boolean)
@@ -77,7 +79,10 @@ export function Field({
         disabled={disabled}
         className={["flex w-full flex-col gap-2", className].filter(Boolean).join(" ")}
       >
-        <BaseField.Label className="text-label text-foreground data-disabled:text-muted-foreground">
+        <BaseField.Label
+          id={labelId}
+          className="text-label text-foreground data-disabled:text-muted-foreground"
+        >
           {label}
           {required ? (
             <span className="text-destructive ml-1" aria-hidden="true">

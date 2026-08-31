@@ -493,6 +493,21 @@ Rules:
 4. Every token pair must be contrast-checked before use. §4.4 holds the measurements.
 5. A theme switch never changes layout, spacing or type — only colour.
 
+### The theme class goes on the root element — VALIDATED
+
+```text
+document.documentElement.classList.toggle("dark", isDark)
+```
+
+**Never on a wrapper element.** Portalled components — Select's popup, and later Dialog,
+Drawer, Popover, Tooltip, Dropdown and Toast — mount on `document.body`, outside any
+wrapper. A theme class on a `<div>` leaves every one of them rendering light-mode tokens
+on a dark page.
+
+Found by visual review on 2026-08-31: the Select popup rendered white
+(`#FFFFFF` background, `#E5E5E5` border) in the middle of a dark page. The components
+were correct; the theme was applied in the wrong place.
+
 Dark mode values are **PROPOSED** (§4.2) and need one review pass before the first screen
 ships.
 
@@ -721,6 +736,24 @@ on both controls, `resize: vertical` and `resize: none` when disabled.
 That is the return on extracting `control-styles.ts` — Textarea inherited two fixes it
 never had to be told about.
 
+#### Visual review — Select, 2026-08-31
+
+Reviewed at 1440px and 375px, both themes, open and closed. Verified: open/close by
+pointer and keyboard, focus ring on the trigger, highlight and selected indicator,
+disabled trigger and disabled option, error and success, long labels and long options,
+dark mode, and dropdown geometry (4px offset, left-aligned, at least trigger width).
+
+**Three defects, none caught by 16 unit tests:**
+
+| | Defect | Cause | Fix |
+|---|---|---|---|
+| 1 | **The popup rendered light-mode on a dark page** — white background, light border | Base UI portals mount on `document.body`, outside the wrapper carrying the theme class | Theme class moved to `document.documentElement`. Now a rule — see §13 |
+| 2 | **A long option pushed the trigger past the viewport** on a 375px screen; `truncate` never fired | A flex child defaults to `min-width: auto` and refuses to shrink below its content | `min-w-0` on `Select.Value`, plus a regression test |
+| 3 | **The popup width guard was inert** — `min-w` and `max-w` both set, popup stayed 471px on a 375px screen | CSS `min-width` always beats `max-width` | Root cause was defect 2; the guard works once the trigger behaves. Recorded so the pairing is not trusted blindly |
+
+Defect 1 is the important one: **it will recur on every portalled component** — Dialog,
+Drawer, Popover, Tooltip, Dropdown, Toast — and no component-level test can see it.
+
 #### The field shell — IMPLEMENTED, the reference for every form control
 
 ```text
@@ -920,6 +953,20 @@ Textarea                       the multi-line text control
    No new pattern: same Field shell, same context, same style fragments.
    rows default 4 · vertical resize only · resize disabled when the control is
    spinner sits at the top, because a tall control has no meaningful middle
+
+Select                         the single-choice control
+→ packages/ui/src/field/Select.tsx  ·  Base UI Select
+→ VALIDATED — implemented and visually reviewed 2026-08-31
+→ MIT · reviewed 2026-08-31
+   No new pattern: same Field shell, same control contract.
+   The trigger is a <button>, so it takes aria-labelledby from the Field context —
+   <label for> cannot address a button. The empty state is data-placeholder, not
+   ::placeholder.
+   alignItemWithTrigger deliberately off: the default overlaps the trigger to line the
+   selected item up under the cursor, which reads as macOS, not as a calm form control.
+   Popup: at least trigger width, free to grow for a long option, capped at
+   --available-width. Options are never truncated; they wrap when the popup runs out
+   of room.
 
 control-styles.ts              the shared visual contract
 → packages/ui/src/field/control-styles.ts

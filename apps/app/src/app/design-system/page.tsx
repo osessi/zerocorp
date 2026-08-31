@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { Field, Input, Textarea } from "@zerocorp/ui";
+import { useEffect, useState } from "react";
+import { Field, Input, Textarea, Select, type SelectOption } from "@zerocorp/ui";
 
 /**
  * Design system review surface.
@@ -27,7 +27,7 @@ function Case({ title, note, children }: { title: string; note?: string; childre
 
 function Matrix() {
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
       <Case title="Default" note="border --input #949494 · 3.03:1">
         <Field label="Business name">
           <Input placeholder="Acme LLC" />
@@ -108,7 +108,7 @@ function Matrix() {
 
 function TextareaMatrix() {
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
       <Case title="Default" note="4 rows · vertical resize only">
         <Field label="Business description">
           <Textarea placeholder="We help agencies launch faster…" />
@@ -152,11 +152,93 @@ function TextareaMatrix() {
   );
 }
 
+const STATES: SelectOption[] = [
+  { value: "wy", label: "Wyoming" },
+  { value: "de", label: "Delaware" },
+  { value: "nm", label: "New Mexico" },
+  { value: "fl", label: "Florida" },
+  { value: "tx", label: "Texas" },
+  { value: "ca", label: "California (not available for non-residents)", disabled: true },
+];
+
+const LONG: SelectOption[] = [
+  { value: "llc", label: "Limited Liability Company (single member, foreign-owned)" },
+  { value: "ccorp", label: "C Corporation — Delaware, standard for venture financing" },
+  { value: "scorp", label: "S Corporation (US persons and residents only)", disabled: true },
+];
+
+function SelectMatrix() {
+  return (
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <Case title="Default" note="placeholder · --muted-foreground">
+        <Field label="State of formation">
+          <Select options={STATES} placeholder="Choose a state" />
+        </Field>
+      </Case>
+
+      <Case title="Selected" note="renders the label, never the value">
+        <Field label="State of formation" description="Wyoming is the usual choice">
+          <Select options={STATES} defaultValue="wy" />
+        </Field>
+      </Case>
+
+      <Case title="Open me" note="check highlight, selected indicator, disabled option">
+        <Field label="Open this select">
+          <Select options={STATES} defaultValue="de" />
+        </Field>
+      </Case>
+
+      <Case title="Long options" note="wrap rather than truncate">
+        <Field label="Entity type">
+          <Select options={LONG} defaultValue="llc" />
+        </Field>
+      </Case>
+
+      <Case title="Disabled" note="inert · --muted background">
+        <Field label="State of formation" disabled description="Locked after filing">
+          <Select options={STATES} defaultValue="wy" disabled />
+        </Field>
+      </Case>
+
+      <Case title="Error" note="--destructive · role=alert">
+        <Field label="State of formation" error="Choose a state of formation">
+          <Select options={STATES} placeholder="Choose a state" />
+        </Field>
+      </Case>
+
+      <Case title="Success" note="--success · role=status">
+        <Field label="State of formation" success="Wyoming confirmed">
+          <Select options={STATES} defaultValue="wy" />
+        </Field>
+      </Case>
+
+      <Case title="Long label" note="i18n — trigger truncates, label wraps">
+        <Field label="État d'immatriculation de la société aux États-Unis">
+          <Select options={LONG} defaultValue="ccorp" />
+        </Field>
+      </Case>
+    </div>
+  );
+}
+
 export default function DesignSystemPage() {
   const [dark, setDark] = useState(false);
 
+  /**
+   * The theme class goes on <html>, never on a wrapper element.
+   *
+   * Portalled components — Select's popup, and later Dialog, Drawer, Popover, Tooltip,
+   * Dropdown and Toast — mount on document.body, outside any wrapper. A theme class on a
+   * div leaves every one of them rendering light-mode tokens on a dark page.
+   * Found by visual review on 2026-08-31. docs/DESIGN_SYSTEM.md §13.
+   */
+  useEffect(() => {
+    document.documentElement.classList.toggle("dark", dark);
+    return () => document.documentElement.classList.remove("dark");
+  }, [dark]);
+
   return (
-    <div className={dark ? "dark" : undefined}>
+    <div>
       <div className="bg-background text-foreground min-h-screen">
         <div className="mx-auto flex max-w-(--container-content) flex-col gap-8 p-8">
           <header className="border-border flex items-center justify-between border-b pb-6">
@@ -186,6 +268,15 @@ export default function DesignSystemPage() {
               Same Field shell, same tokens, same states. No new pattern.
             </p>
             <TextareaMatrix />
+          </section>
+
+          <section className="flex flex-col gap-4">
+            <h2 className="text-h4">Select</h2>
+            <p className="text-body-sm text-muted-foreground">
+              Same Field shell and control contract. The trigger is a button, so it takes
+              aria-labelledby from the Field.
+            </p>
+            <SelectMatrix />
           </section>
 
           <footer className="border-border text-caption text-muted-foreground border-t pt-6">
