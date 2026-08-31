@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
 import {
-  ChartBarIcon, BuildingsIcon, FileTextIcon, PlugsConnectedIcon, ListChecksIcon,
+  ChartBarIcon, BuildingsIcon, FileTextIcon, ListChecksIcon,
   GearIcon, LifebuoyIcon, MagnifyingGlassIcon, LightningIcon, UserPlusIcon,
   BellIcon, CaretDownIcon, CaretUpIcon, CaretLeftIcon,
 } from "@phosphor-icons/react/dist/ssr";
@@ -26,6 +26,7 @@ const NAV = [
     children: [
       { href: "/design-system/screens/businesses", label: "All businesses" },
       { href: "/design-system/screens/business", label: "Formation queue" },
+      { href: "/design-system/screens/drawer", label: "Queue + drawer" },
     ],
   },
   {
@@ -33,7 +34,6 @@ const NAV = [
     icon: FileTextIcon,
     children: [{ href: "/design-system/screens/documents", label: "Document vault" }],
   },
-  { href: "/design-system/screens/drawer", label: "Integrations", icon: PlugsConnectedIcon },
   { href: "/design-system/screens/tasks", label: "Tasks", icon: ListChecksIcon },
 ];
 
@@ -221,13 +221,13 @@ export function DashboardShell({ children, dark, onToggleTheme }: { children: Re
 
       <div className="flex min-w-0 flex-1 flex-col">
         <TopCommandBar />
-        <main className="min-h-0 flex-1 overflow-y-auto">{children}</main>
+        <main className="flex min-h-0 flex-1 flex-col overflow-y-auto pb-16">{children}</main>
       </div>
 
       {/* Review-only affordance. Not part of the pattern. */}
       <button
         onClick={onToggleTheme}
-        className="border-input bg-background text-label focus-visible:outline-ring fixed right-6 bottom-6 z-40 h-9 border px-3 focus-visible:outline-2 focus-visible:outline-offset-2"
+        className="border-input bg-background text-label focus-visible:outline-ring fixed right-6 bottom-6 z-30 h-9 border px-3 shadow-floating focus-visible:outline-2 focus-visible:outline-offset-2"
       >
         {dark ? "Light" : "Dark"}
       </button>
@@ -254,7 +254,7 @@ export function PageHeader({
   actions?: ReactNode;
 }) {
   return (
-    <div className="border-border border-b">
+    <div className="border-border shrink-0 border-b">
       {breadcrumb || meta ? (
         <div className="border-border flex items-center justify-between gap-4 border-b px-8 py-3">
           <div className="text-body-sm text-muted-foreground flex min-w-0 items-center gap-2">{breadcrumb}</div>

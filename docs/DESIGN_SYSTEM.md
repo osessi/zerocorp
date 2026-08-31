@@ -1561,8 +1561,8 @@ overflow anywhere, every colour resolving from tokens in both themes.
 
 | | Finding | Status |
 |---|---|---|
-| 1 | **Overlapping avatar stacks clip initials.** The reference overlaps photos, which reads fine. With two-letter initials at 24px, a `-8px` overlap hides the first letter — "AO" renders as "AC" | **Needs a decision.** Either no overlap for initials, or initials-avatars are wider, or the stack shows one avatar plus a count |
-| 2 | **The drawer covers the top bar in the reference; ours starts beneath it** | **Needs a decision.** §21.13 does not say. Covering the bar is more immersive; sitting beneath keeps search reachable |
+| 1 | **Overlapping avatar stacks clip initials.** The reference overlaps photos, which reads fine. With two-letter initials at 24px, a `-8px` overlap hides the first letter — "AO" renders as "AC" | **Fixed.** Initials never overlap. Overlap may return when real photographs replace initials — as a deliberate decision, on that condition |
+| 2 | **The drawer covered only the content column**, starting beneath the top bar and stopping short of the bottom | **Fixed.** `fixed inset-0` — the veil and the drawer cover the whole window, sidebar and top bar included, as the reference does. Escape now closes it |
 | 3 | **Status badges** are rendered outlined with a square marker, using the five validated colours as border and text — because pastel fills were refused and no subtle scale exists (§21.0) | **PROPOSED.** This is an interpretation, not an observation |
 | 4 | **Two token rules were too broad** and fired on correct code — see below | **Fixed** |
 
@@ -1584,6 +1584,23 @@ draw a second one, but it must still stay visible in forced-colors mode.
 > A rule that fires on correct code gets ignored, and then it stops catching the
 > incorrect code too. Both narrowings made the rules **stricter in intent** and quieter
 > in practice.
+
+**Three more fixed on review, 2026-08-31**
+
+| | Finding | Fix |
+|---|---|---|
+| 5 | **The split layout stopped mid-air.** The vertical rule between the context and main columns ended wherever the taller column's content happened to end, leaving dead space beneath | `flex-1` on the split fills the remaining viewport height; each column scrolls on its own. §21.9 |
+| 6 | **A navigation item lit up for the wrong screen** — the drawer prototype activated "Integrations" | Routes now map to the record they actually show. An active state that lies about where you are is worse than no active state |
+| 7 | **The review theme toggle covered page content** | Bottom padding on the content column; the toggle sits below the drawer in the stacking order |
+
+#### Two rules this settles
+
+**A panel that overlays the page covers the whole window** — sidebar and top bar
+included — and closes on Escape. Anchoring an overlay to the content column leaves it
+starting under the top bar and cut off at the bottom. §21.13.
+
+**A split layout fills the viewport height.** Its dividing rule is a structural line, not
+a content boundary; stopping it where content ends reads as a rendering bug.
 
 ---
 
@@ -1696,9 +1713,7 @@ raises seven questions a screenshot cannot answer — they are items 8 to 14 bel
 | 12 | **Table row height, column widths, hover and click target** (§21.8) | `DataTableLayout` |
 | 13 | **Drawer min/max width and motion** (§21.13) | `RightDrawer` |
 | 14 | **Overview and chart tokens** (§21.14) — series colours, axes, grid, empty and loading states | The Overview screen |
-| 15 | **Avatar stack with initials** (§21.19) — overlap clips the first letter | Tables, page headers, anywhere a team is shown |
-| 16 | **Does the drawer cover the top bar?** (§21.19) | `RightDrawer` |
-| 17 | **Status badge treatment** (§21.19) — outlined with a marker is a proposal, not an observation | `StatusBadge`, every status surface |
+| 15 | **Status badge treatment** (§21.19) — outlined with a marker is a proposal, not an observation | `StatusBadge`, every status surface |
 
 ---
 

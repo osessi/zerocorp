@@ -36,6 +36,14 @@ const NO_DB_OUTSIDE_COMPOSITION_ROOT = {
   },
 };
 
+/** Repository tooling runs in Node, not in a browser. */
+const TOOLING_NODE = {
+  files: ["tooling/**/*.mjs", "tooling/**/*.js"],
+  languageOptions: {
+    globals: { process: "readonly", console: "readonly", __dirname: "readonly", URL: "readonly" },
+  },
+};
+
 /** Tooling config files run in CommonJS under Node. */
 const TOOLING_CJS = {
   files: ["**/*.cjs"],
@@ -48,6 +56,7 @@ const TOOLING_CJS = {
 export default tseslint.config(
   { ignores: ["**/dist/**", "**/.next/**", "**/.turbo/**", "**/node_modules/**", ".claude/**", "**/next-env.d.ts"] },
   TOOLING_CJS,
+  TOOLING_NODE,
   js.configs.recommended,
   ...tseslint.configs.recommended,
   FRAMEWORK_FREE,

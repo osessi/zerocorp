@@ -55,18 +55,26 @@ export function Avatar({ initials, size = "md" }: { initials: string; size?: "sm
   );
 }
 
+/**
+ * AvatarStack — initials do NOT overlap.
+ *
+ * The reference overlaps photographs, which reads fine because a face survives being
+ * half-covered. Two-letter initials do not: an 8px overlap at 24px hides the first
+ * character, so "AO TK" renders as "AC TK". Found in review 2026-08-31.
+ *
+ * When real photographs replace initials, overlap can come back — as a deliberate
+ * decision, on that condition.
+ */
 export function AvatarStack({ people, max = 3 }: { people: string[]; max?: number }) {
   const shown = people.slice(0, max);
   const rest = people.length - shown.length;
   return (
-    <span className="flex items-center">
-      {shown.map((p, i) => (
-        <span key={p} className={cx("border-background border-2", i > 0 && "-ml-2")}>
-          <Avatar initials={p} size="sm" />
-        </span>
+    <span className="flex items-center gap-1">
+      {shown.map((p) => (
+        <Avatar key={p} initials={p} size="sm" />
       ))}
       {rest > 0 ? (
-        <span className="border-background bg-muted text-muted-foreground text-caption -ml-2 inline-flex size-6 items-center justify-center border-2">
+        <span className="bg-muted text-muted-foreground text-caption inline-flex size-6 items-center justify-center">
           +{rest}
         </span>
       ) : null}

@@ -7,16 +7,17 @@
     "node": ">=20.11"
   },
   "scripts": {
-    "build": "turbo run build",
-    "dev": "turbo run dev",
-    "typecheck": "turbo run typecheck",
+    "build": "node tooling/scripts/no-sync.mjs && turbo run build",
+    "dev": "node tooling/scripts/no-sync.mjs && turbo run dev",
+    "typecheck": "node tooling/scripts/no-sync.mjs && turbo run typecheck",
     "lint": "eslint .",
     "test": "vitest run",
     "test:tenant-isolation": "vitest run --project tenant-isolation",
     "boundaries": "depcruise --config .dependency-cruiser.cjs apps packages",
     "boundaries:graph": "depcruise --config .dependency-cruiser.cjs --output-type dot apps packages",
     "verify": "pnpm typecheck && pnpm lint && pnpm boundaries && pnpm test",
-    "diagrams:verify": "node .claude/skills/archify/bin/archify.mjs validate architecture docs/diagrams/zerocorp-runtime.architecture.json --quality showcase --json"
+    "diagrams:verify": "node .claude/skills/archify/bin/archify.mjs validate architecture docs/diagrams/zerocorp-runtime.architecture.json --quality showcase --json",
+    "no-sync": "node tooling/scripts/no-sync.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.5",

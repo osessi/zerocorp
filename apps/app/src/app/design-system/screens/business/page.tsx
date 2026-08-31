@@ -33,9 +33,14 @@ export default function BusinessScreen() {
         actions={<><Button><EnvelopeSimpleIcon size={16} /> Email</Button><Button><PhoneIcon size={16} /> Call</Button><Button><DotsThreeIcon size={16} /> More</Button></>}
       />
 
-      <div className="flex min-h-0 flex-col lg:flex-row">
+      {/*
+        flex-1 makes the split fill the remaining viewport height, so the vertical rule
+        between the two columns runs to the bottom instead of stopping wherever the
+        taller column's content happens to end. Found in review 2026-08-31.
+      */}
+      <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
         {/* Context column — ~30% */}
-        <div className="border-border shrink-0 border-b px-8 lg:w-[30%] lg:border-r lg:border-b-0">
+        <div className="border-border shrink-0 overflow-y-auto border-b px-8 lg:w-[30%] lg:border-r lg:border-b-0">
           <Tabs items={[{ id: "info", label: "Business" }, { id: "activity", label: "Activity" }]} active={ctxTab} onSelect={setCtxTab} />
           <div className="flex flex-col gap-6 py-6">
             <div className="flex flex-col gap-4">
@@ -64,7 +69,7 @@ export default function BusinessScreen() {
         </div>
 
         {/* Main column */}
-        <div className="min-w-0 flex-1 px-8">
+        <div className="min-w-0 flex-1 overflow-y-auto px-8">
           <Tabs
             items={[
               { id: "details", label: "Details" }, { id: "documents", label: "Documents" },

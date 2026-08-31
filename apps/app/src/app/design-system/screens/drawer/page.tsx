@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   XIcon, ChatCircleIcon, EnvelopeSimpleIcon, PhoneIcon, DotsThreeIcon,
   PlusIcon, ClockCounterClockwiseIcon, NoteIcon, SpinnerGapIcon,
@@ -24,8 +24,16 @@ export default function DrawerScreen() {
   const [openId, setOpenId] = useState<string | null>("b1");
   const business = BUSINESSES.find((b) => b.id === openId) ?? null;
 
+  // A dialog closes on Escape. Non-negotiable (§14).
+  useEffect(() => {
+    if (!openId) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setOpenId(null); };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [openId]);
+
   return (
-    <div className="relative">
+    <div className="flex min-h-0 flex-1 flex-col">
       <PageHeader
         breadcrumb={<span>Businesses</span>}
         title="Formation queue"
@@ -33,7 +41,7 @@ export default function DrawerScreen() {
         actions={<Button variant="primary">Export</Button>}
       />
 
-      <div className="p-8">
+      <div className="min-h-0 flex-1 overflow-y-auto p-8">
         <div className="border-border border">
           {BUSINESSES.map((b, i) => (
             <button
@@ -59,16 +67,22 @@ export default function DrawerScreen() {
 
       {business ? (
         <>
-          {/* White veil — the page stays legible. Not a dark scrim. */}
+          {/*
+            fixed, not absolute: the veil and the drawer cover the WHOLE window —
+            sidebar and top command bar included — as the reference does. Anchoring them
+            to the content column left the drawer starting under the top bar and cut off
+            at the bottom. Found in review 2026-08-31.
+          */}
           <button
             aria-label="Close detail"
             onClick={() => setOpenId(null)}
-            className="bg-background/80 absolute inset-0 z-40 cursor-default"
+            className="bg-background/80 fixed inset-0 z-40 cursor-default"
           />
           <aside
             role="dialog"
+            aria-modal="true"
             aria-label="Business detail"
-            className="border-border bg-background absolute inset-y-0 right-0 z-50 flex w-full flex-col border-l sm:w-[70%] lg:w-[40%]"
+            className="border-border bg-background fixed inset-y-0 right-0 z-50 flex w-full flex-col border-l sm:w-[70%] lg:w-[40%]"
           >
             <header className="border-border flex shrink-0 items-center gap-3 border-b px-6 py-4">
               <button onClick={() => setOpenId(null)} aria-label="Close" className="hover:bg-accent focus-visible:outline-ring flex size-9 items-center justify-center transition-colors duration-normal focus-visible:outline-2 focus-visible:-outline-offset-2">

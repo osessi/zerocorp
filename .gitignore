@@ -41,3 +41,7 @@ docs/diagrams/*visual-check*
 # Playwright MCP artefacts
 .playwright-mcp/
 docs/design-review/*.png
+
+# iCloud Drive conflict forks — see tooling/scripts/no-sync.mjs
+* [2-9].*
+* [2-9]
