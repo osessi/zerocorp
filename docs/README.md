@@ -37,7 +37,7 @@ These six documents are the authoritative specification of ZeroCorp.
 | Document | Owns |
 |---|---|
 | [`PRODUCT_VISION.md`](./PRODUCT_VISION.md) | Vision, positioning, business model, pricing strategy, ARR milestones, roadmap phases, moat, success metrics |
-| [`PRODUCT_SPEC.md`](./PRODUCT_SPEC.md) | Product scope, plan contents, customer journeys, module behaviour, V1 boundary, product metrics |
+| [`PRODUCT_SPEC.md`](./PRODUCT_SPEC.md) | Product scope, plan contents, customer journeys, module behaviour, **the V1–V5 version roadmap (§29)**, V1 boundary, product metrics |
 | [`ARCHITECTURE.md`](./ARCHITECTURE.md) | Runtime topology, monorepo layout, domain boundaries, API style, provider abstractions, events, CI/CD, deployment |
 | [`DATABASE.md`](./DATABASE.md) | Schema, tenancy and RLS, identifiers, indexing, migrations, retention |
 | [`DESIGN_SYSTEM.md`](./DESIGN_SYSTEM.md) | Design tokens, foundations, product components, layout patterns, website block and variant system, **component selection policy**, approved component registry, AI visual restrictions |

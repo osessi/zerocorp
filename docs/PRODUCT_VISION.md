@@ -2225,6 +2225,14 @@ Especially for:
 
 # 47. V1 scope — what must actually ship
 
+> **`PRODUCT_SPEC.md` §29 owns the version boundary** (D7, resolved 2026-08-31). The list
+> below is compatible with §29.3's blocks A to J and is kept for traceability, but §29 is
+> the current scope.
+>
+> One substantive difference: §29.3 H adds **Get Customers — Lite** to V1 — a prospect
+> database with search, filters and CSV export. A founder who finishes V1 with a company,
+> a site and no prospects has a business that exists and cannot sell.
+
 The V1 should be narrower than the ultimate ZeroCorp vision.
 
 ## Must ship

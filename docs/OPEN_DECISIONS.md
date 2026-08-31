@@ -250,21 +250,36 @@ from `sites`.
 
 ---
 
-## D7 — V1 scope: two incompatible definitions 🟠
+## D7 — V1 scope ✅ RESOLVED 2026-08-31 · 🟡 estimates still open
+
+**Was:** three sources, none of them a single V1 list.
 
 | Source | V1 |
 |---|---|
-| `archive` §10 | **7 modules**, with per-module day estimates (2–5 days each, ~43 days total) |
-| `PRODUCT_VISION.md` §47 | **17 "must ship" items**, no estimates |
-| `PRODUCT_SPEC.md` | No explicit V1 must-ship list; §16 defines a V1 for leads that §47 does not include at all |
+| `archive` §10 | 7 modules, with per-module day estimates (2–5 days each, ~43 days total) |
+| `PRODUCT_VISION.md` §47 | 17 "must ship" items, no estimates |
+| `PRODUCT_SPEC.md` | No explicit V1 must-ship list |
 
-The current V1 is materially larger than the archived V1 and carries **no time
-estimate of any kind**. There is no document in the repository from which the
-feasibility of "$100k ARR as the first milestone" can be assessed.
+**Resolved.** `PRODUCT_SPEC.md` §29 now owns the version boundary and carries the full
+V1 to V5 roadmap. V1 is ten lettered blocks, A to J.
 
-**Recommendation (not applied):** `PRODUCT_SPEC.md` should own a single V1 scope table
-with an owner and a rough estimate per line, and `PRODUCT_VISION.md` §47 should
-reference it.
+Two things changed in substance while writing it, and both are recorded there:
+
+- **"Get Customers — Lite" moved into V1.** A founder who finishes V1 with a company, a
+  site and no prospects has a business that exists and cannot sell. Prospect database,
+  search, filters and CSV export ship in V1; campaigns, sequences and CRM stay in V2.
+  This matches what §16 already said.
+- **The admin console is required in V1.** Without it every formation, refund and support
+  request is a manual database edit — which does not scale past the first customers, and
+  is how identity documents get mishandled.
+
+§29 also names a collision worth knowing about: §4–§6 are the subscription **plans**
+(Launch $99, Growth $399, Autopilot $799) and V1/V2/V3 are product **versions**. Three
+shared words, two different axes. A V1 customer can be on the Growth plan.
+
+**Still open, and deliberately not hidden.** §29 is a scope, not a plan: it carries **no
+time estimate of any kind** and no per-line owner. The feasibility of "$100k ARR as the
+first milestone" still cannot be assessed from this repository. Recorded in §29.9.
 
 ---
 

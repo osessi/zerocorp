@@ -4,6 +4,9 @@
 >
 > **Owns:** product scope, plan contents, customer journeys, module behaviour, V1 boundary, product metrics.
 >
+> **The version roadmap V1 to V5 is §29.** It owns the version boundary and resolves D7.
+> Note that §4–§6 are subscription *plans*, not versions — see §29.0.
+>
 > When this document conflicts with anything under `docs/archive/`, **this document wins**.
 > See [`docs/README.md`](./README.md) for the full documentation hierarchy and topic ownership map.
 >
@@ -445,13 +448,18 @@ Every publication attempt is recorded.
 
 ## 16. Leads and CRM
 
+> The full V1 lead scope is **§29.3 H — Get Customers, Lite**, which owns the version
+> boundary. This section states the progression; §29 states what ships when.
+
 Lead system progression:
 
 ### V1
 
 - curated lead lists;
-- filtering;
-- CSV export.
+- continuous background ingestion;
+- filtering — niche, country, industry, size, email available, phone where available;
+- CSV export;
+- credits and limits.
 
 ### Later
 
@@ -778,3 +786,263 @@ A good ZeroCorp release should feel:
 
 The product should never feel like eight SaaS tools glued together.
 
+---
+
+## 29. Version roadmap — V1 to V5
+
+Added 2026-08-31. **This section owns the version boundary.** It resolves D7, which
+recorded that no document in the repository carried a single V1 scope: the archive named
+7 modules with day estimates, `PRODUCT_VISION.md` §47 named 17 must-ship items, and this
+document had no explicit list at all.
+
+### 29.0 Two things are called Launch, Growth and Autopilot
+
+> 🔴 **A version is not a plan.** §4, §5 and §6 describe the **subscription plans**
+> — Launch $99, Growth $399, Autopilot $799 — which a customer chooses. The versions
+> below describe **what ZeroCorp can do**, which the whole product advances through.
+>
+> ```text
+> Launch / Growth / Autopilot   a price and an entitlement   §3–§6
+> V1 / V2 / V3 / V4 / V5        a product capability         this section
+> ```
+>
+> They share three words and they are different axes. A V1 customer can be on the Growth
+> plan. Never say "the Growth version" or "the V2 plan".
+
+### 29.1 Each version is an outcome, not a feature count
+
+This is the part that matters. A version is defined by what becomes true for the
+customer, and the feature list is only how that is achieved.
+
+| | The customer can say | The one thing that proves it |
+|---|---|---|
+| **V1 — BUILD** | *My business exists and is operational.* | A formed company with a live site, working email, and the first list of prospects |
+| **V2 — GROW** | *My business has a repeatable customer acquisition system.* | Campaigns that run, a pipeline that moves, numbers that explain both |
+| **V3 — AUTOPILOT** | *My business operates with minimal intervention from me.* | A week of work happened and the founder only approved it |
+| **V4 — ADMINISTER** | *My business administration is organized and monitored.* | No deadline was missed, and the accountant had what they needed |
+| **V5 — PLATFORM** | *ZeroCorp is the operating infrastructure around my business.* | Someone else built on top of it |
+
+> "V1 = 12 features, V2 = 20 features" tells nobody whether V1 is finished.
+> "My business exists and is operational" does.
+
+### 29.2 What ZeroCorp is at twelve months
+
+A founder arrives with an idea and says **"Build my business."** By then ZeroCorp must:
+
+```text
+Create and structure       Business Brain · formation · EIN · documents · brand
+                           website · domain · email · SEO · blog
+Find customers             prospect database · search and filters · enrichment
+                           export · campaigns · follow-up · social · CRM and pipeline
+Do the work                content agent · social agent · prospector · email assistant
+                           analyst · workflows · Telegram · notifications · daily reports
+Run the business           documents · compliance · deadlines · billing · credits
+                           usage · accountant and legal partnerships
+Show it in one place       Overview · Company · Website · Content · Growth · Agents
+                           Automation · Notifications · Compliance · Billing
+```
+
+That is the destination. V1 to V5 is the order it is reached in.
+
+---
+
+### 29.3 V1 — BUILD
+
+> **Start from zero. Become operational.**
+
+V1 must be **sellable and deliver a complete transformation**, not a prototype. The test
+is not "does it demo" but "would a founder pay $997 and get a company".
+
+**A · Acquisition and checkout**
+landing · pricing · $997 checkout · Stripe · account and tenant creation · subscription ·
+acquisition attribution
+
+**B · Onboarding**
+voice onboarding · transcription · structured extraction · Business Brain · user
+validation · form fallback
+
+The voice flow is already specified in §10: five to six questions → transcription →
+extraction → Business Brain → validation. The form is a fallback, never the default.
+
+**C · Company**
+structure choice · state choice · personal and business information · documents ·
+identity · signature · submission · status tracking · EIN tracking
+
+The state machines are decided (D2) and live in `packages/contracts/src/formation.ts`,
+documented in `DATABASE.md` §5. See §21.
+
+```text
+formation_orders   draft → collecting_documents → verifying_identity → operator_review
+                   → ready_to_file → filed → formed
+companies          pending → active → delinquent → dissolved
+ein_status         not_started → requested → issued
+```
+
+**D · Brand**
+name · positioning · target · value proposition · tone · logo · colours · brand
+foundations
+
+**E · Website**
+generation · approved blocks · variants · pages · responsive · preview · publication ·
+domain · basic SEO
+
+**F · Email**
+domain · DNS · SPF · DKIM · DMARC · mailboxes · warm-up · monitoring
+
+**G · Content**
+blog · article generation · SEO · calendar · publication · content library · images
+
+**H · Get Customers — Lite**
+
+> **DECIDED 2026-08-31: the first acquisition brick ships in V1, not V2.**
+> A founder who finishes V1 with a company, a site and no prospects has a business that
+> exists and cannot sell. "Operational" has to include the first customer path.
+
+In V1:
+
+```text
+prospect database · continuous background ingestion · search
+filters: niche · country · industry · size · email available · phone where available
+CSV export · credits and limits
+```
+
+Not yet in V1: campaigns · sequences · full CRM · automated follow-up. This matches §16,
+which already scoped V1 leads to curated lists, filtering and CSV export.
+
+**I · Dashboard**
+
+The dashboard answers one question: **What is ZeroCorp doing for me?**
+
+company status · website status · marketing progress · leads · content · recent activity ·
+**tasks requiring user action** · notifications
+
+The Command Center and daily digest principles are in §19 and §20.
+
+**J · Admin console**
+
+> **Required in V1, not later.** Without it, every formation, refund and support request
+> is a manual database edit. That does not scale past the first few customers and it is
+> how identity documents get mishandled.
+
+tenants · users · formation queue · documents · provider refs · payments · plans ·
+credits · support · **controlled impersonation** · audit · errors · retries
+
+Impersonation is controlled and audited — `CLAUDE_CODE_RULES.md` and the tenant-isolation
+tests apply to the console exactly as they apply to the product.
+
+**What the customer buys at V1**
+
+```text
+$997 setup + Launch subscription
+= business built + online + operational + initial customer acquisition capability
+```
+
+---
+
+### 29.4 V2 — GROW
+
+> **Find customers, contact them and create opportunities.**
+
+Everything in V1, plus:
+
+**Lead intelligence** — enrichment · scoring · deduplication · segmentation · better
+search · dynamic lists
+
+**Outreach** — email campaigns · sequences · follow-ups · templates · unsubscribe ·
+bounce handling · campaign analytics
+
+**Social** — account connection · content publishing · social calendar · scheduling ·
+analytics
+
+**CRM** — contacts · companies · opportunities · stages · notes · activities · pipeline ·
+basic automations
+
+**Creative engine** — image generation · templates · social formats · ad creatives
+
+**Analytics** — traffic · content · leads · campaigns · conversion · channel performance
+
+§27 still applies: this is not a general-purpose enterprise CRM.
+
+---
+
+### 29.5 V3 — AUTOPILOT
+
+> **Stop operating the business manually.**
+
+Everything in V2, plus:
+
+**Agents** — Content Strategist · Writer · Community Manager · Prospector · Email
+Assistant · Analyst · Financial Assistant · Legal Information Assistant (§18)
+
+**Automation** — triggers · schedules · workflows · retry · **approval gates** · stop
+conditions · budgets · permissions
+
+The approval gates, budgets and permissions are not optional extras. A ZeroCorp invariant
+is that an agent never performs a privileged action without explicit permission.
+
+**Autonomy — a week under autopilot**
+
+```text
+Monday      strategist plans content
+Tuesday     writer creates the article
+Wednesday   social agent creates posts
+Thursday    prospector finds leads
+Friday      analyst summarizes performance
+```
+
+**Interface** — Agent Center: runs · approvals · activity · costs · limits · logs.
+Telegram: daily digest · actions · approvals · alerts · commands.
+
+---
+
+### 29.6 V4 — ADMINISTER
+
+> **Run the business responsibly.**
+
+**Compliance** — deadlines · annual filings · state obligations · document collection ·
+reminders · compliance dashboard
+
+**Finance** — invoices · expenses · revenue overview · financial summaries
+
+**Professional network** — accountant collaboration · tax professional · lawyer network ·
+document sharing · task handoff
+
+The governing principle, unchanged from §22:
+
+> **Become the operational system around the accountant before trying to become the
+> accountant.**
+
+---
+
+### 29.7 V5 — PLATFORM
+
+> **ZeroCorp becomes infrastructure.**
+
+public API · mobile · partner API · accountant portal · lawyer portal · enterprise ·
+affiliate platform · integrations ecosystem · marketplace · advanced analytics · advanced
+AI intelligence
+
+**This is the trigger for `apps/api`.** [ADR 0001](./adr/0001-runtime-topology.md) already
+defines `apps/api` as the public API added on trigger — never a BFF for `apps/app`. V5 is
+that trigger, and until then `apps/api` is not deployed.
+
+---
+
+### 29.8 One line each
+
+```text
+V1  BUILD        Create the business.
+V2  GROW         Find and acquire customers.
+V3  AUTOPILOT    Let ZeroCorp do the work.
+V4  ADMINISTER   Manage compliance and business administration.
+V5  PLATFORM     Make ZeroCorp infrastructure for modern businesses.
+```
+
+### 29.9 What is still missing from this section
+
+Recorded honestly rather than left implied:
+
+- **No estimates.** D7 also noted that the current V1 carries no time estimate of any
+  kind. Ten lettered blocks A to J is a scope, not a plan, and the feasibility of
+  "$100k ARR as the first milestone" still cannot be assessed from this repository.
+- **No per-line owner.** Solo for now, which makes it moot — until it is not.
