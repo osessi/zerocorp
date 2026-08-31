@@ -10,9 +10,8 @@ import {
   SparkleIcon,
   XIcon,
 } from "@phosphor-icons/react/dist/ssr";
-import { Button, IconButton, StatusBadge, type StatusTone } from "@zerocorp/ui";
+import { Alert, Button, IconButton, StatusBadge, type StatusTone } from "@zerocorp/ui";
 import { Demo, cx } from "./shell";
-import { Alert } from "./feedback";
 
 /* ── Credit / usage meter ─────────────────────────────────────────────────── */
 

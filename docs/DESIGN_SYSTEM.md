@@ -1193,6 +1193,87 @@ button-styles.ts               the shared visual contract for both
    It also does not use `transition-colors`: in Tailwind v4 that shorthand includes
    outline-color, which animated the focus ring. §21.21.
 
+Alert                          persistent status, in the flow of the page
+→ packages/ui/src/feedback/Alert.tsx
+→ VALIDATED — implemented and visually reviewed 2026-08-31
+→ MIT · reviewed 2026-08-31
+   The persistent half of the feedback pair; Toast is the transient half. Anything the
+   user must ACT on is an Alert, and a Toast at most repeats it.
+   role is derived from the tone and is NOT a prop: danger and warning get role=alert
+   (assertive), everything else role=status (polite). A caller who could choose would
+   eventually make a success message abandon a screen reader mid-sentence.
+   The title carries the tone colour; the body stays --foreground. A whole paragraph in
+   a status colour reads worse and adds nothing — same finding as the Select label.
+   A 2px left rule, never a tinted fill: there is no tint scale (§24), and a tinted panel
+   changes the ground every piece of text inside it sits on.
+
+Toast                          transient status, bottom right
+→ packages/ui/src/feedback/Toast.tsx  ·  @base-ui/react/toast
+→ VALIDATED — implemented and visually reviewed 2026-08-31
+→ MIT · reviewed 2026-08-31
+   A receipt, never a record. §17 forbids a silent save, and a message that vanishes is
+   close to silent for anyone who looked away — so anything durable ALSO lands in an
+   Alert or the activity feed.
+   Mount <ToastProvider> once near the root; fire with useToast().
+   Same tone map, same role rule as Alert. flex-col-reverse so an arriving toast never
+   displaces the one being read.
+
+Dialog                         the modal
+→ packages/ui/src/overlay/Dialog.tsx  ·  @base-ui/react/dialog
+→ VALIDATED — implemented and visually reviewed 2026-08-31
+→ MIT · reviewed 2026-08-31
+   Focus trap, scroll lock, Escape and focus returned to the trigger — all from Base UI,
+   and all the reason this is a primitive and not a <div>. A test asserts the return.
+   `title` is REQUIRED: aria-labelledby on a modal is not optional.
+   w-[calc(100vw-2rem)] with a max, never a bare max-w-md — at 375px a fixed width
+   overflows and scrolls the page sideways.
+
+DropdownMenu                   actions, not choices
+→ packages/ui/src/overlay/DropdownMenu.tsx  ·  @base-ui/react/menu
+→ VALIDATED — implemented and visually reviewed 2026-08-31
+→ MIT · reviewed 2026-08-31
+   A Select holds a VALUE the form submits; a menu fires an ACTION and holds nothing.
+   A menu used as a select loses the value on close.
+   Destructive items take --destructive as TEXT, never a red fill: a menu is a list, and
+   one filled red band out-shouts every other row.
+   MenuItem · MenuGroupLabel · MenuSeparator · MenuCheckboxItem · MenuRadioGroup ·
+   MenuRadioItem.
+
+CommandMenu                    ⌘K
+→ packages/ui/src/overlay/CommandMenu.tsx  ·  @base-ui/react/combobox + dialog
+→ VALIDATED — rebuilt and visually reviewed 2026-08-31
+→ MIT · reviewed 2026-08-31
+   Built on Combobox, NOT on a bare input over a list of buttons. That was the first
+   version and it was wrong in a way that showed immediately: plain <button>s never get
+   data-highlighted, carry no role=option, and give the input nothing to point
+   aria-activedescendant at. It looked like a different component because it was one.
+   cmdk was not adopted — a second overlay system beside Base UI for something Base UI
+   already covers (§2).
+   Top-anchored, not centred: a palette that grows and shrinks while you type would jump
+   around a vertical centre.
+   emptyMessage is a prop, so the empty state is translatable.
+
+overlay-styles.ts              one floating surface, not five
+→ packages/ui/src/overlay/overlay-styles.ts
+→ VALIDATED — 2026-08-31
+   OVERLAY_SURFACE · OVERLAY_BACKDROP · OVERLAY_MOTION · OVERLAY_ITEM ·
+   OVERLAY_ITEM_INDICATOR · OVERLAY_SEPARATOR · OVERLAY_GROUP_LABEL
+   Composed by Dialog, DropdownMenu, CommandMenu and the Select popup. A menu and a
+   select popup that highlight differently teach two rules for one gesture; a test
+   asserts they share the contract.
+   OVERLAY_ITEM carries BOTH data-selected: and data-checked:. Base UI does not name the
+   chosen state consistently — Select.Item sets data-selected, Menu and Combobox set
+   data-checked — and a contract carrying one silently stops marking the choice on the
+   other two.
+   Edge is --input, never --border. Backdrop is --foreground/40, so it flips.
+
+tone.ts                        one status system, three surfaces
+→ packages/ui/src/tone.ts
+→ VALIDATED — extracted 2026-08-31 when Alert and Toast arrived
+   StatusTone · TONE_GLYPH · TONE_INK · TONE_EDGE · isAssertive()
+   StatusBadge, Alert and Toast all read it. Spelled out three times it would drift one
+   entry at a time, the way transition-colors and the four inline spinners did.
+
 motion.ts                      COLOR_TRANSITION — the one colour transition
 → packages/ui/src/motion.ts
 → VALIDATED — 2026-08-31

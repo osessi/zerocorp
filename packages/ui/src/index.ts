@@ -13,6 +13,8 @@
  */
 export * from "./button/index";
 export type { IconSize } from "./icon";
+export * from "./tone";
+export * from "./overlay/index";
 export * from "./feedback/index";
 export * from "./field/index";
 export * from "./status-badge/index";

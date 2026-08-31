@@ -1,12 +1,5 @@
 import type { ReactNode } from "react";
-import {
-  CheckCircleIcon,
-  CircleNotchIcon,
-  WarningIcon,
-  XCircleIcon,
-  InfoIcon,
-  MinusCircleIcon,
-} from "@phosphor-icons/react/dist/ssr";
+import { TONE_GLYPH, type StatusTone } from "../tone";
 // cx lives with the control fragments today. It is a pure join helper with no form
 // semantics; promoting it to its own module is the right move the day a third area
 // needs it, not before.
@@ -35,14 +28,10 @@ import { cx } from "../field/control-styles";
 /**
  * Six tones. §17 names six; §4.3 gives colours to five — `neutral` has none and takes
  * the muted pair, which is why it is the only tone whose border is not a status colour.
+ *
+ * Defined in ../tone.ts and re-exported here, because Alert and Toast render the same six.
  */
-export type StatusTone =
-  | "success"
-  | "processing"
-  | "warning"
-  | "danger"
-  | "info"
-  | "neutral";
+export type { StatusTone };
 
 export type StatusEmphasis = "default" | "prominent";
 
@@ -58,27 +47,7 @@ export interface StatusBadgeProps {
   className?: string;
 }
 
-/**
- * One icon per tone, differing in SHAPE and not only in colour.
- *
- * This is what actually makes the system work. §4.3 tuned the five status colours to
- * sit between 4.83:1 and 5.36:1 — a deliberately even set, so no status shouts louder
- * than another. Even contrast means they collapse to nearly the same grey: in the
- * greyscale review all six tones were indistinguishable by colour alone, in every
- * treatment. The glyph is the only thing left for a colour-blind reader, a greyscale
- * print, or a screenshot pasted into a ticket.
- *
- * One weight, Regular, across both emphases — §11 forbids one icon appearing in two
- * weights for the same meaning.
- */
-const ICON = {
-  success: CheckCircleIcon,
-  processing: CircleNotchIcon,
-  warning: WarningIcon,
-  danger: XCircleIcon,
-  info: InfoIcon,
-  neutral: MinusCircleIcon,
-} as const satisfies Record<StatusTone, unknown>;
+// The glyph map lives in ../tone.ts — StatusBadge, Alert and Toast all read it.
 
 /**
  * Outlined. Border and label both take the status colour.
@@ -147,7 +116,7 @@ export function StatusBadge({
   children,
   className,
 }: StatusBadgeProps) {
-  const Glyph = ICON[tone];
+  const Glyph = TONE_GLYPH[tone];
   return (
     <span className={cx(BASE, emphasis === "prominent" ? SOLID[tone] : OUTLINE[tone], className)}>
       {/*

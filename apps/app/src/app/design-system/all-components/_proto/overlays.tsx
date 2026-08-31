@@ -1,17 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { Dialog } from "@base-ui/react/dialog";
 import { Drawer } from "@base-ui/react/drawer";
-import { Menu } from "@base-ui/react/menu";
 import { Popover } from "@base-ui/react/popover";
 import { Tooltip } from "@base-ui/react/tooltip";
 import {
   ArrowRightIcon,
   BellIcon,
   BuildingsIcon,
-  CaretRightIcon,
-  CheckIcon,
+  PlusIcon,
+  UserPlusIcon,
   DotsThreeIcon,
   DownloadSimpleIcon,
   FileTextIcon,
@@ -20,26 +18,28 @@ import {
   TrashIcon,
   XIcon,
 } from "@phosphor-icons/react/dist/ssr";
-import { Button, IconButton, StatusBadge } from "@zerocorp/ui";
+import {
+  Button,
+  Dialog,
+  DialogClose,
+  DropdownMenu,
+  IconButton,
+  MenuCheckboxItem,
+  MenuGroupLabel,
+  MenuItem,
+  MenuRadioGroup,
+  MenuRadioItem,
+  MenuSeparator,
+  OVERLAY_BACKDROP,
+  StatusBadge,
+  CommandMenu,
+  type CommandItem,
+} from "@zerocorp/ui";
 import { Demo, OVERLAY_MOTION, Row, SURFACE, cx } from "./shell";
 
-/* ────────────────────────────────────────────────────────────────────────────
-   The one popup list idiom. Select already ships it; Menu, Popover and the
-   command palette reuse the SAME item rules rather than inventing three.
-   ──────────────────────────────────────────────────────────────────────────── */
 
-const MENU_ITEM = [
-  "relative flex cursor-default items-center gap-2",
-  "border border-transparent",
-  "py-2 pr-3 pl-8",
-  "text-body sm:text-body-sm text-foreground",
-  "data-highlighted:bg-accent data-highlighted:text-accent-foreground",
-  "data-checked:border-primary data-checked:font-medium",
-  "data-disabled:text-muted-foreground data-disabled:cursor-not-allowed",
-  "outline-hidden",
-].join(" ");
 
-const POPUP = cx(SURFACE, "min-w-56 px-1 py-1", OVERLAY_MOTION, "origin-(--transform-origin)");
+
 
 /* ── Tooltip ──────────────────────────────────────────────────────────────── */
 
@@ -104,87 +104,43 @@ export function TooltipDemo() {
 
 /* ── Dropdown menu ────────────────────────────────────────────────────────── */
 
+/** The SHIPPED component. Reuses the Select popup contract exactly — a test asserts it. */
 export function MenuDemo() {
+  const [density, setDensity] = useState("cosy");
+  const [dissolved, setDissolved] = useState(true);
   return (
     <Demo>
       <Row label="row actions">
-        <Menu.Root>
-          <Menu.Trigger
-            render={<Button variant="secondary" icon={DotsThreeIcon} iconPosition="end">Actions</Button>}
-          />
-          <Menu.Portal>
-            <Menu.Positioner sideOffset={4} align="start" className="z-50">
-              <Menu.Popup className={POPUP}>
-                <Menu.GroupLabel className="text-overline text-muted-foreground px-3 py-2 uppercase">
-                  Northwind Studio LLC
-                </Menu.GroupLabel>
-                <Menu.Item className={MENU_ITEM}>
-                  <PencilSimpleIcon size={16} className="absolute left-2" aria-hidden="true" />
-                  Edit details
-                </Menu.Item>
-                <Menu.Item className={MENU_ITEM}>
-                  <DownloadSimpleIcon size={16} className="absolute left-2" aria-hidden="true" />
-                  Download documents
-                </Menu.Item>
-                <Menu.SubmenuRoot>
-                  <Menu.SubmenuTrigger className={cx(MENU_ITEM, "justify-between")}>
-                    <FileTextIcon size={16} className="absolute left-2" aria-hidden="true" />
-                    File a report
-                    <CaretRightIcon size={14} aria-hidden="true" />
-                  </Menu.SubmenuTrigger>
-                  <Menu.Portal>
-                    <Menu.Positioner sideOffset={4} align="start" className="z-50">
-                      <Menu.Popup className={POPUP}>
-                        <Menu.Item className={MENU_ITEM}>Annual report</Menu.Item>
-                        <Menu.Item className={MENU_ITEM}>Beneficial ownership</Menu.Item>
-                      </Menu.Popup>
-                    </Menu.Positioner>
-                  </Menu.Portal>
-                </Menu.SubmenuRoot>
-                <Menu.Separator className="bg-border my-1 h-px" />
-                {/*
-                  Destructive items take --destructive as TEXT, which flips with the theme
-                  and clears 4.5:1 in both. Not a red fill: a menu is a list, and one red
-                  band would out-shout the whole popup.
-                */}
-                <Menu.Item className={cx(MENU_ITEM, "text-destructive")}>
-                  <TrashIcon size={16} className="absolute left-2" aria-hidden="true" />
-                  Dissolve company
-                </Menu.Item>
-              </Menu.Popup>
-            </Menu.Positioner>
-          </Menu.Portal>
-        </Menu.Root>
+        <DropdownMenu
+          trigger={<Button variant="secondary" icon={DotsThreeIcon} iconPosition="end">Actions</Button>}
+        >
+          <MenuGroupLabel>Northwind Studio LLC</MenuGroupLabel>
+          <MenuItem icon={PencilSimpleIcon}>Edit details</MenuItem>
+          <MenuItem icon={DownloadSimpleIcon}>Download documents</MenuItem>
+          <MenuItem icon={FileTextIcon}>File annual report</MenuItem>
+          <MenuSeparator />
+          <MenuItem icon={TrashIcon} destructive>Dissolve company</MenuItem>
+        </DropdownMenu>
 
-        <Menu.Root>
-          <Menu.Trigger render={<IconButton label="More actions" icon={DotsThreeIcon} variant="secondary" />} />
-          <Menu.Portal>
-            <Menu.Positioner sideOffset={4} align="end" className="z-50">
-              <Menu.Popup className={POPUP}>
-                <Menu.GroupLabel className="text-overline text-muted-foreground px-3 py-2 uppercase">
-                  Density
-                </Menu.GroupLabel>
-                <Menu.RadioGroup defaultValue="cosy">
-                  {["Compact", "Cosy", "Comfortable"].map((d) => (
-                    <Menu.RadioItem key={d} value={d.toLowerCase()} className={MENU_ITEM}>
-                      <Menu.RadioItemIndicator className="bg-primary text-primary-foreground absolute left-2 flex size-4 items-center justify-center">
-                        <CheckIcon size={12} weight="bold" />
-                      </Menu.RadioItemIndicator>
-                      {d}
-                    </Menu.RadioItem>
-                  ))}
-                </Menu.RadioGroup>
-                <Menu.Separator className="bg-border my-1 h-px" />
-                <Menu.CheckboxItem defaultChecked className={MENU_ITEM}>
-                  <Menu.CheckboxItemIndicator className="bg-primary text-primary-foreground absolute left-2 flex size-4 items-center justify-center">
-                    <CheckIcon size={12} weight="bold" />
-                  </Menu.CheckboxItemIndicator>
-                  Show dissolved
-                </Menu.CheckboxItem>
-              </Menu.Popup>
-            </Menu.Positioner>
-          </Menu.Portal>
-        </Menu.Root>
+        <DropdownMenu
+          align="end"
+          trigger={<IconButton label="View options" icon={DotsThreeIcon} variant="secondary" />}
+        >
+          <MenuGroupLabel>Density</MenuGroupLabel>
+          <MenuRadioGroup value={density} onValueChange={setDensity}>
+            {([["compact", "Compact"], ["cosy", "Cosy"], ["comfortable", "Comfortable"]] as const).map(
+              ([value, label]) => (
+                <MenuRadioItem key={value} value={value}>
+                  {label}
+                </MenuRadioItem>
+              ),
+            )}
+          </MenuRadioGroup>
+          <MenuSeparator />
+          <MenuCheckboxItem checked={dissolved} onCheckedChange={setDissolved}>
+            Show dissolved
+          </MenuCheckboxItem>
+        </DropdownMenu>
       </Row>
     </Demo>
   );
@@ -231,40 +187,27 @@ export function PopoverDemo() {
 
 /* ── Dialog ───────────────────────────────────────────────────────────────── */
 
-const BACKDROP = cx(
-  "fixed inset-0 z-50 bg-foreground/40",
-  "transition-opacity duration-emphasis ease-out",
-  "data-starting-style:opacity-0 data-ending-style:opacity-0",
-);
-
+/**
+ * The SHIPPED component — promoted into packages/ui on 2026-08-31. Focus trap, scroll
+ * lock, Escape and focus return to the trigger all come from Base UI; the surface, the
+ * backdrop and the motion come from packages/ui/src/overlay/overlay-styles.ts, shared
+ * with DropdownMenu and the Select popup.
+ */
 export function DialogDemo() {
   return (
     <Demo>
       <Row label="confirmation">
-        <Dialog.Root>
-          <Dialog.Trigger render={<Button variant="danger" icon={TrashIcon}>Dissolve company</Button>} />
-          <Dialog.Portal>
-            <Dialog.Backdrop className={BACKDROP} />
-            <Dialog.Popup
-              className={cx(
-                SURFACE,
-                "fixed top-1/2 left-1/2 z-50 flex w-[calc(100vw-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 flex-col gap-4 p-6",
-                OVERLAY_MOTION,
-              )}
-            >
-              <div className="flex flex-col gap-1">
-                <Dialog.Title className="text-h4">Dissolve Vela Commerce LLC?</Dialog.Title>
-                <Dialog.Description className="text-body-sm text-muted-foreground">
-                  This files a certificate of dissolution with New Mexico. It cannot be undone.
-                </Dialog.Description>
-              </div>
-              <div className="flex flex-wrap justify-end gap-2">
-                <Dialog.Close render={<Button variant="secondary">Cancel</Button>} />
-                <Dialog.Close render={<Button variant="danger">Dissolve company</Button>} />
-              </div>
-            </Dialog.Popup>
-          </Dialog.Portal>
-        </Dialog.Root>
+        <Dialog
+          trigger={<Button variant="danger" icon={TrashIcon}>Dissolve company</Button>}
+          title="Dissolve Vela Commerce LLC?"
+          description="This files a certificate of dissolution with New Mexico. It cannot be undone."
+          footer={
+            <>
+              <DialogClose><Button variant="secondary">Cancel</Button></DialogClose>
+              <DialogClose><Button variant="danger">Dissolve company</Button></DialogClose>
+            </>
+          }
+        />
       </Row>
     </Demo>
   );
@@ -279,7 +222,7 @@ export function DrawerDemo() {
         <Drawer.Root>
           <Drawer.Trigger render={<Button variant="secondary" icon={BuildingsIcon}>Open record</Button>} />
           <Drawer.Portal>
-            <Drawer.Backdrop className={BACKDROP} />
+            <Drawer.Backdrop className={OVERLAY_BACKDROP} />
             <Drawer.Popup
               className={cx(
                 "bg-surface-elevated border-input fixed inset-y-0 right-0 z-50 flex w-full max-w-md flex-col border-l",
@@ -320,76 +263,34 @@ export function DrawerDemo() {
 
 /* ── Command menu ─────────────────────────────────────────────────────────── */
 
-const COMMANDS = [
-  { group: "Businesses", items: ["Northwind Studio LLC", "Bluepine Labs LLC", "Auric Freight LLC"] },
-  { group: "Actions", items: ["Start a new formation", "Upload a document", "Invite a teammate"] },
+const COMMANDS: CommandItem[] = [
+  { id: "b1", group: "Businesses", label: "Northwind Studio LLC", icon: BuildingsIcon, hint: "Wyoming" },
+  { id: "b2", group: "Businesses", label: "Bluepine Labs LLC", icon: BuildingsIcon, hint: "Delaware" },
+  { id: "b3", group: "Businesses", label: "Auric Freight LLC", icon: BuildingsIcon, hint: "Wyoming" },
+  { id: "a1", group: "Actions", label: "Start a new formation", icon: PlusIcon },
+  { id: "a2", group: "Actions", label: "Upload a document", icon: FileTextIcon },
+  { id: "a3", group: "Actions", label: "Invite a teammate", icon: UserPlusIcon },
 ];
 
+/**
+ * The SHIPPED component. Rebuilt on Base UI Combobox after review, 2026-08-31.
+ *
+ * The first version was a bare input over a list of plain <button>s. They never receive
+ * `data-highlighted`, so they could not join the item contract Select and DropdownMenu
+ * share — they looked like a different component because they were one.
+ */
 export function CommandDemo() {
   const [open, setOpen] = useState(false);
-  const [q, setQ] = useState("");
-  const groups = COMMANDS.map((g) => ({
-    ...g,
-    items: g.items.filter((i) => i.toLowerCase().includes(q.toLowerCase())),
-  })).filter((g) => g.items.length > 0);
-
   return (
     <Demo>
       <Row label="⌘K palette">
         <Button variant="secondary" icon={MagnifyingGlassIcon} onClick={() => setOpen(true)}>
           Search everything
         </Button>
-        <Dialog.Root open={open} onOpenChange={setOpen}>
-          <Dialog.Portal>
-            <Dialog.Backdrop className={BACKDROP} />
-            <Dialog.Popup
-              className={cx(
-                SURFACE,
-                "fixed top-24 left-1/2 z-50 flex w-[calc(100vw-2rem)] max-w-lg -translate-x-1/2 flex-col",
-                OVERLAY_MOTION,
-              )}
-            >
-              <Dialog.Title className="sr-only">Search</Dialog.Title>
-              <div className="border-border flex items-center gap-2 border-b px-3">
-                <MagnifyingGlassIcon size={16} className="text-muted-foreground shrink-0" aria-hidden="true" />
-                <input
-                  autoFocus
-                  value={q}
-                  onChange={(e) => setQ(e.target.value)}
-                  placeholder="Search businesses, documents, actions…"
-                  aria-label="Search"
-                  // Inset ring, not outline-none. The input fills the dialog edge to edge, so an
-                  // outset ring would spill past the popup border; -outline-offset draws it
-                  // inside. Removing it entirely is the defect the CI rule exists to catch.
-                  className="text-body sm:text-body-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-ring h-12 w-full bg-transparent focus-visible:outline-2 focus-visible:-outline-offset-2"
-                />
-              </div>
-              <div className="max-h-80 overflow-y-auto px-1 py-1">
-                {groups.length === 0 ? (
-                  <p className="text-body-sm text-muted-foreground px-3 py-6 text-center">
-                    Nothing matches “{q}”.
-                  </p>
-                ) : (
-                  groups.map((g) => (
-                    <div key={g.group}>
-                      <p className="text-overline text-muted-foreground px-3 py-2 uppercase">{g.group}</p>
-                      {g.items.map((i) => (
-                        <button
-                          key={i}
-                          type="button"
-                          onClick={() => setOpen(false)}
-                          className={cx(MENU_ITEM, "w-full text-left", "hover:bg-accent focus-visible:bg-accent")}
-                        >
-                          {i}
-                        </button>
-                      ))}
-                    </div>
-                  ))
-                )}
-              </div>
-            </Dialog.Popup>
-          </Dialog.Portal>
-        </Dialog.Root>
+        <span className="text-caption text-muted-foreground">
+          or press <span className="font-mono">⌘K</span>
+        </span>
+        <CommandMenu items={COMMANDS} open={open} onOpenChange={setOpen} />
       </Row>
     </Demo>
   );

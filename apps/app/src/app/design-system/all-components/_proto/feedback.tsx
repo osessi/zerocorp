@@ -1,98 +1,32 @@
 "use client";
 
 import { Progress } from "@base-ui/react/progress";
-import { Toast } from "@base-ui/react/toast";
 import {
-  CheckCircleIcon,
-  CircleNotchIcon,
-  InfoIcon,
   MagnifyingGlassIcon,
-  MinusCircleIcon,
   PlusIcon,
-  WarningIcon,
   XCircleIcon,
-  XIcon,
 } from "@phosphor-icons/react/dist/ssr";
-import { Button, IconButton } from "@zerocorp/ui";
-import { Demo, OVERLAY_MOTION, Row, SURFACE, cx } from "./shell";
-
-/* ────────────────────────────────────────────────────────────────────────────
-   One status system, three surfaces.
-
-   StatusBadge, Alert and Toast all read from §4.3. The tone → colour → GLYPH map is
-   written once here and shared, so a warning is the same warning in all three. §17.
-   ──────────────────────────────────────────────────────────────────────────── */
-
-export type Tone = "success" | "processing" | "warning" | "danger" | "info" | "neutral";
-
-export const TONE_GLYPH = {
-  success: CheckCircleIcon,
-  processing: CircleNotchIcon,
-  warning: WarningIcon,
-  danger: XCircleIcon,
-  info: InfoIcon,
-  neutral: MinusCircleIcon,
-} as const;
-
-/** The accent edge. A 2px rule, not a tinted fill — we have no tint scale (§24.10). */
-export const TONE_EDGE: Record<Tone, string> = {
-  success: "border-l-success",
-  processing: "border-l-processing",
-  warning: "border-l-warning",
-  danger: "border-l-destructive",
-  info: "border-l-info",
-  neutral: "border-l-muted-foreground",
-};
-
-export const TONE_INK: Record<Tone, string> = {
-  success: "text-success",
-  processing: "text-processing",
-  warning: "text-warning",
-  danger: "text-destructive",
-  info: "text-info",
-  neutral: "text-muted-foreground",
-};
-
-/* ── Alert ────────────────────────────────────────────────────────────────── */
+import {
+  Alert,
+  Button,
+  ToastProvider,
+  useToast,
+  TONE_EDGE,
+  TONE_GLYPH,
+  TONE_INK,
+  type StatusTone,
+} from "@zerocorp/ui";
+import { Demo, Row, cx } from "./shell";
 
 /**
- * Inline, in the flow of the page. No primitive needed — the semantics are a role.
- *
- * role="alert" for danger and warning (interrupts), role="status" for the rest (polite).
- * Getting that backwards either shouts over a screen reader or lets an error pass
- * silently, which is the same failure Field already solved.
- *
- * The title carries the tone colour; the body stays --foreground. A whole paragraph in a
- * status colour is harder to read and adds nothing — the same finding as the Select
- * label, where 3.18:1 teal text failed while a 3.18:1 teal border passed.
+ * Alert and Toast are now the SHIPPED components — promoted into packages/ui on
+ * 2026-08-31. What is rendered here is @zerocorp/ui, not a copy. The tone map they read
+ * is packages/ui/src/tone.ts, shared with StatusBadge: one status system, three surfaces.
  */
-export function Alert({
-  tone,
-  title,
-  children,
-  action,
-}: {
-  tone: Tone;
-  title: string;
-  children?: React.ReactNode;
-  action?: React.ReactNode;
-}) {
-  const Glyph = TONE_GLYPH[tone];
-  const assertive = tone === "danger" || tone === "warning";
-  return (
-    <div
-      role={assertive ? "alert" : "status"}
-      className={cx("border-border flex gap-3 border border-l-2 p-3", TONE_EDGE[tone])}
-    >
-      <Glyph size={20} weight="regular" aria-hidden="true" className={cx("mt-0.5 shrink-0", TONE_INK[tone])} />
-      <div className="flex min-w-0 flex-1 flex-col gap-1">
-        <span className={cx("text-label", TONE_INK[tone])}>{title}</span>
-        {children ? <div className="text-body-sm text-foreground">{children}</div> : null}
-        {action ? <div className="mt-1 flex flex-wrap gap-2">{action}</div> : null}
-      </div>
-    </div>
-  );
-}
+
+/** Re-exported so the data and zerocorp prototypes read the same map the components do. */
+export type Tone = StatusTone;
+export { TONE_GLYPH, TONE_INK, TONE_EDGE };
 
 export function AlertDemo() {
   return (
@@ -118,48 +52,8 @@ export function AlertDemo() {
   );
 }
 
-/* ── Toast ────────────────────────────────────────────────────────────────── */
-
-/**
- * Base UI Toast. Transient, bottom-right, and it never carries the ONLY record of
- * something important — §17 forbids a silent save, but a toast that vanishes is not a
- * receipt either. Anything durable also lands in the activity feed.
- */
-const TOAST_TONE: Record<string, Tone> = { success: "success", error: "danger", warning: "warning", info: "info" };
-
-function ToastList() {
-  const { toasts } = Toast.useToastManager();
-  return (
-    <>
-      {toasts.map((toast) => {
-        const tone = TOAST_TONE[String(toast.type ?? "info")] ?? "info";
-        const Glyph = TONE_GLYPH[tone];
-        return (
-          <Toast.Root
-            key={toast.id}
-            toast={toast}
-            className={cx(
-              SURFACE,
-              "flex w-80 gap-3 border-l-2 p-3",
-              TONE_EDGE[tone],
-              OVERLAY_MOTION,
-            )}
-          >
-            <Glyph size={20} weight="regular" aria-hidden="true" className={cx("mt-0.5 shrink-0", TONE_INK[tone])} />
-            <div className="flex min-w-0 flex-1 flex-col gap-1">
-              <Toast.Title className={cx("text-label", TONE_INK[tone])} />
-              <Toast.Description className="text-body-sm text-foreground" />
-            </div>
-            <Toast.Close render={<IconButton label="Dismiss" icon={XIcon} size="sm" />} />
-          </Toast.Root>
-        );
-      })}
-    </>
-  );
-}
-
 function ToastTriggers() {
-  const manager = Toast.useToastManager();
+  const manager = useToast();
   return (
     <Row label="fire one">
       {(
@@ -185,16 +79,11 @@ function ToastTriggers() {
 
 export function ToastDemo() {
   return (
-    <Toast.Provider>
+    <ToastProvider>
       <Demo>
         <ToastTriggers />
       </Demo>
-      <Toast.Portal>
-        <Toast.Viewport className="fixed right-4 bottom-4 z-50 flex flex-col-reverse gap-2">
-          <ToastList />
-        </Toast.Viewport>
-      </Toast.Portal>
-    </Toast.Provider>
+    </ToastProvider>
   );
 }
 
@@ -210,7 +99,21 @@ export function ProgressDemo() {
         <Progress.Root key={label as string} value={value as number} className="flex flex-col gap-2">
           <div className="flex items-baseline justify-between gap-3">
             <Progress.Label className="text-label text-foreground">{label as string}</Progress.Label>
-            <Progress.Value className="text-caption text-muted-foreground font-mono" />
+            {/*
+              The value is rendered explicitly, not by Progress.Value's default.
+
+              Its default formats with the BROWSER locale, so the server produced "64%"
+              and a French client produced "64 %" — a non-breaking space — and React threw
+              a hydration mismatch. Found in the console during the all-components review,
+              2026-08-31.
+
+              English-first and USD-first means the locale is a product decision that goes
+              through the i18n layer, never the browser default. An explicit locale is not
+              a workaround here; it is the rule.
+            */}
+            <span className="text-caption text-muted-foreground font-mono">
+              {new Intl.NumberFormat("en-US", { style: "percent" }).format((value as number) / 100)}
+            </span>
           </div>
           {/* A 4px rail. No radius, no gradient — §7, §8. */}
           <Progress.Track className="bg-muted border-border h-1 w-full border">
