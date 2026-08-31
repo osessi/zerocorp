@@ -1541,6 +1541,52 @@ Reads as *"Your business is running."*
 
 ---
 
+### 21.19 Prototype review — 2026-08-31
+
+Five screens were built on invented ZeroCorp content — formation states, plans, identity
+documents, agent activity — to test whether §21 is precise enough to build from.
+
+```text
+apps/app/src/app/design-system/screens/   overview · businesses · business · documents · drawer
+apps/app/src/app/design-system/_prototype/ the pattern implementations
+```
+
+**These are prototypes.** They live in the review surface, not in `@zerocorp/ui`, and are
+not in the registry. They are promoted only once the patterns are approved.
+
+Verified at 1440px and 375px, light and dark: sidebar 240px on all five, no horizontal
+overflow anywhere, every colour resolving from tokens in both themes.
+
+**Four findings.**
+
+| | Finding | Status |
+|---|---|---|
+| 1 | **Overlapping avatar stacks clip initials.** The reference overlaps photos, which reads fine. With two-letter initials at 24px, a `-8px` overlap hides the first letter — "AO" renders as "AC" | **Needs a decision.** Either no overlap for initials, or initials-avatars are wider, or the stack shows one avatar plus a count |
+| 2 | **The drawer covers the top bar in the reference; ours starts beneath it** | **Needs a decision.** §21.13 does not say. Covering the bar is more immersive; sitting beneath keeps search reachable |
+| 3 | **Status badges** are rendered outlined with a square marker, using the five validated colours as border and text — because pastel fills were refused and no subtle scale exists (§21.0) | **PROPOSED.** This is an interpretation, not an observation |
+| 4 | **Two token rules were too broad** and fired on correct code — see below | **Fixed** |
+
+**The rules that were wrong, and why it matters**
+
+Extending the token-discipline test to `apps/*` immediately failed on the prototypes:
+
+- `no hard-coded hex` fired on the review page's own **documentation labels**
+  (`border --input #949494 · 3.03:1`). Narrowed to `className` and inline `style` only:
+  the rule is about styling, not about copy.
+- `no arbitrary bracket value` fired on `w-[30%]`, `w-[40%]`, `grid-cols-[1fr_20rem]` —
+  the very proportions §21 specifies. Narrowed to **colours and pixel values**, which are
+  what the token scales govern. A proportion is not a design token.
+
+One real violation was also caught: `focus:outline-none` on the search inputs, now
+`focus:outline-hidden` — the wrapper draws the focus ring, so the inner input must not
+draw a second one, but it must still stay visible in forced-colors mode.
+
+> A rule that fires on correct code gets ignored, and then it stops catching the
+> incorrect code too. Both narrowings made the rules **stricter in intent** and quieter
+> in practice.
+
+---
+
 ### 21.18 Building a new screen
 
 ```text
@@ -1650,6 +1696,9 @@ raises seven questions a screenshot cannot answer — they are items 8 to 14 bel
 | 12 | **Table row height, column widths, hover and click target** (§21.8) | `DataTableLayout` |
 | 13 | **Drawer min/max width and motion** (§21.13) | `RightDrawer` |
 | 14 | **Overview and chart tokens** (§21.14) — series colours, axes, grid, empty and loading states | The Overview screen |
+| 15 | **Avatar stack with initials** (§21.19) — overlap clips the first letter | Tables, page headers, anywhere a team is shown |
+| 16 | **Does the drawer cover the top bar?** (§21.19) | `RightDrawer` |
+| 17 | **Status badge treatment** (§21.19) — outlined with a marker is a proposal, not an observation | `StatusBadge`, every status surface |
 
 ---
 

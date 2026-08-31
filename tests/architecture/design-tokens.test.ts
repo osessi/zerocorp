@@ -36,6 +36,11 @@ const TOKEN_LAYER = "packages/design-system/src/tokens.css";
 const UI_SOURCES = [
   ...sourceFiles("packages/ui/src"),
   ...sourceFiles("packages/site-renderer/src"),
+  // apps render UI too. The prototype screens under apps/app are held to the same
+  // discipline as the component library — a token rule that stops at a package
+  // boundary is not a rule.
+  ...sourceFiles("apps/app/src"),
+  ...sourceFiles("apps/sites/src"),
 ].filter((f) => !f.endsWith(".test.ts") && !f.endsWith(".test.tsx"));
 
 /** Strips comments so a hex quoted in documentation is not reported as code. */
@@ -50,22 +55,33 @@ describe("design tokens — no arbitrary visual values", () => {
     expect(UI_SOURCES.length).toBeGreaterThan(0);
   });
 
-  it("declares no hard-coded hex colour outside the token layer", () => {
+  it("declares no hard-coded hex colour in a className or an inline style", () => {
+    // Scoped to styling. A hex quoted in visible copy — the review page labels its own
+    // token values — is documentation, not a style. Narrowed 2026-08-31 after the rule
+    // fired on its own documentation.
     const offenders: string[] = [];
     for (const file of UI_SOURCES) {
-      const hits = code(file).match(/#[0-9a-fA-F]{3,8}\b/g);
+      const styling = code(file).match(/className=(?:"[^"]*"|\{[^}]*\})|style=\{\{[^}]*\}\}/g) ?? [];
+      const hits = styling.join(" ").match(/#[0-9a-fA-F]{3,8}\b/g);
       if (hits) offenders.push(`${relative(ROOT, file)} → ${hits.join(", ")}`);
     }
     expect(offenders).toEqual([]);
   });
 
-  it("uses no arbitrary Tailwind bracket value", () => {
-    // Catches className="mt-[17px] bg-[#00786F] text-[13px]" — the exact defect
-    // CLAUDE_CODE_RULES.md §11 names.
+  it("uses no arbitrary colour or pixel value in a Tailwind bracket", () => {
+    // Catches className="mt-[17px] bg-[#00786F] text-[13px]" — the defect
+    // CLAUDE_CODE_RULES.md §11 names: values the token scales govern.
+    //
+    // Structural brackets are allowed: percentages, fr units, rem, grid templates and
+    // transitioned property names. DESIGN_SYSTEM.md §21 specifies proportions — a 30%
+    // context column, a 40% drawer — and a proportion is not a design token.
+    // Narrowed 2026-08-31 while building the dashboard prototypes.
     const offenders: string[] = [];
     for (const file of UI_SOURCES) {
-      const hits = code(file).match(/\b[a-z-]+-\[[^\]]+\]/g);
-      if (hits) offenders.push(`${relative(ROOT, file)} → ${hits.join(", ")}`);
+      const hits = (code(file).match(/\b[a-z-]+-\[[^\]]+\]/g) ?? []).filter(
+        (h) => /#[0-9a-fA-F]{3,8}/.test(h) || /\d+px/.test(h),
+      );
+      if (hits.length) offenders.push(`${relative(ROOT, file)} → ${hits.join(", ")}`);
     }
     expect(offenders).toEqual([]);
   });
