@@ -1026,6 +1026,19 @@ Select                         the single-choice control
    The trigger is a <button>, so it takes aria-labelledby from the Field context —
    <label for> cannot address a button. The empty state is data-placeholder, not
    ::placeholder.
+   SELECTION AND CURSOR ARE TWO DIFFERENT THINGS. Until 2026-08-31 only
+   data-highlighted had a rule, so selection rode on a 16px tick while the grey CURSOR
+   band read as "selected" — the louder visual belonged to the less important meaning.
+   Treatment C, chosen 2026-08-31: the selected row is BOXED in --primary and carries a
+   filled tick badge. The border is always present and transparent when unselected, so
+   selecting shifts nothing. Weight goes to 500 — a second carrier that survives
+   greyscale, as does the badge shape. §14.
+   The selected label stays --foreground, NOT --primary. Teal text measures 3.18:1 on
+   --surface-elevated in dark and under greyscale made the selected row the DIMMEST text
+   in the list. A border is a graphical object at a 3:1 threshold, which 3.18 clears, so
+   the teal lives in the box and the badge. Revisit if §24.15 lands.
+   The popup edge is --input, never --border: a floating layer boundary is a meaningful
+   graphical object and owes WCAG 1.4.11 its 3:1. --border read as edgeless at 1.26:1.
    alignItemWithTrigger deliberately off: the default overlaps the trigger to line the
    selected item up under the cursor, which reads as macOS, not as a calm form control.
    Popup: at least trigger width, free to grow for a long option, capped at
@@ -2090,6 +2103,45 @@ teal text measures 3.69:1 on `#0A0A0A`: fine as a fill, fine as a border, below 
 floor as text. `--processing` already carries the lighter dark teal for exactly this
 reason, but borrowing a status token for an action would put two meanings on one colour.
 §24.15.
+
+### 21.22 Select — option treatment review, 2026-08-31
+
+Reported from a mobile screenshot: the selected option reads as too basic, the popup has
+no visible edge, and the tick is not distinctive enough.
+
+Reading the code found something worse than a styling complaint. `ITEM` carried a
+`data-highlighted` rule and **no `data-selected` rule at all**:
+
+- selection was carried by a 16px glyph and nothing else
+- the grey band that reads as "selected" is the **cursor**
+- the louder of the two visuals belonged to the less important meaning
+
+Three treatments were prototyped with every state visible at once — plain, selected,
+cursor, **selected *and* cursor**, disabled. The fourth is the one a live popup never lets
+you check, which is why the prototype was static.
+
+| | Selected label, dark | Greyscale: selected fill vs cursor fill | Outcome |
+|---|---|---|---|
+| A filled row | 5.14:1 | `94` vs `38` — distinct | works, loudest |
+| B edge bar + badge | 16.33:1 | `28` vs `38` — nearly identical | weak; the bar vanishes in dark |
+| C boxed row | **3.18:1** | `28` vs `38` | **chosen, with one correction** |
+
+**C was chosen and shipped with the label colour corrected.** As prototyped it used
+`text-primary`, which measured 3.18:1 on `--surface-elevated` in dark — below the 4.5:1
+floor — and under greyscale rendered the selected label at `94` while every other label
+sat at `250`. The one row that must read best was the dimmest text in the list.
+
+The failure was entirely in the label colour, not in the treatment. The box and the badge
+were always fine: a border is a graphical object at a 3:1 threshold, which 3.18 clears.
+So the teal stays in the box and the tick badge, and the label takes `--foreground`.
+
+> A colour can be correct as a border and wrong as text at the very same contrast ratio.
+> 3.18:1 passes 1.4.11 and fails 1.4.3. The threshold belongs to the role, not the value.
+
+**Measured after, light / dark:** popup edge 3.03 / 3.72 (was 1.26 / 1.31) · selection box
+5.36 / 3.18 · badge ink 5.14 / 5.14 · selected label 16.25 / 14.50. Under greyscale the
+selected and unselected labels are now identical, which is the point: selection rests
+entirely on the box and the badge, and both are shapes.
 
 ---
 

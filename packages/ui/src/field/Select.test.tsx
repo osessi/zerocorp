@@ -3,7 +3,7 @@ import { describe, it, expect, afterEach } from "vitest";
 import { render, screen, cleanup, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Field } from "./Field";
-import { Select, type SelectOption } from "./Select";
+import { ITEM, POPUP, Select, type SelectOption } from "./Select";
 
 afterEach(cleanup);
 
@@ -234,5 +234,40 @@ describe("Select shares the control contract with Input and Textarea", () => {
     expect(screen.getByLabelText("State").className).toContain(
       "data-placeholder:text-muted-foreground",
     );
+  });
+});
+
+describe("Select — selection is not the cursor", () => {
+  it("gives the selected option a rule of its own", async () => {
+    // Until 2026-08-31 ITEM had a data-highlighted rule and NO data-selected rule, so
+    // selection rode on a 16px tick while the grey CURSOR band read as "selected".
+    expect(ITEM).toContain("data-selected:border-primary");
+    expect(ITEM).toContain("data-selected:font-medium");
+  });
+
+  it("never inks the selected label with --primary", () => {
+    // Teal text measures 3.18:1 on --surface-elevated in dark, below the 4.5:1 floor,
+    // and in greyscale it made the selected row the dimmest text in the list. The box
+    // and the tick badge carry the teal; a border owes 3:1, which 3.18 clears. §24.15.
+    expect(ITEM).not.toContain("data-selected:text-primary");
+    expect(ITEM).toContain("text-foreground");
+  });
+
+  it("keeps the border present but transparent, so selecting shifts nothing", () => {
+    // Adding a border on selection would move every row by 2px the moment a value lands.
+    expect(ITEM).toContain("border border-transparent");
+  });
+
+  it("carries selection on more than colour", () => {
+    // §14. The weight change and the filled badge both survive greyscale.
+    expect(ITEM).toContain("data-selected:font-medium");
+  });
+
+  it("draws the popup edge with --input, never --border", () => {
+    // A popup edge separates a floating layer from the page: a meaningful graphical
+    // object, so WCAG 1.4.11 asks 3:1. --border is 1.26:1 light and 1.31:1 dark, and the
+    // popup read as edgeless. Same failure §4.4 fixed for controls.
+    expect(POPUP).toContain("border-input");
+    expect(POPUP).not.toMatch(/\bborder-border\b/);
   });
 });

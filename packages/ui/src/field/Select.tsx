@@ -49,10 +49,16 @@ export interface SelectProps {
 }
 
 /** Popup surface. Elevated, bordered, radius 0 — §7, §8. */
-const POPUP = [
-  "bg-surface-elevated border-border border shadow-floating",
+/** Exported so the visual contract is assertable, as button-styles.ts is. */
+export const POPUP = [
+  // --input, not --border. A popup edge separates a floating layer from the page, so it
+  // is a meaningful graphical object and owes WCAG 1.4.11 its 3:1. --border measures
+  // 1.26:1 light and 1.31:1 dark and the popup read as edgeless — reported in review
+  // 2026-08-31, the same failure §4.4 fixed for controls and §21.20 for the neutral badge.
+  "bg-surface-elevated border-input border shadow-floating",
   "max-h-72 overflow-y-auto",
-  "py-1",
+  // px-1 so a selected row's box does not touch the popup edge.
+  "px-1 py-1",
   // At least as wide as its trigger, free to grow so a long option stays on one line,
   // never wider than the space the positioner has.
   //
@@ -67,15 +73,35 @@ const POPUP = [
 /**
  * Option row.
  *
- * `data-highlighted` is the keyboard AND pointer state — Base UI unifies them, so a
- * mouse user and a keyboard user see the same affordance. That is why there is no
- * separate `hover:` rule here.
+ * There are TWO states here and they mean different things:
+ *
+ *   data-highlighted   where the cursor is — keyboard and pointer, unified by Base UI,
+ *                      which is why there is no separate `hover:` rule
+ *   data-selected      the value the field actually holds
+ *
+ * Until 2026-08-31 only `data-highlighted` had a rule. Selection rode on a 16px tick and
+ * nothing else, so the grey band — the CURSOR — was the loudest thing in the popup and
+ * read as "selected". The louder visual belonged to the less important meaning.
+ *
+ * Treatment C, chosen by review 2026-08-31: the selected row is BOXED in --primary and
+ * carries a filled tick badge. Hierarchy from borders, §1.
+ *
+ * The label stays --foreground, NOT --primary. Teal text measures 3.18:1 on
+ * --surface-elevated in dark, below the 4.5:1 floor, and in greyscale it made the
+ * selected row the DIMMEST text in the list — the one row that must read best. The box
+ * and the badge carry the teal instead: a border is a graphical object at a 3:1
+ * threshold, which 3.18 clears. Revisit if §24.15 gives --primary a dark value.
  */
-const ITEM = [
+export const ITEM = [
   "relative flex cursor-default items-center gap-2",
-  "py-2 pr-3 pl-9",
+  // The border is always there, transparent when unselected. Adding it on selection
+  // would shift every row by 2px the moment a value is chosen.
+  "border border-transparent",
+  "py-2 pr-3 pl-8",
   "text-body sm:text-body-sm text-foreground",
   "data-highlighted:bg-accent data-highlighted:text-accent-foreground",
+  // Two carriers, neither of them colour alone: the box and the weight. §14.
+  "data-selected:border-primary data-selected:font-medium",
   "data-disabled:text-muted-foreground data-disabled:cursor-not-allowed",
   "outline-hidden",
 ].join(" ");
@@ -135,8 +161,14 @@ export function Select({
                   disabled={option.disabled ?? false}
                   className={ITEM}
                 >
-                  <BaseSelect.ItemIndicator className="text-primary absolute left-3 flex items-center">
-                    <CheckIcon size={16} weight="bold" />
+                  {/*
+                    A filled badge, not a bare tick. Base UI renders the indicator only
+                    when the item is selected, so the badge IS the selection marker and
+                    it survives greyscale as a shape. --primary-foreground on --primary
+                    measures 5.14:1 in both themes.
+                  */}
+                  <BaseSelect.ItemIndicator className="bg-primary text-primary-foreground absolute left-2 flex size-4 items-center justify-center">
+                    <CheckIcon size={12} weight="bold" />
                   </BaseSelect.ItemIndicator>
                   {/* Never truncated. The popup grows to fit; when it runs out of
                       room the text wraps. A state name the user cannot read is worse
