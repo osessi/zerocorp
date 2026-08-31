@@ -58,19 +58,46 @@ function ToastTriggers() {
     <Row label="fire one">
       {(
         [
-          ["success", "Business created", "Northwind Studio LLC is filed with Wyoming."],
-          ["error", "Filing rejected", "The agent address is a PO box."],
-          ["warning", "Payment due", "Your card expires in 6 days."],
-          ["info", "Draft saved", "Autosaved just now."],
+          [
+            "success",
+            "Northwind Studio LLC is filed",
+            "Wyoming accepted the certificate at 14:02. Your EIN request is queued.",
+            undefined,
+          ],
+          [
+            "error",
+            "Wyoming rejected the filing",
+            "A PO box was given as the registered agent address. Wyoming requires a street address.",
+            "Fix the address",
+          ],
+          [
+            "warning",
+            "Your card expires before the next charge",
+            "Visa ending 4242 expires 30 September. The 1 October renewal will fail.",
+            "Update card",
+          ],
+          [
+            "info",
+            "Draft saved",
+            "Autosaved at 14:07. Nothing publishes until you approve it.",
+            undefined,
+          ],
         ] as const
-      ).map(([type, title, description]) => (
+      ).map(([type, title, description, action]) => (
         <Button
           key={type}
           size="sm"
           variant={type === "error" ? "danger" : "secondary"}
-          onClick={() => manager.add({ type, title, description })}
+          onClick={() =>
+            manager.add({
+              type,
+              title,
+              description,
+              ...(action ? { actionProps: { children: action } } : {}),
+            })
+          }
         >
-          {title}
+          {title.length > 24 ? `${title.slice(0, 22)}…` : title}
         </Button>
       ))}
     </Row>

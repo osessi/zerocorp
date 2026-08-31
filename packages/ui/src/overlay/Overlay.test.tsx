@@ -11,6 +11,7 @@ import {
   OVERLAY_BACKDROP,
   OVERLAY_ITEM,
   OVERLAY_SURFACE,
+  OVERLAY_SURFACE_MODAL,
 } from "./overlay-styles";
 import { ITEM as SELECT_ITEM, POPUP as SELECT_POPUP } from "../field/Select";
 
@@ -48,6 +49,15 @@ describe("overlay-styles — one floating surface, not five", () => {
       expect(OVERLAY_ITEM).toContain(`${attr}:border-primary`);
       expect(OVERLAY_ITEM).toContain(`${attr}:font-medium`);
     }
+  });
+
+  it("gives a surface over a backdrop a different edge from one on the page", () => {
+    // --input is validated at 3.03:1 against the PAGE. A modal sits on the page dimmed by
+    // a 40% scrim, and against that ground (~#999) the same #949494 measures 1.06:1 — the
+    // border was present, correct by its own rule, and invisible. Chrome, 2026-08-31.
+    expect(OVERLAY_SURFACE).toContain("border-input");
+    expect(OVERLAY_SURFACE_MODAL).toContain("border-foreground");
+    expect(OVERLAY_SURFACE_MODAL).not.toContain("border-input");
   });
 
   it("flips the backdrop with the theme", () => {

@@ -1154,7 +1154,7 @@ Button                         the action control — five variants, three sizes
    A PROMINENCE LADDER, built from borders and type the way §1 says hierarchy is built:
      primary    filled + bordered     one per screen, the thing to do
      danger     filled + bordered     destructive, and it must look destructive
-     secondary  bordered, page fill   has an edge, does not compete
+     secondary  TEAL border, page fill the second action, and it must be findable
      tertiary   no border, full ink   reads as a button on hover
      ghost      no border, muted ink  recedes until hovered — toolbars, dense rows
    type defaults to "button". A <button> in a <form> submits by default, which turns
@@ -1166,8 +1166,13 @@ Button                         the action control — five variants, three sizes
    The spinner takes the icon slot: a button that HAS an icon does not move at all, and
    the label stays readable throughout.
    tertiary does NOT use --primary as text — teal text measures 3.69:1 in dark. §24.15.
-   secondary fills with --background, not --secondary: --input is tuned against the page
-   colour and falls to 2.76:1 on #F4F4F5, failing WCAG 1.4.11.
+   secondary carries --primary as its border, changed 2026-08-31 after review: it was
+   --input, a neutral grey, and second actions went unnoticed — "Change plan" beside
+   "Upgrade to Scale", "Download all" beside a list. A control the user cannot find is not
+   restrained, it is broken. 5.36:1 light, 3.69:1 dark.
+   Hover moves the LINE and nothing else (--primary-hover). Deliberately no background
+   change: a filled hover on a bordered button reads as a different variant appearing
+   under the cursor.
    Sizes sm 32 · md 40 · lg 48. md matches CONTROL_HEIGHT so a button sits flush beside
    an Input. sm still clears the 24×24 target minimum of WCAG 2.5.8.
 
@@ -1265,7 +1270,13 @@ overlay-styles.ts              one floating surface, not five
    chosen state consistently — Select.Item sets data-selected, Menu and Combobox set
    data-checked — and a contract carrying one silently stops marking the choice on the
    other two.
-   Edge is --input, never --border. Backdrop is --foreground/40, so it flips.
+   TWO surfaces, not one. OVERLAY_SURFACE (--input edge) is for anchored popups on the
+   undimmed page. OVERLAY_SURFACE_MODAL (--foreground edge) is for anything over a
+   backdrop. --input is validated at 3.03:1 against the PAGE, but a modal sits on the page
+   dimmed by a 40% scrim, and against that ground (~#999) #949494 measures 1.06:1 — the
+   Dialog's border was present, correct by its own rule, and rigorously invisible.
+   Reported 2026-08-31.
+   Backdrop is --foreground/40, so it flips with the theme.
 
 tone.ts                        one status system, three surfaces
 → packages/ui/src/tone.ts
@@ -2320,6 +2331,22 @@ CI rule.
 > The test that settled it was moving an unrelated element and watching it move.
 
 **3. `Choice` requires a visible label**, so a table selection column cannot use it. §24.17.
+
+**A follow-up styling review, same day.** Six points, all acted on. Two were structural:
+
+- **Second actions went unnoticed.** `secondary` took `--primary` as its border. §19.
+- **A modal's border was invisible.** Not missing — *invisible*. `--input` is validated
+  against the page; a modal sits on the page under a 40% scrim, and against that ground
+  the same value falls from 3.03:1 to **1.06:1**.
+
+> A border tuned against one ground is not tuned against another. The token was right and
+> the context changed underneath it. `--input` is still correct for an anchored popup;
+> `OVERLAY_SURFACE_MODAL` exists for everything over a backdrop.
+
+The other four were composition, not tokens: an anchored section header rather than a
+bare word on white, filled status badges where the status is the column being scanned,
+a filled tick for an included feature rather than a loose check mark that reads as a
+bullet, and toast copy carrying a name, a number and a next step instead of a category.
 
 **Decided the same day, on the strength of this pass:** `--muted-foreground` `#707070`,
 the source policy (§2), and the engines for calendar, chart and data table (§19). Calendar

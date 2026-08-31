@@ -12,7 +12,7 @@ import {
   OVERLAY_ITEM,
   OVERLAY_ITEM_INDICATOR,
   OVERLAY_MOTION,
-  OVERLAY_SURFACE,
+  OVERLAY_SURFACE_MODAL,
 } from "./overlay-styles";
 
 /**
@@ -93,7 +93,7 @@ export function CommandMenu({
         <BaseDialog.Backdrop className={OVERLAY_BACKDROP} />
         <BaseDialog.Popup
           className={cx(
-            OVERLAY_SURFACE,
+            OVERLAY_SURFACE_MODAL,
             // Top-anchored, not centred: a palette that grows and shrinks while you type
             // would jump around a vertical centre.
             "fixed top-24 left-1/2 z-50 flex w-[calc(100vw-2rem)] max-w-lg -translate-x-1/2 flex-col",

@@ -111,9 +111,23 @@ export const BUTTON_VARIANT: Record<ButtonVariant, string> = {
     "bg-destructive border-destructive text-destructive-foreground",
     "hover:bg-destructive-hover hover:border-destructive-hover",
   ].join(" "),
+  /*
+    --primary as the border, decided 2026-08-31 after review.
+
+    It was --input, a neutral grey, and second actions went unnoticed — "Change plan"
+    beside "Upgrade to Scale", "Download all" beside a list. A control the user cannot
+    find is not restrained, it is broken.
+
+    Hover moves the LINE and nothing else: --primary-hover is a darker teal, so the
+    boundary strengthens exactly as §9 requires. Deliberately no background change — a
+    filled hover on a bordered button reads as a different variant appearing under the
+    cursor.
+
+    5.36:1 on white, 3.69:1 on #0A0A0A. Both clear the 3:1 a boundary owes (WCAG 1.4.11).
+  */
   secondary: [
-    "bg-background border-input text-foreground",
-    "hover:border-input-hover hover:bg-accent",
+    "bg-background border-primary text-foreground",
+    "hover:border-primary-hover",
   ].join(" "),
   tertiary: ["border-transparent bg-transparent text-foreground", "hover:bg-accent"].join(" "),
   ghost: [

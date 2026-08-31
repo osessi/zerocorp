@@ -22,6 +22,28 @@
 export const OVERLAY_SURFACE = "bg-surface-elevated border-input shadow-floating border";
 
 /**
+ * The floating surface, over a BACKDROP.
+ *
+ * A different edge, and the reason is measurable. `--input` is validated at 3.03:1
+ * against the page — but a modal does not sit on the page, it sits on the page dimmed by
+ * a 40% scrim. Against that ground (~#999) the same #949494 measures **1.06:1**: the
+ * border was present, correct by its own rule, and rigorously invisible. Reported in
+ * review 2026-08-31.
+ *
+ * > A border tuned against one ground is not tuned against another. The token is right;
+ * > the context changed underneath it.
+ *
+ * `--foreground` is used instead: a crisp 1px rule that separates from BOTH the dimmed
+ * surround and the surface's own fill. 19.8:1 on the fill and 6.95:1 on the scrim in
+ * light; the inverse, and equally crisp, in dark.
+ *
+ * Anchored popups — menu, select, popover, tooltip — keep OVERLAY_SURFACE: they sit on
+ * the undimmed page, which is exactly what --input was tuned for.
+ */
+export const OVERLAY_SURFACE_MODAL =
+  "bg-surface-elevated border-foreground shadow-floating border";
+
+/**
  * The backdrop.
  *
  * --foreground at 40%, so it flips with the theme: a dark scrim on a light page, a light

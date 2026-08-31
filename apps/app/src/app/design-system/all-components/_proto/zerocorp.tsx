@@ -5,7 +5,9 @@ import {
   ArrowSquareOutIcon,
   CheckIcon,
   GlobeIcon,
+  DownloadSimpleIcon,
   EnvelopeSimpleIcon,
+  ReceiptIcon,
   RobotIcon,
   SparkleIcon,
   XIcon,
@@ -111,6 +113,12 @@ export function BusinessStatusDemo() {
 const usd = (minor: number) =>
   new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(minor / 100);
 
+const INVOICES: { date: string; cents: number; tone: StatusTone; status: string }[] = [
+  { date: "Aug 1, 2026", cents: 39900, tone: "success", status: "Paid" },
+  { date: "Jul 1, 2026", cents: 39900, tone: "success", status: "Paid" },
+  { date: "Jun 1, 2026", cents: 39900, tone: "danger", status: "Failed" },
+];
+
 export function BillingDemo() {
   return (
     <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
@@ -126,34 +134,60 @@ export function BillingDemo() {
           {usd(39900)}
           <span className="text-body-sm text-muted-foreground font-sans"> / month</span>
         </p>
-        <ul className="text-body-sm text-muted-foreground flex flex-col gap-1">
+        <ul className="text-body-sm text-foreground flex flex-col gap-2">
           {["5 000 AI credits", "10 000 email sends", "3 businesses", "Priority filing"].map((f) => (
             <li key={f} className="flex items-center gap-2">
-              <CheckIcon size={14} className="text-success shrink-0" aria-hidden="true" />
+              {/*
+                A filled tick, not a bare glyph — the same badge the Select and the menu
+                use for the chosen item. A loose check mark floating beside text reads as
+                a bullet; a filled square reads as "included, confirmed".
+                --primary-foreground on --primary is 5.14:1 in both themes.
+              */}
+              <span className="bg-primary text-primary-foreground flex size-4 shrink-0 items-center justify-center">
+                <CheckIcon size={12} weight="bold" aria-hidden="true" />
+              </span>
               {f}
             </li>
           ))}
         </ul>
         <div className="flex flex-wrap gap-2">
           <Button variant="primary">Upgrade to Scale</Button>
-          <Button variant="ghost">Change plan</Button>
+          {/* secondary, not ghost. A real second action must be findable. */}
+          <Button variant="secondary">Change plan</Button>
         </div>
       </div>
 
       <div className="border-border flex flex-col border">
-        <div className="border-border flex items-center justify-between border-b px-4 py-3">
-          <span className="text-label">Invoices</span>
-          <Button size="sm" variant="ghost">Download all</Button>
+        {/*
+          The header is anchored: --muted ground, an icon, and the count. A bare 14px
+          word floating on white gives the eye nothing to land on, which is exactly what
+          the review reported.
+        */}
+        <div className="border-border bg-muted flex flex-wrap items-center justify-between gap-3 border-b px-4 py-3">
+          <span className="text-label text-foreground inline-flex items-center gap-2">
+            <ReceiptIcon size={16} weight="regular" aria-hidden="true" className="text-muted-foreground" />
+            Invoices
+            <span className="text-caption text-muted-foreground font-mono">3</span>
+          </span>
+          <Button size="sm" variant="secondary" icon={DownloadSimpleIcon}>
+            Download all
+          </Button>
         </div>
-        {[
-          ["Aug 1, 2026", 39900, "success", "Paid"],
-          ["Jul 1, 2026", 39900, "success", "Paid"],
-          ["Jun 1, 2026", 39900, "danger", "Failed"],
-        ].map(([date, cents, tone, status]) => (
-          <div key={date as string} className="border-border flex items-center justify-between gap-3 border-b px-4 py-3 last:border-b-0">
-            <span className="text-body-sm text-muted-foreground font-mono">{date as string}</span>
-            <span className="text-body-sm text-foreground font-mono">{usd(cents as number)}</span>
-            <StatusBadge tone={tone as StatusTone}>{status as string}</StatusBadge>
+        {INVOICES.map((inv) => (
+          <div
+            key={inv.date}
+            className="border-border hover:bg-accent flex items-center justify-between gap-3 border-b px-4 py-3 last:border-b-0"
+          >
+            <span className="text-body-sm text-muted-foreground font-mono">{inv.date}</span>
+            <span className="text-body-sm text-foreground font-mono">{usd(inv.cents)}</span>
+            {/*
+              prominent, not the outlined default. An invoice status is terminal — paid or
+              failed, nothing in between — and it is the one thing the eye scans this list
+              for. The outlined default is for a status among many; this is the column.
+            */}
+            <StatusBadge tone={inv.tone} emphasis="prominent">
+              {inv.status}
+            </StatusBadge>
           </div>
         ))}
       </div>

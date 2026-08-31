@@ -125,11 +125,21 @@ describe("Button — contrast findings that must not be undone", () => {
   });
 
   it("fills secondary with --background, never --secondary", () => {
-    // --input is tuned against the page colour: 3.03:1 there, 2.76:1 on --secondary
-    // (#F4F4F5). A button edge is a control boundary and owes WCAG 1.4.11 3:1. §4.4.
+    // A filled secondary would need its own border tuning: --input measures 3.03:1 on the
+    // page colour but only 2.76:1 on --secondary (#F4F4F5). §4.4.
     expect(BUTTON_VARIANT.secondary).toContain("bg-background");
     expect(BUTTON_VARIANT.secondary).not.toMatch(/\bbg-secondary\b/);
-    expect(BUTTON_VARIANT.secondary).toContain("border-input");
+  });
+
+  it("gives secondary a teal border, and moves only the line on hover", () => {
+    // It was --input, a neutral grey, and second actions went unnoticed — "Change plan"
+    // beside "Upgrade to Scale". Reported in review 2026-08-31.
+    //
+    // Hover strengthens the LINE and nothing else. A filled hover on a bordered button
+    // reads as a different variant appearing under the cursor.
+    expect(BUTTON_VARIANT.secondary).toContain("border-primary");
+    expect(BUTTON_VARIANT.secondary).toContain("hover:border-primary-hover");
+    expect(BUTTON_VARIANT.secondary).not.toContain("hover:bg-");
   });
 
   it("gives every filled variant a hover that is a token, not an opacity trick", () => {

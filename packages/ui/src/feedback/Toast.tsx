@@ -68,6 +68,25 @@ function ToastList() {
             <div className="flex min-w-0 flex-1 flex-col gap-1">
               <BaseToast.Title className={cx("text-label", TONE_INK[tone])} />
               <BaseToast.Description className="text-body-sm text-foreground" />
+              {/*
+                An action, when the toast is about something the user can fix. This is the
+                difference between a notification and a dead end: "card expiring" with no
+                way to update it is just anxiety.
+
+                Rendered as a tertiary Button so it does not compete with the toast's own
+                left rule, and only when actionProps carries a label.
+              */}
+              {toast.actionProps ? (
+                <BaseToast.Action
+                  className={cx(
+                    "text-label mt-1 self-start underline underline-offset-2",
+                    TONE_INK[tone],
+                    COLOR_TRANSITION,
+                    "hover:no-underline",
+                    "focus-visible:outline-ring focus-visible:outline-2 focus-visible:outline-offset-2",
+                  )}
+                />
+              ) : null}
             </div>
             <BaseToast.Close
               render={<IconButton label="Dismiss notification" icon={XIcon} size="sm" />}

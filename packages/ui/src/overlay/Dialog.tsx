@@ -3,7 +3,7 @@
 import { Dialog as BaseDialog } from "@base-ui/react/dialog";
 import type { ReactNode } from "react";
 import { cx } from "../field/control-styles";
-import { OVERLAY_BACKDROP, OVERLAY_MOTION, OVERLAY_SURFACE } from "./overlay-styles";
+import { OVERLAY_BACKDROP, OVERLAY_MOTION, OVERLAY_SURFACE_MODAL } from "./overlay-styles";
 
 /**
  * Dialog — a modal that takes the whole screen's attention.
@@ -47,7 +47,7 @@ export function Dialog({
         <BaseDialog.Backdrop className={OVERLAY_BACKDROP} />
         <BaseDialog.Popup
           className={cx(
-            OVERLAY_SURFACE,
+            OVERLAY_SURFACE_MODAL,
             // w-[calc(100vw-2rem)] with a max: at 375px a fixed max-w-md would overflow
             // and scroll the page sideways. The gutter is the §12 mobile gutter, twice.
             "fixed top-1/2 left-1/2 z-50 flex max-h-[calc(100vh-2rem)] w-[calc(100vw-2rem)] max-w-md",
