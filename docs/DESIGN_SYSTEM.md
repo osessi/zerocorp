@@ -657,6 +657,43 @@ notification preferences, actionable notifications.
 **Forms** — field spacing from the §6 scale, inline validation, error summary on submit,
 explicit success feedback, never a silent save.
 
+#### Form state — VALIDATED 2026-08-31
+
+```text
+State        Base UI Field / Form — native
+             validity · touched · dirty · filled · focused · aria-invalid
+Validation   packages/contracts (Zod) — the same schemas the use cases validate against
+Submission   Next.js Server Actions
+Dependencies added: none
+```
+
+**react-hook-form is not adopted.** Base UI already carries the field state ZeroCorp
+needs, and the validation schemas exist in `packages/contracts` because NN-5 requires
+everything crossing a boundary to be typed there. Reusing them means a form and its use
+case can never drift apart.
+
+This also means shadcn/ui's `Form` component — which is built on react-hook-form — is
+**not** part of our system. Do not import it.
+
+The decision is reversible and scoped: if a specific screen genuinely needs repeatable
+fields, cross-field dependencies or multi-step state that Base UI cannot carry, propose
+react-hook-form **for that screen**, with the reason. Do not adopt it globally by default.
+
+#### The field shell
+
+Every form control in ZeroCorp is composed, never bare:
+
+```text
+Field.Root
+├── Field.Label          always present — a placeholder is not a label
+├── Field.Control        Input · Textarea · Select · Combobox · DatePicker · FileUpload
+├── Field.Description    optional help text
+└── Field.Error          validation message, wired via aria-describedby
+```
+
+Textarea, Select, Combobox, DatePicker and FileUpload reuse this shell. They do not each
+invent their own label and error handling.
+
 **Tables** — pagination, sorting, filtering, one density, selection, bulk actions, and
 all five states. Numbers in Geist Mono, right-aligned.
 
@@ -791,11 +828,41 @@ Format:
 ### Current registry
 
 ```text
-(empty)
+Field                          label · description · error · required · validity wiring
+→ Base UI · Field.Root / Label / Description / Error / Control
+→ Approved
+→ MIT · reviewed 2026-08-31
+
+Input                          text · password · search
+→ Base UI · Input
+→ Approved
+→ MIT · reviewed 2026-08-31
+
+Button
+→ handled separately by the product owner — registry reference pending
+→ Approved
 ```
 
-**Nothing is approved yet.** The registry grows one component at a time, as each is
-actually chosen and integrated. It is not pre-populated to look complete.
+**Considered and deferred, with the reason on record:**
+
+```text
+Shadcn Studio input (46 variants)
+→ Deferred, not rejected
+→ Three inputs are needed today: text, password, search. Importing 46 variants at V1
+  is the "dozens of low-quality components" failure PRODUCT_SPEC 27 forbids.
+  Individual variants will be pulled on concrete need, one at a time.
+
+shadcn/ui input
+→ Reference only, not a source
+→ It is a styled <input> with no label, description or error. DESIGN_SYSTEM 17 requires
+  all of them. Adopting it would mean deleting its radius and shadow defaults, then
+  building the field shell anyway.
+
+react-hook-form
+→ Not adopted — see "Form state" below
+```
+
+The registry grows one component at a time. It is never pre-populated to look complete.
 
 ---
 
