@@ -118,9 +118,13 @@ They share the token *architecture*, never the token *values*. See §15 and §16
 | `--muted-foreground` | `#737373` | Low-emphasis text, help, placeholders |
 | `--accent` | `#F5F5F5` | Hover surfaces, selected rows |
 | `--border` | `#E5E5E5` | Dividers, card edges |
-| `--input` | `#E5E5E5` | Form control borders |
+| `--input` | `#959595` | Form control borders — see §4.4 |
 | `--ring` | `#00786F` | Focus ring |
 | `--destructive` | `#DC2626` | Destructive actions, errors |
+| `--success` | `#15803D` | Completed, healthy, verified |
+| `--warning` | `#B45309` | Needs attention, degraded, expiring |
+| `--info` | `#2563EB` | Neutral information, guidance |
+| `--processing` | `#00786F` | In progress, pending, running |
 
 > **Note — `--muted` and `--accent` are the same value (`#F5F5F5`).** That is workable but
 > means the two roles are visually indistinguishable. If a hover state ever needs to read
@@ -145,51 +149,95 @@ They share the token *architecture*, never the token *values*. See §15 and §16
 | `--primary` | `#00786F` | **PROPOSED** — unchanged; see the contrast finding below |
 | `--primary-foreground` | `#F0FDFA` | **PROPOSED** — unchanged |
 | `--primary-emphasis` | `#2DD4BF` | **PROPOSED** — teal **text**, links and icons on dark only |
-| `--destructive` | `#EF4444` | **PROPOSED** — `#DC2626` is too dark on `#0A0A0A` |
+| `--destructive` | `#EF4444` | **PROPOSED** — `#DC2626` reaches only 4.10:1 on `#0A0A0A` |
+| `--success` | `#22C55E` | **PROPOSED** — 8.69:1 · `#15803D` reaches only 3.95:1 |
+| `--warning` | `#F59E0B` | **PROPOSED** — 9.22:1 · `#B45309` reaches only 3.94:1 |
+| `--info` | `#3B82F6` | **PROPOSED** — 5.38:1 · `#2563EB` reaches only 3.83:1 |
+| `--processing` | `#2DD4BF` | **PROPOSED** — 10.64:1 · same value as `--primary-emphasis` |
 
-### 4.3 Semantic status colors — TO VALIDATE
+Every light-mode status colour lands between 3.69:1 and 4.10:1 on `#0A0A0A` — enough for a
+filled badge (a UI component needs 3:1) but **not for status text or an icon on the page
+ground**. The lighter set above is required wherever status is rendered as text on dark.
 
-`success`, `warning`, `info` and `processing` have no values yet. `--destructive` covers
-danger. A status system spanning formation, payments, domains, email, social, agents,
-content and CRM (§17) cannot be built without them.
+### 4.3 Semantic status colors — VALIDATED
 
-**Do not invent these. Ask.**
+```text
+success      #15803D      completed · healthy · verified
+warning      #B45309      needs attention · degraded · expiring
+info         #2563EB      neutral information · guidance
+processing   #00786F      in progress · pending · running
+destructive  #DC2626      failed · error · destructive action
+```
+
+All five measure between **4.83:1 and 5.36:1** on white — a deliberately even set, so no
+status reads as louder than another purely through contrast.
+
+`--processing` intentionally reuses `--primary`. Work in progress *is* ZeroCorp working;
+it should not introduce a sixth colour.
+
+**One status system across the entire product** (§17): formation, payments, domains,
+email, social, agents, content, CRM. A feature never invents its own status colour.
+
+> **Colour is never the only carrier of meaning.** Every status pairs a colour with an
+> icon and a label (`CLAUDE_CODE_RULES.md` §25).
+
+Dark-mode equivalents are **PROPOSED** — see §4.2.
 
 ### 4.4 Measured contrast
 
 Computed against WCAG 2.1. Recorded so nobody re-derives them.
 
+#### Light mode — on `#FFFFFF`
+
 | Pair | Ratio | Verdict |
 |---|---:|---|
-| `#00786F` on `#FFFFFF` | **5.36:1** | AA normal text ✓ · AAA ✗ |
-| `#F0FDFA` on `#00786F` | **5.16:1** | AA normal text ✓ |
-| `#737373` on `#FFFFFF` | **4.74:1** | AA normal text ✓ (narrow margin) |
-| `#DC2626` on `#FFFFFF` | **4.83:1** | AA normal text ✓ |
-| `#E5E5E5` on `#FFFFFF` | **1.26:1** | dividers ✓ · **form control boundaries ✗** |
-| `#00786F` on `#0A0A0A` | **3.69:1** | UI component ✓ · **text ✗** |
-| `#DC2626` on `#0A0A0A` | **4.10:1** | UI component ✓ · **text ✗** |
-| `#EF4444` on `#0A0A0A` | **5.26:1** | AA normal text ✓ |
+| `#00786F` primary | **5.36:1** | AA text ✓ |
+| `#F0FDFA` on `#00786F` | **5.16:1** | AA text ✓ |
+| `#2563EB` info | **5.17:1** | AA text ✓ |
+| `#15803D` success | **5.02:1** | AA text ✓ |
+| `#B45309` warning | **5.02:1** | AA text ✓ |
+| `#DC2626` destructive | **4.83:1** | AA text ✓ |
+| `#737373` muted-foreground | **4.74:1** | AA text ✓ (narrow margin) |
+| `#959595` input border | **2.995:1** | see the finding below |
+| `#E5E5E5` border | **1.26:1** | dividers and card edges ✓ · never a control boundary |
 
-#### 🔴 Finding — form control borders fail WCAG 1.4.11 — TO VALIDATE
+#### Dark mode — on `#0A0A0A`
 
-`--input: #E5E5E5` on `#FFFFFF` measures **1.26:1**. WCAG 2.1 SC 1.4.11 (Non-text
-Contrast) requires **3:1** for the visual boundary that identifies a user interface
-component. A grey reaching 3:1 on white is approximately **`#959595`** — visually far
-heavier than `#E5E5E5`, which would change the aesthetic.
+| Pair | Ratio | Verdict |
+|---|---:|---|
+| `#2DD4BF` processing | **10.64:1** | AA ✓ |
+| `#F59E0B` warning | **9.22:1** | AA ✓ |
+| `#22C55E` success | **8.69:1** | AA ✓ |
+| `#3B82F6` info | **5.38:1** | AA ✓ |
+| `#EF4444` destructive | **5.26:1** | AA ✓ |
+| light-mode statuses | **3.69–4.10:1** | filled badge ✓ · **text ✗** |
 
-Three honest options:
+### Form control boundaries — RESOLVED
 
-| | Option | Consequence |
-|---|---|---|
-| **A** | Darken `--input` to ≥ `#959595` for form controls only; keep `--border: #E5E5E5` for dividers and card edges | Compliant. Inputs read heavier — a real change to the Lyra look |
-| **B** | Keep `#E5E5E5` and give inputs a filled ground (`#FAFAFA`) plus a persistent visible label | Preserves the aesthetic. `#FAFAFA` on `#FFFFFF` is ~1.05:1, so the fill alone does **not** satisfy 1.4.11 either |
-| **C** | Accept the deviation and record it as a known accessibility debt |
+**VALIDATED:**
 
-**Recommendation: A, scoped to form controls only.** `--border` and `--input` are already
-separate tokens precisely so they can diverge. This needs your decision — it visibly
-changes every form in the product.
+```text
+--border   #E5E5E5     dividers, card edges, table rules — decorative
+--input    #959595     the boundary that identifies a form control
+--ring     #00786F     focus indicator
+```
 
----
+Splitting `--border` from `--input` is the right call: it keeps the light Lyra look on
+every decorative line while giving controls a boundary that can actually be perceived.
+`--ring` at 5.36:1 against white is a strong focus indicator.
+
+> #### ⚠️ Residual finding — `#959595` measures **2.995:1**
+>
+> WCAG 2.1 SC 1.4.11 requires **at least 3:1**. `#959595` misses by **0.005**, so an
+> automated audit will report it as a failure even though a human cannot see the
+> difference.
+>
+> **`#949494` — one hex step darker — measures 3.033:1 and passes.** It is visually
+> indistinguishable from `#959595`.
+>
+> **Recommendation: change `--input` to `#949494`.** Zero visual cost, and it turns a
+> reported failure into a pass. One word from you and it is done. Until then `#959595`
+> stands as validated, with this deviation on record.
 
 ## 5. Typography — VALIDATED
 
@@ -906,16 +954,18 @@ problem, the current value, the proposal, the alternatives, the trade-offs and t
 
 ## 24. Open items
 
+Resolved 2026-08-31: semantic status colours (§4.3) and form control boundaries (§4.4).
+
 | # | Item | Blocks |
 |---|---|---|
-| 1 | **Semantic status colours** (§4.3) — success, warning, info, processing | `StatusBadge`, every status surface |
-| 2 | **Form control contrast** (§4.4) — `--input` at 1.26:1 fails WCAG 1.4.11 | Every form |
-| 3 | **Dark mode values** (§4.2) — PROPOSED, need one review pass | Dark mode |
-| 4 | **Base UI vs Radix** (§2) — which primitive layer do the chosen components use | The first component |
-| 5 | **Block taxonomy and variants** (§20) — D3 / D4 | The block registry |
-| 6 | **Customer art directions** (§16) — 6–8 curated directions | Every customer site |
-| 7 | **Flaticon licence** (§11) | Animated icons |
-| 8 | **Border hover in dark mode** (§9) | Dark mode components |
+| 1 | **`--input` at 2.995:1** (§4.4) — `#949494` clears 3:1 at zero visual cost | An accessibility audit report, not the work |
+| 2 | **Dark mode values** (§4.2) — PROPOSED, need one review pass | Dark mode |
+| 3 | **Base UI vs Radix** (§2) — which primitive layer do the chosen components use | The next component integration |
+| 4 | **Block taxonomy and hero variants** (§20) — D3 / D4 | The block registry |
+| 5 | **Customer art directions** (§16) — 6–8 curated directions | Every customer site |
+| 6 | **Flaticon licence** (§11) | Animated icons |
+| 7 | **Border hover in dark mode** (§9) | Dark mode components |
+| 8 | **`dashboard columns` and `editor widths`** (§12) | Dashboard grid, block editor |
 
 ---
 

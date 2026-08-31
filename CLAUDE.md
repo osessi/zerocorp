@@ -160,8 +160,14 @@ Icons    Phosphor · 20px standard · Regular
 Type     Geist Sans · Geist Mono for every comparable number
 Radius   0px default · 2–4px only where a control truly needs it
 Primary  #00786F           Spacing  4px scale, 16px central
+Status   success #15803D · warning #B45309 · info #2563EB
+         processing #00786F · destructive #DC2626
+Borders  --border #E5E5E5 decorative · --input #959595 controls · --ring #00786F
 Motion   100 / 150 / 200 / 250ms · no decorative bounce
 ```
+
+One status system for the whole product. Colour is never the only carrier of meaning —
+always an icon and a label too. `--border` and `--input` are not interchangeable.
 
 Hierarchy comes from **borders, spacing and typography** — not shadows or gradients.
 

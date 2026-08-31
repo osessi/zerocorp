@@ -404,15 +404,25 @@ exist.
 
 **Still open** — tracked in `DESIGN_SYSTEM.md` §24, and blocking:
 
+**Resolved 2026-08-31:**
+
+- **Semantic status colours** — `success #15803D · warning #B45309 · info #2563EB ·
+  processing #00786F · destructive #DC2626`. All five measure 4.83–5.36:1 on white.
+  One status system for the whole product.
+- **Form control boundaries** — `--border #E5E5E5` stays decorative, `--input #959595`
+  identifies controls, `--ring #00786F` is the focus indicator.
+
+**Still open:**
+
 | | Item | Blocks |
 |---|---|---|
-| 1 | **Semantic status colours** — success, warning, info, processing have no values | `StatusBadge` and every status surface across formation, payments, domains, email, social, agents, content, CRM |
-| 2 | **Form control contrast** — `--input: #E5E5E5` measures **1.26:1** on white; WCAG 2.1 SC 1.4.11 requires 3:1 for the boundary that identifies a control | Every form. Three options presented in `DESIGN_SYSTEM.md` §4.4; needs a decision |
-| 3 | **Dark mode values** — PROPOSED, need one review pass | Dark mode |
-| 4 | **Base UI vs Radix** — the declared primitive base is Base UI; most shadcn distributions ship on Radix. Confirm which layer the chosen components use | The first component integration |
-| 5 | **Customer website art directions** — 6–8 curated directions do not exist | Every customer site. This is the remaining half of D-G6 |
-| 6 | **Flaticon licence** — Flaticon assets are stock-licensed, not open source; incompatible with §28 as written until the tier is read and recorded | Animated icons. Motion + Phosphor is the approved path meanwhile |
-| 7 | **Border hover in dark mode** — no value | Dark mode components |
+| 1 | **`--input` measures 2.995:1** — misses WCAG 1.4.11's 3:1 by 0.005. `#949494` clears it at 3.033:1 and is visually identical | An audit report, not the work. Recommendation on record |
+| 2 | **Dark mode values** — PROPOSED, need one review pass. Includes the four dark status variants | Dark mode |
+| 3 | **Base UI vs Radix** — the declared primitive base is Base UI; most shadcn distributions ship on Radix | The next component integration |
+| 4 | **Customer website art directions** — 6–8 curated directions do not exist | Every customer site. The remaining half of D-G6 |
+| 5 | **Flaticon licence** — stock-licensed, not open source | Animated icons. Motion + Phosphor approved meanwhile |
+| 6 | **Border hover in dark mode** — no value | Dark mode components |
+| 7 | **`dashboard columns` and `editor widths`** — carried from v1, still without values | Dashboard grid, block editor |
 
 ---
 
@@ -435,4 +445,5 @@ Several Part C items above have no home until these exist.
 |---|---|
 | 2026-08-30 | Register created during documentation reorganization. 7 unresolved contradictions (Part A), 10 recorded reversals (Part B), 9 archive-only knowledge items (Part C), 7 gaps (Part D). No decision was changed. |
 | 2026-08-30 | **D1 resolved** by ADR 0001 (Option C). Part A now holds 6 open contradictions. Part B gains B11 and B12. D-G6 (design-system token values) becomes the top remaining blocker. |
+| 2026-08-31 | Status colours and form control boundaries **VALIDATED**. D-G6 open sub-items drop from 7 to 7 (two resolved, `--input` residual and layout widths added). |
 | 2026-08-31 | **D-G6 partially resolved.** ZeroCorp Product UI tokens are now concrete in `DESIGN_SYSTEM.md` v2; seven sub-items remain open, including a WCAG 1.4.11 contrast finding on form controls and the Flaticon licence gate. **D3 and D4 remain open** — the new document restates the block and variant *counts* but does not freeze the canonical lists. |

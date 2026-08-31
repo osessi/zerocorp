@@ -1135,9 +1135,20 @@ Icons      Phosphor · 20px standard · Regular weight
 Type       Geist Sans · Geist Mono for all comparable numbers
 Radius     0px default · 2–4px only where a control genuinely needs it
 Primary    #00786F
+Status     success #15803D · warning #B45309 · info #2563EB
+           processing #00786F · destructive #DC2626
+Borders    --border #E5E5E5 decorative · --input #959595 controls · --ring #00786F
 Spacing    4px scale, 16px central
 Motion     100 / 150 / 200 / 250ms · no decorative bounce
 ```
+
+There is **one** status system for the whole product — formation, payments, domains,
+email, social, agents, content, CRM. A feature never invents its own status colour, and
+colour is never the only carrier of meaning: every status pairs a colour with an icon and
+a label.
+
+`--border` and `--input` are **not interchangeable**. A form control boundary uses
+`--input`; a divider or card edge uses `--border`. Swapping them breaks WCAG 1.4.11.
 
 Never introduce an arbitrary colour, font size, spacing value, radius, shadow, icon set or
 animation duration. If the value is not a token, it is a defect.
