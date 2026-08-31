@@ -71,11 +71,20 @@ Signature color    Teal #00786F
 The visual signature is **sharp corners, a single teal accent, generous whitespace and
 a neutral greyscale**. Nothing else competes for attention.
 
-> ⚠️ **Base UI vs Radix — TO VALIDATE.** `Base UI` is the declared primitive base, while
-> most shadcn distributions ship on Radix primitives. Before the first component is
-> integrated, confirm which primitive layer the chosen Shadcn Studio components actually
-> use. Mixing both is acceptable only if deliberate and recorded here — two headless
-> libraries doing the same job is exactly the drift this document exists to prevent.
+### Primitive layer — RESOLVED 2026-08-31
+
+**Base UI is the primitive layer.** This was flagged as a possible conflict with the
+shadcn ecosystem; it is not.
+
+Since **July 2026, Base UI is the default in shadcn/ui**. Radix is not deprecated — every
+component ships for both — and registry items without a pinned library now initialise as
+Base UI. Shadcn Studio publishes for both and documents migration between them.
+
+Base UI is MIT, ~10.8k stars, and maintained by a team that includes the creators of
+Radix. Choosing it aligns ZeroCorp with the ecosystem default rather than diverging from it.
+
+**Rule:** Base UI primitives only. A component that exists solely on Radix requires an
+explicit decision recorded here — never a silent second headless library.
 
 ---
 
@@ -954,18 +963,18 @@ problem, the current value, the proposal, the alternatives, the trade-offs and t
 
 ## 24. Open items
 
-Resolved 2026-08-31: semantic status colours (§4.3) and form control boundaries (§4.4).
+Resolved 2026-08-31: semantic status colours (§4.3), form control boundaries (§4.4),
+and the primitive layer (§2 — Base UI, now the shadcn/ui default).
 
 | # | Item | Blocks |
 |---|---|---|
 | 1 | **`--input` at 2.995:1** (§4.4) — `#949494` clears 3:1 at zero visual cost | An accessibility audit report, not the work |
 | 2 | **Dark mode values** (§4.2) — PROPOSED, need one review pass | Dark mode |
-| 3 | **Base UI vs Radix** (§2) — which primitive layer do the chosen components use | The next component integration |
-| 4 | **Block taxonomy and hero variants** (§20) — D3 / D4 | The block registry |
-| 5 | **Customer art directions** (§16) — 6–8 curated directions | Every customer site |
-| 6 | **Flaticon licence** (§11) | Animated icons |
-| 7 | **Border hover in dark mode** (§9) | Dark mode components |
-| 8 | **`dashboard columns` and `editor widths`** (§12) | Dashboard grid, block editor |
+| 3 | **Block taxonomy and hero variants** (§20) — D3 / D4 | The block registry |
+| 4 | **Customer art directions** (§16) — 6–8 curated directions | Every customer site |
+| 5 | **Flaticon licence** (§11) | Animated icons |
+| 6 | **Border hover in dark mode** (§9) | Dark mode components |
+| 7 | **`dashboard columns` and `editor widths`** (§12) | Dashboard grid, block editor |
 
 ---
 
