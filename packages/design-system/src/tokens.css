@@ -51,6 +51,22 @@
   --processing: #00786f;
   --destructive: #dc2626;
   --destructive-foreground: #ffffff;
+
+  /* Hover for FILLED surfaces. PROPOSED 2026-08-31, pending review.
+     --input-hover already covers control BORDERS; nothing covered a filled button,
+     so a Button had no token-safe hover at all.
+
+     --primary-hover darkens in BOTH themes, unlike --input-hover. The reason is that
+     --primary and --primary-foreground do not flip with the theme, so lightening the
+     fill in dark would drop the label from 5.14:1 to 3.60:1. Darkening raises it to
+     7.35:1 instead. The button keeps border-primary, so its edge against the dark page
+     stays at the validated 3.69:1 while the fill moves — the border carries the
+     boundary, the fill carries the state.
+
+     --destructive-hover DOES flip, because --destructive-foreground flips with it:
+     dark ink on light red, so the fill lightens to raise contrast. 6.47:1 / 7.16:1. */
+  --primary-hover: #005e57;
+  --destructive-hover: #b91c1c;
 }
 
 /* ---------------------------------------------------------------------------
@@ -88,6 +104,9 @@
   --processing: #2dd4bf;
   --destructive: #ef4444;
   --destructive-foreground: #0a0a0a;
+
+  /* --primary-hover is deliberately NOT redefined here. See the light block. */
+  --destructive-hover: #f87171; /* #0A0A0A on it: 7.16:1 */
 }
 
 /* ---------------------------------------------------------------------------
@@ -119,6 +138,8 @@
   --color-processing: var(--processing);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
+  --color-primary-hover: var(--primary-hover);
+  --color-destructive-hover: var(--destructive-hover);
 }
 
 @theme {

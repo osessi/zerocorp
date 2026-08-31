@@ -135,6 +135,27 @@ They share the token *architecture*, never the token *values*. See §15 and §16
 | `--info` | `#2563EB` | Neutral information, guidance |
 | `--processing` | `#00786F` | In progress, pending, running |
 
+#### Hover for filled surfaces — PROPOSED 2026-08-31
+
+| Token | Light | Dark | Use |
+|---|---|---|---|
+| `--primary-hover` | `#005E57` | *(same)* | Hover fill for a filled primary button |
+| `--destructive-hover` | `#B91C1C` | `#F87171` | Hover fill for a filled destructive button |
+
+Added while implementing `Button`, which had no token-safe hover at all: `--input-hover`
+covers control *borders*, and nothing covered a filled surface. They follow the rule
+`--input-hover` already established — **hover must strengthen, never weaken** — and are
+`PROPOSED` until reviewed.
+
+`--primary-hover` darkens in **both** themes, unlike `--input-hover`. `--primary` and
+`--primary-foreground` do not flip with the theme, so lightening the fill in dark drops
+the label from 5.14:1 to 3.60:1; darkening raises it to 7.35:1 in both. The button keeps
+`border-primary`, so its edge against the dark page stays at the validated 3.69:1 — the
+border carries the boundary, the fill carries the state.
+
+`--destructive-hover` *does* flip, because `--destructive-foreground` flips with it: dark
+ink on light red, so the fill lightens to raise contrast. 6.47:1 light, 7.16:1 dark.
+
 > **Note — `--muted` and `--accent` are the same value (`#F5F5F5`).** That is workable but
 > means the two roles are visually indistinguishable. If a hover state ever needs to read
 > against a muted surface, `--accent` must diverge. Recorded, not changed.
@@ -587,7 +608,42 @@ Rules:
 
 ## 17. Foundations and product components
 
-Nothing here is implemented yet. This is the required surface, not a registry.
+This is the required *surface*, not a registry and not a plan. The registry is §19.
+
+### Components are built when a screen needs them — DECIDED 2026-08-31
+
+The two lists below name **52 components**. Built breadth-first at the quality bar this
+system actually holds — accessibility, tests, a browser-measured visual review, a registry
+entry — that is roughly 43 more sessions ending in a complete component library and no
+product. §24.8 makes it worse: the twelve dashboard patterns are still `PROPOSED` and none
+may be built until approved, so the screens could not be assembled even then.
+
+So the order is reversed. **A component is implemented when a real screen requires it**,
+and it goes through the full pipeline when it is. This is the rule §19 already states —
+*"the registry grows one component at a time; it is never pre-populated to look
+complete"* — applied to the queue as well as to the registry.
+
+One exception, agreed the same day: six primitives that no screen of any kind can exist
+without are built up front.
+
+```text
+Tier 1 — no screen can exist without these
+  Button · IconButton    ✅ 2026-08-31
+  Spinner · Skeleton     the five required states need them
+  Toast                  §17 forbids a silent save
+  Alert                  inline and banner feedback
+  Dialog                 confirmation, and the shell every overlay reuses
+  Dropdown               row and toolbar actions
+
+Tier 2 — what the first real screen (Launch Your Business) asks for
+  DataTable · Tabs · ProgressStepper · FileUploader
+
+Tier 3 — the remaining 33+
+  Deferred, NOT rejected. ContentCalendar, WorkflowBuilder and LeadPipeline are whole
+  screens wearing a component's name; building them now would be guessing.
+```
+
+Nothing below is implemented unless §19 says so.
 
 ### Foundations
 
@@ -1045,6 +1101,54 @@ StatusBadge                    one status system for the whole product
    a tooltip or a row of its own. §5 is satisfied because the badge has no fixed width
    and no fixed height; the surfaces around it absorb the growth.
 
+Button                         the action control — five variants, three sizes
+→ packages/ui/src/button/Button.tsx  ·  a plain <button>, no wrapper library
+→ VALIDATED — implemented and visually reviewed 2026-08-31
+→ MIT · reviewed 2026-08-31
+   Base UI has no Button primitive and does not need one: there is no state machine
+   here, only a native element and a token contract.
+   A PROMINENCE LADDER, built from borders and type the way §1 says hierarchy is built:
+     primary    filled + bordered     one per screen, the thing to do
+     danger     filled + bordered     destructive, and it must look destructive
+     secondary  bordered, page fill   has an edge, does not compete
+     tertiary   no border, full ink   reads as a button on hover
+     ghost      no border, muted ink  recedes until hovered — toolbars, dense rows
+   type defaults to "button". A <button> in a <form> submits by default, which turns
+   every Cancel that forgot to say so into an accidental submit.
+   loading also disables — a submit that can fire twice is a defect — but LOADING AND
+   DISABLED MUST NOT LOOK THE SAME. The dimming and the cursor are applied by the
+   component, never as a `disabled:` variant, because loading would inherit it. See
+   §21.21.
+   The spinner takes the icon slot: a button that HAS an icon does not move at all, and
+   the label stays readable throughout.
+   tertiary does NOT use --primary as text — teal text measures 3.69:1 in dark. §24.15.
+   secondary fills with --background, not --secondary: --input is tuned against the page
+   colour and falls to 2.76:1 on #F4F4F5, failing WCAG 1.4.11.
+   Sizes sm 32 · md 40 · lg 48. md matches CONTROL_HEIGHT so a button sits flush beside
+   an Input. sm still clears the 24×24 target minimum of WCAG 2.5.8.
+
+IconButton                     square, glyph only, name required
+→ packages/ui/src/button/IconButton.tsx
+→ VALIDATED — implemented and visually reviewed 2026-08-31
+→ MIT · reviewed 2026-08-31
+   §17 lists `icon` as a Button VARIANT. Implemented as a separate component instead:
+   a control with no visible text must carry an accessible name, and `label` being a
+   required prop makes that a compile error rather than a review comment. A variant
+   string cannot require anything.
+   Defaults to ghost — an icon-only control lives in toolbars and dense rows.
+   Same three heights as Button, so the two sit flush together.
+
+button-styles.ts               the shared visual contract for both
+→ packages/ui/src/button/button-styles.ts
+→ VALIDATED — 2026-08-31
+   BUTTON_BASE · BUTTON_VARIANT · BUTTON_SIZE · BUTTON_INERT · BUTTON_BUSY
+   ICON_BUTTON_SIZE · ICON_PX
+   BUTTON_BASE carries NO `disabled:` utility. Both dimming and cursor live in
+   BUTTON_INERT / BUTTON_BUSY, applied by the component — a `disabled:` variant
+   out-specifies a bare utility and silently wins. §21.21.
+   It also does not use `transition-colors`: in Tailwind v4 that shorthand includes
+   outline-color, which animated the focus ring. §21.21.
+
 control-styles.ts              the shared visual contract
 → packages/ui/src/field/control-styles.ts
 → VALIDATED — extracted 2026-08-31 when Textarea arrived
@@ -1060,9 +1164,6 @@ Phosphor icons                 CircleNotch used for the loading state
 → Approved
 → MIT · reviewed 2026-08-31
 
-Button
-→ handled separately by the product owner — registry reference pending
-→ Approved
 ```
 
 **Considered and deferred, with the reason on record:**
@@ -1890,6 +1991,81 @@ exactly why they were not evidence of anything.
 
 ---
 
+### 21.21 Button — implementation review, 2026-08-31
+
+The first component built under the screen-driven rule agreed the same day: components
+are implemented when a screen needs them, not to complete a list. §17 names 52; this is
+one of the six that no screen can exist without.
+
+**Two tokens were added, both PROPOSED.** There was no token-safe hover for a filled
+surface — `--input-hover` covers borders only — so a Button had no hover at all. §4.1.
+
+**Three defects the visual review caught that 26 unit tests did not.**
+
+**1. `loading` and `disabled` were byte-identical, and the busy label read 1.76:1.**
+
+`disabled:opacity-60` sat in the base. `loading` also sets the disabled attribute — a
+submit that can fire twice is a defect — so it inherited the dimming. Measured in Chrome:
+
+| Variant | Busy label, before | After |
+|---|---|---|
+| primary | 1.76:1 | 5.14:1 |
+| danger | 1.86:1 | 4.83:1 |
+| ghost | 2.30:1 | 4.74:1 |
+
+WCAG 1.4.3 exempts an **inactive** component from contrast. A busy one is not inactive —
+it is working, the user is waiting on it, and "Submitting" is the text they most need to
+read. The state that matters most was the least legible thing on the screen.
+
+The fix is structural, not cosmetic: `BUTTON_BASE` now carries **no `disabled:` utility at
+all**. Dimming and cursor live in `BUTTON_INERT` and `BUTTON_BUSY` and are applied by the
+component. A `disabled:` variant carries a pseudo-class and out-specifies a bare utility,
+so any attempt to override it from the outside loses silently.
+
+**2. The busy cursor never rendered — and the test passed anyway.**
+
+The first fix set `cursor-progress` while `disabled:cursor-not-allowed` was still in the
+base. Specificity 0,2,0 beats 0,1,0, so Chrome reported `not-allowed`. The unit test
+asserted the class was **present**, which it was.
+
+> A test that asserts a class name proves the class is there. It proves nothing about
+> what the browser does with it.
+
+**3. The focus ring animated, and arrived in the wrong colour.**
+
+`transition-colors` includes `outline-color` in Tailwind v4. Measured on a primary button:
+`rgb(240,253,250)` — the label colour — at 0ms, half-teal at 75ms, `--ring` at 150ms.
+Always visible, so not a WCAG failure, but a focus indicator is the one signal a keyboard
+user navigates by, and it must not arrive late or in the wrong hue while someone tabs
+through a toolbar. `BUTTON_BASE` now names the transitioned properties explicitly.
+
+> 🔴 **`Input`, `Textarea`, `Select` and the choice controls all use `transition-colors`
+> and carry the identical defect.** Not changed: they are validated components and the
+> fix is a behaviour change, which needs an explicit decision. Recorded as §24.16.
+
+**What was measured, after the fixes** (light / dark):
+
+| Variant | Label on fill | Edge on page | Hover label | Busy label |
+|---|---|---|---|---|
+| primary | 5.14 / 5.14 | 5.36 / 3.69 | 7.35 / 7.35 | 5.14 / 5.14 |
+| danger | 4.83 / 5.26 | 4.83 / 5.26 | 6.47 / 7.16 | 4.83 / 5.26 |
+| secondary | 19.80 / 18.97 | 3.03 / 3.72 | edge 4.35 / 4.68 | 19.80 / 18.97 |
+| tertiary | 19.80 / 18.97 | ink only | 18.16 / 14.50 | 19.80 / 18.97 |
+| ghost | 4.74 / 7.85 | ink only | 18.16 / 14.50 | 4.74 / 7.85 |
+
+Focus ring `#00786F`, solid, 2px, 2px offset, on all 12 buttons at frame 0. At 375px:
+three heights only (32 / 40 / 48), no button wrapped, none below 24×24, no horizontal
+overflow. In greyscale `primary` and `danger` collapse to the same fill — which is why a
+destructive button always carries its own verb and its own icon, never red alone.
+
+**On `tertiary`.** It does not use `--primary` as text. `--primary` has no dark value, so
+teal text measures 3.69:1 on `#0A0A0A`: fine as a fill, fine as a border, below the 4.5:1
+floor as text. `--processing` already carries the lighter dark teal for exactly this
+reason, but borrowing a status token for an action would put two meanings on one colour.
+§24.15.
+
+---
+
 ## 24. Open items
 
 Resolved 2026-08-31: semantic status colours (§4.3), form control boundaries (§4.4, now `#949494` at 3.03:1),
@@ -1898,6 +2074,7 @@ the primitive layer (§2 — Base UI, now the shadcn/ui default), and the status
 
 Added 2026-08-31: the Dashboard Visual Language (§21). Adopting a structural reference
 raises seven questions a screenshot cannot answer — they are items 8 to 14 below.
+Items 15 to 17 were raised by the `Button` implementation review (§21.21).
 
 | # | Item | Blocks |
 |---|---|---|
@@ -1915,6 +2092,9 @@ raises seven questions a screenshot cannot answer — they are items 8 to 14 bel
 | 12 | **Table row height, column widths, hover and click target** (§21.8) | `DataTableLayout` |
 | 13 | **Drawer min/max width and motion** (§21.13) | `RightDrawer` |
 | 14 | **Overview and chart tokens** (§21.14) — series colours, axes, grid, empty and loading states | The Overview screen |
+| 15 | **`--primary` has no dark value** — teal TEXT measures 3.69:1 on `#0A0A0A`, below the 4.5:1 floor. Fine as a fill or a border. `--processing` already carries a lighter dark teal, but it is a status token | Any teal text or teal link in dark. `Button` tertiary works around it today |
+| 16 | **`transition-colors` animates the focus ring** — Tailwind v4 includes `outline-color`. Fixed in `Button`; `Input`, `Textarea`, `Select` and the choice controls still carry it. The fix is a behaviour change to validated components | Keyboard navigation across every form control |
+| 17 | **`--primary-hover` and `--destructive-hover`** (§4.1) — PROPOSED, added for `Button` | Any future filled surface with a hover state |
 
 ---
 

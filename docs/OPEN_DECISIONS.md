@@ -49,6 +49,26 @@ non-negotiables and the migration path are in the ADR. See also `ARCHITECTURE.md
 
 ---
 
+## D8 — Component build order ✅ RESOLVED 2026-08-31
+
+**Question.** `DESIGN_SYSTEM.md` §17 names 52 components. Are they built breadth-first, or
+on demand?
+
+**Decision.** On demand. A component is implemented when a real screen requires it, with
+the full pipeline each time (source → ZeroCorp adaptation → accessibility → tests →
+visual review → registry). One exception: six primitives no screen can exist without are
+built up front. `DESIGN_SYSTEM.md` §17 carries the tiers.
+
+**Why.** Breadth-first is ~43 more sessions ending in a component library and no product,
+and §24.8 blocks screen assembly regardless until the twelve dashboard patterns are
+approved. The design system was the only thing progressing while `packages/*` held 14
+single-file stubs and no business logic existed.
+
+**Consequence.** The remaining §17 components are **deferred, not rejected**, and are no
+longer treated as blocking. The quality bar does not move.
+
+---
+
 ## D2 — Company formation state machine: three different versions 🔴 BLOCKING
 
 | Source | States |
