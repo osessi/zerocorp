@@ -48,7 +48,7 @@ export default function DrawerScreen() {
               key={b.id}
               onClick={() => setOpenId(b.id)}
               className={cx(
-                "hover:bg-accent focus-visible:outline-ring flex w-full items-center gap-4 px-4 py-4 text-left transition-colors duration-fast focus-visible:outline-2 focus-visible:-outline-offset-2",
+                "hover:bg-accent focus-visible:outline-ring flex w-full items-center gap-4 px-4 py-4 text-left transition-[color,background-color,border-color] duration-fast focus-visible:outline-2 focus-visible:-outline-offset-2",
                 i > 0 && "border-border border-t",
                 openId === b.id && "bg-accent",
               )}
@@ -85,7 +85,7 @@ export default function DrawerScreen() {
             className="border-border bg-background fixed inset-y-0 right-0 z-50 flex w-full flex-col border-l sm:w-[70%] lg:w-[40%]"
           >
             <header className="border-border flex shrink-0 items-center gap-3 border-b px-6 py-4">
-              <button onClick={() => setOpenId(null)} aria-label="Close" className="hover:bg-accent focus-visible:outline-ring flex size-9 items-center justify-center transition-colors duration-normal focus-visible:outline-2 focus-visible:-outline-offset-2">
+              <button onClick={() => setOpenId(null)} aria-label="Close" className="hover:bg-accent focus-visible:outline-ring flex size-9 items-center justify-center transition-[color,background-color,border-color] duration-normal focus-visible:outline-2 focus-visible:-outline-offset-2">
                 <XIcon size={20} />
               </button>
               <h2 className="text-h4 flex-1">Business detail</h2>
@@ -103,7 +103,7 @@ export default function DrawerScreen() {
                 </div>
                 <span className="flex shrink-0 items-center gap-1">
                   {[ChatCircleIcon, EnvelopeSimpleIcon, PhoneIcon, DotsThreeIcon].map((Icon, i) => (
-                    <button key={i} aria-label={`Action ${i + 1}`} className="border-input hover:border-input-hover focus-visible:outline-ring flex size-9 items-center justify-center border transition-colors duration-normal focus-visible:outline-2 focus-visible:outline-offset-2">
+                    <button key={i} aria-label={`Action ${i + 1}`} className="border-input hover:border-input-hover focus-visible:outline-ring flex size-9 items-center justify-center border transition-[color,background-color,border-color] duration-normal focus-visible:outline-2 focus-visible:outline-offset-2">
                       <Icon size={16} />
                     </button>
                   ))}

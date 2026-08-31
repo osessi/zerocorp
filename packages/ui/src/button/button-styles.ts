@@ -6,6 +6,7 @@
  *
  * Every value here is a token. docs/DESIGN_SYSTEM.md §17.
  */
+import { COLOR_TRANSITION } from "../motion";
 
 /**
  * Five variants, a prominence ladder built the way §1 says hierarchy is built —
@@ -37,12 +38,7 @@ export type ButtonSize = "sm" | "md" | "lg";
 export const BUTTON_BASE = [
   "inline-flex shrink-0 items-center justify-center",
   "rounded-none border whitespace-nowrap select-none",
-  // NOT `transition-colors`. In Tailwind v4 that shorthand includes outline-color, so
-  // the focus ring faded in over 150ms: measured in Chrome, at 0ms the outline still
-  // carried the LABEL colour and only reached --ring at ~150ms. A focus indicator is the
-  // one signal a keyboard user navigates by; it must not arrive late or in the wrong
-  // hue while someone tabs through a toolbar. Colour still transitions on hover.
-  "transition-[color,background-color,border-color] duration-normal ease-out",
+  COLOR_TRANSITION,
   "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
   // No disabled: styling here at all. `disabled` and `loading` both set the disabled
   // attribute and must NOT look the same, so both the dimming and the cursor are applied

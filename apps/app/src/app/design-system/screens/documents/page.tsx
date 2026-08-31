@@ -61,7 +61,7 @@ export default function DocumentsScreen() {
             {/* Segmented scope control */}
             <div className="border-input flex h-9 shrink-0 items-center border">
               {[{ id: "all", label: "All documents" }, { id: "milestones", label: "Portal milestones" }].map((s, i) => (
-                <button key={s.id} onClick={() => setScope(s.id)} className={cx("text-label focus-visible:outline-ring h-full px-3 transition-colors duration-normal focus-visible:outline-2 focus-visible:-outline-offset-2", i > 0 && "border-input border-l", scope === s.id ? "bg-accent text-foreground" : "text-muted-foreground hover:text-foreground")}>
+                <button key={s.id} onClick={() => setScope(s.id)} className={cx("text-label focus-visible:outline-ring h-full px-3 transition-[color,background-color,border-color] duration-normal focus-visible:outline-2 focus-visible:-outline-offset-2", i > 0 && "border-input border-l", scope === s.id ? "bg-accent text-foreground" : "text-muted-foreground hover:text-foreground")}>
                   {s.label}
                 </button>
               ))}
@@ -89,13 +89,13 @@ export default function DocumentsScreen() {
                   {d.state === "accepted" ? "Accepted" : d.state === "pending" ? "In review" : "Owed"}
                 </StatusBadge>
                 <span className="flex shrink-0 items-center gap-1">
-                  <button aria-label={`Accept ${d.title}`} disabled={d.state === "owed"} className="hover:bg-accent focus-visible:outline-ring flex size-9 items-center justify-center transition-colors duration-normal focus-visible:outline-2 focus-visible:-outline-offset-2 disabled:cursor-not-allowed disabled:opacity-40">
+                  <button aria-label={`Accept ${d.title}`} disabled={d.state === "owed"} className="hover:bg-accent focus-visible:outline-ring flex size-9 items-center justify-center transition-[color,background-color,border-color] duration-normal focus-visible:outline-2 focus-visible:-outline-offset-2 disabled:cursor-not-allowed disabled:opacity-40">
                     <CheckCircleIcon size={20} />
                   </button>
-                  <button aria-label={`Reject ${d.title}`} disabled={d.state === "owed"} className="hover:bg-accent focus-visible:outline-ring flex size-9 items-center justify-center transition-colors duration-normal focus-visible:outline-2 focus-visible:-outline-offset-2 disabled:cursor-not-allowed disabled:opacity-40">
+                  <button aria-label={`Reject ${d.title}`} disabled={d.state === "owed"} className="hover:bg-accent focus-visible:outline-ring flex size-9 items-center justify-center transition-[color,background-color,border-color] duration-normal focus-visible:outline-2 focus-visible:-outline-offset-2 disabled:cursor-not-allowed disabled:opacity-40">
                     <XCircleIcon size={20} />
                   </button>
-                  <button aria-label={`More actions for ${d.title}`} className="hover:bg-accent focus-visible:outline-ring flex size-9 items-center justify-center transition-colors duration-normal focus-visible:outline-2 focus-visible:-outline-offset-2">
+                  <button aria-label={`More actions for ${d.title}`} className="hover:bg-accent focus-visible:outline-ring flex size-9 items-center justify-center transition-[color,background-color,border-color] duration-normal focus-visible:outline-2 focus-visible:-outline-offset-2">
                     <DotsThreeVerticalIcon size={20} />
                   </button>
                 </span>

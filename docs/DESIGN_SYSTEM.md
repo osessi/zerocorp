@@ -1149,6 +1149,14 @@ button-styles.ts               the shared visual contract for both
    It also does not use `transition-colors`: in Tailwind v4 that shorthand includes
    outline-color, which animated the focus ring. §21.21.
 
+motion.ts                      COLOR_TRANSITION — the one colour transition
+→ packages/ui/src/motion.ts
+→ VALIDATED — 2026-08-31
+   Never Tailwind's `transition-colors`: in v4 that shorthand includes outline-color,
+   so the focus ring animated and arrived carrying the label colour. Composed by
+   CONTROL_BASE, CHOICE_BOX, SWITCH_TRACK and BUTTON_BASE, so the string exists once.
+   Enforced by tests/architecture/design-tokens.test.ts.
+
 control-styles.ts              the shared visual contract
 → packages/ui/src/field/control-styles.ts
 → VALIDATED — extracted 2026-08-31 when Textarea arrived
@@ -2039,9 +2047,28 @@ Always visible, so not a WCAG failure, but a focus indicator is the one signal a
 user navigates by, and it must not arrive late or in the wrong hue while someone tabs
 through a toolbar. `BUTTON_BASE` now names the transitioned properties explicitly.
 
-> 🔴 **`Input`, `Textarea`, `Select` and the choice controls all use `transition-colors`
-> and carry the identical defect.** Not changed: they are validated components and the
-> fix is a behaviour change, which needs an explicit decision. Recorded as §24.16.
+**Extended to every control, same day, on explicit approval.** `Input`, `Textarea`,
+`Select` and the three choice controls carried the identical defect. The fix is now a
+single shared constant, `COLOR_TRANSITION` in `packages/ui/src/motion.ts`, composed by
+`CONTROL_BASE`, `CHOICE_BOX`, `SWITCH_TRACK` and `BUTTON_BASE` — the string is written
+once, so it cannot drift back in one fragment at a time.
+
+A CI rule now forbids `transition-colors` anywhere in `packages/ui`, `packages/site-renderer`
+or `apps/*`. It fired immediately on 26 further occurrences across the review pages and
+the dashboard prototype, all fixed.
+
+> Naming the properties explicitly does more than fix the ring: it documents what is
+> allowed to animate at all. Anything that moves or recolours the focus indicator is not.
+
+Verified in Chrome, light and dark, on `[role=checkbox]`, `[role=radio]`, `[role=switch]`,
+`[role=combobox]`, `textarea`, `input` and `button`: `#00786F`, solid, 2px, 2px offset,
+resolved on the first style recalculation after focus. A real keyboard Tab walk confirms
+the same end to end.
+
+> A note on measuring this. Reading `getComputedStyle` inside a `focusin` handler reports
+> the ring as absent: `:focus-visible` is resolved at the next style recalculation, not
+> inside the event. Two `requestAnimationFrame`s give the true value. The first
+> measurement said the checkbox and switch had no ring at all; they did.
 
 **What was measured, after the fixes** (light / dark):
 
@@ -2074,7 +2101,9 @@ the primitive layer (§2 — Base UI, now the shadcn/ui default), and the status
 
 Added 2026-08-31: the Dashboard Visual Language (§21). Adopting a structural reference
 raises seven questions a screenshot cannot answer — they are items 8 to 14 below.
-Items 15 to 17 were raised by the `Button` implementation review (§21.21).
+Items 15 and 16 were raised by the `Button` implementation review (§21.21).
+Also resolved 2026-08-31: the animated focus ring — `COLOR_TRANSITION` replaced
+`transition-colors` in every control and a CI rule now forbids it (§21.21).
 
 | # | Item | Blocks |
 |---|---|---|
@@ -2093,8 +2122,7 @@ Items 15 to 17 were raised by the `Button` implementation review (§21.21).
 | 13 | **Drawer min/max width and motion** (§21.13) | `RightDrawer` |
 | 14 | **Overview and chart tokens** (§21.14) — series colours, axes, grid, empty and loading states | The Overview screen |
 | 15 | **`--primary` has no dark value** — teal TEXT measures 3.69:1 on `#0A0A0A`, below the 4.5:1 floor. Fine as a fill or a border. `--processing` already carries a lighter dark teal, but it is a status token | Any teal text or teal link in dark. `Button` tertiary works around it today |
-| 16 | **`transition-colors` animates the focus ring** — Tailwind v4 includes `outline-color`. Fixed in `Button`; `Input`, `Textarea`, `Select` and the choice controls still carry it. The fix is a behaviour change to validated components | Keyboard navigation across every form control |
-| 17 | **`--primary-hover` and `--destructive-hover`** (§4.1) — PROPOSED, added for `Button` | Any future filled surface with a hover state |
+| 16 | **`--primary-hover` and `--destructive-hover`** (§4.1) — PROPOSED, deliberately not validated yet | Any future filled surface with a hover state |
 
 ---
 

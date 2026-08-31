@@ -143,7 +143,7 @@ export default function ButtonReviewPage() {
         >
           <div className="border-border flex flex-wrap items-center gap-2 border p-4">
             <input
-              className="border-input hover:border-input-hover text-body sm:text-body-sm bg-background text-foreground placeholder:text-muted-foreground focus-visible:outline-ring h-10 flex-1 border px-3 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2"
+              className="border-input hover:border-input-hover text-body sm:text-body-sm bg-background text-foreground placeholder:text-muted-foreground focus-visible:outline-ring h-10 flex-1 border px-3 transition-[color,background-color,border-color] focus-visible:outline-2 focus-visible:outline-offset-2"
               placeholder="northwind-studio.com"
               aria-label="Domain"
             />

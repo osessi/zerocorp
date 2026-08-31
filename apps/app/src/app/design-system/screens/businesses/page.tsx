@@ -50,13 +50,13 @@ export default function BusinessesScreen() {
       <div className="flex flex-col gap-0 p-8 pt-6">
         {/* Toolbar — §21.8 */}
         <div className="flex flex-wrap items-center gap-3 pb-4">
-          <label className="border-input hover:border-input-hover focus-within:outline-ring flex h-9 min-w-0 flex-1 items-center gap-2 border px-3 transition-colors duration-normal focus-within:outline-2 focus-within:outline-offset-2">
+          <label className="border-input hover:border-input-hover focus-within:outline-ring flex h-9 min-w-0 flex-1 items-center gap-2 border px-3 transition-[color,background-color,border-color] duration-normal focus-within:outline-2 focus-within:outline-offset-2">
             <MagnifyingGlassIcon size={16} className="text-muted-foreground shrink-0" />
             <input className="text-body-sm placeholder:text-muted-foreground w-full bg-transparent focus:outline-hidden" placeholder="Search businesses…" aria-label="Search businesses" />
           </label>
           <div className="border-input flex h-9 shrink-0 items-center border">
             {[RowsIcon, TableIcon, CalendarBlankIcon].map((Icon, i) => (
-              <button key={i} aria-label={`View ${i + 1}`} className={cx("focus-visible:outline-ring flex size-9 items-center justify-center transition-colors duration-normal focus-visible:outline-2 focus-visible:-outline-offset-2", i === 1 ? "bg-accent" : "hover:bg-accent", i > 0 && "border-input border-l")}>
+              <button key={i} aria-label={`View ${i + 1}`} className={cx("focus-visible:outline-ring flex size-9 items-center justify-center transition-[color,background-color,border-color] duration-normal focus-visible:outline-2 focus-visible:-outline-offset-2", i === 1 ? "bg-accent" : "hover:bg-accent", i > 0 && "border-input border-l")}>
                 <Icon size={16} />
               </button>
             ))}
@@ -78,7 +78,7 @@ export default function BusinessesScreen() {
             </thead>
             <tbody>
               {BUSINESSES.map((b, i) => (
-                <tr key={b.id} className={cx("hover:bg-accent transition-colors duration-fast", i > 0 && "border-border border-t")}>
+                <tr key={b.id} className={cx("hover:bg-accent transition-[color,background-color,border-color] duration-fast", i > 0 && "border-border border-t")}>
                   <td className="px-4 py-4"><input type="checkbox" aria-label={`Select ${b.name}`} checked={selected.includes(b.id)} onChange={() => setSelected((s) => s.includes(b.id) ? s.filter((x) => x !== b.id) : [...s, b.id])} className="accent-primary size-4" /></td>
                   <td className="px-4 py-4">
                     <span className="flex items-center gap-3">
@@ -108,7 +108,7 @@ export default function BusinessesScreen() {
         <div className="flex items-center justify-center gap-2 pt-6">
           <Button><CaretLeftIcon size={14} /> Previous</Button>
           {["1", "2", "…", "5"].map((p, i) => (
-            <button key={i} className={cx("text-label focus-visible:outline-ring size-9 transition-colors duration-normal focus-visible:outline-2 focus-visible:outline-offset-2", p === "1" ? "bg-foreground text-background" : "hover:bg-accent text-muted-foreground")}>{p}</button>
+            <button key={i} className={cx("text-label focus-visible:outline-ring size-9 transition-[color,background-color,border-color] duration-normal focus-visible:outline-2 focus-visible:outline-offset-2", p === "1" ? "bg-foreground text-background" : "hover:bg-accent text-muted-foreground")}>{p}</button>
           ))}
           <Button>Next <CaretRightIcon size={14} /></Button>
         </div>

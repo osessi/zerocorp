@@ -8,6 +8,7 @@
  *
  * Every value here is a token. docs/DESIGN_SYSTEM.md §17.
  */
+import { COLOR_TRANSITION } from "../motion";
 
 /**
  * Shared by every control.
@@ -26,7 +27,7 @@ export const CONTROL_BASE = [
   "rounded-none border bg-background",
   "text-body sm:text-body-sm text-foreground",
   "placeholder:text-muted-foreground",
-  "transition-colors duration-normal ease-out",
+  COLOR_TRANSITION,
 ].join(" ");
 
 /**
@@ -89,7 +90,7 @@ export const CHOICE_BOX = [
   // The Switch already used --muted for its off track and never had the problem, so
   // this also makes all three choice controls agree. Reported in review 2026-08-31.
   "border bg-muted",
-  "transition-colors duration-normal ease-out",
+  COLOR_TRANSITION,
 ].join(" ");
 
 /** Checked: filled with the accent. Teal marks the chosen state. */
@@ -114,7 +115,7 @@ export const CHOICE_CIRCLE = "rounded-full";
 export const SWITCH_TRACK = [
   "relative inline-flex h-5 w-14 shrink-0 items-center",
   "border bg-muted",
-  "transition-colors duration-normal ease-out",
+  COLOR_TRANSITION,
   "data-checked:bg-primary data-checked:border-primary",
 ].join(" ");
 

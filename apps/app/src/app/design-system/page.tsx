@@ -347,7 +347,7 @@ export default function DesignSystemPage() {
             <button
               type="button"
               onClick={() => setDark((d) => !d)}
-              className="border-input hover:border-input-hover text-label focus-visible:outline-ring h-10 border px-4 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2"
+              className="border-input hover:border-input-hover text-label focus-visible:outline-ring h-10 border px-4 transition-[color,background-color,border-color] focus-visible:outline-2 focus-visible:outline-offset-2"
             >
               {dark ? "Light" : "Dark"}
             </button>

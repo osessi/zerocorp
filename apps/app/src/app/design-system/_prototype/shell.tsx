@@ -60,7 +60,7 @@ function SidebarNavigation({ collapsed }: { collapsed: boolean }) {
                 <Link
                   href={item.href!}
                   className={cx(
-                    "text-label flex h-9 items-center gap-3 px-3 transition-colors duration-normal ease-out",
+                    "text-label flex h-9 items-center gap-3 px-3 transition-[color,background-color,border-color] duration-normal ease-out",
                     "focus-visible:outline-ring focus-visible:outline-2 focus-visible:-outline-offset-2",
                     active ? "bg-accent text-foreground" : "text-muted-foreground hover:text-foreground",
                     collapsed && "justify-center px-0",
@@ -79,7 +79,7 @@ function SidebarNavigation({ collapsed }: { collapsed: boolean }) {
                 type="button"
                 onClick={() => setOpen((o) => (isOpen ? o.filter((x) => x !== item.label) : [...o, item.label]))}
                 className={cx(
-                  "text-label flex h-9 w-full items-center gap-3 px-3 transition-colors duration-normal ease-out",
+                  "text-label flex h-9 w-full items-center gap-3 px-3 transition-[color,background-color,border-color] duration-normal ease-out",
                   "focus-visible:outline-ring focus-visible:outline-2 focus-visible:-outline-offset-2",
                   childActive ? "bg-accent text-foreground" : "text-muted-foreground hover:text-foreground",
                   collapsed && "justify-center px-0",
@@ -104,7 +104,7 @@ function SidebarNavigation({ collapsed }: { collapsed: boolean }) {
                         <Link
                           href={c.href}
                           className={cx(
-                            "text-label flex h-9 items-center pl-12 transition-colors duration-normal ease-out",
+                            "text-label flex h-9 items-center pl-12 transition-[color,background-color,border-color] duration-normal ease-out",
                             "focus-visible:outline-ring focus-visible:outline-2 focus-visible:-outline-offset-2",
                             active ? "bg-accent text-foreground" : "text-muted-foreground hover:text-foreground",
                           )}
@@ -160,7 +160,7 @@ function TopCommandBar() {
   return (
     <header className="border-border flex h-16 shrink-0 items-center gap-4 border-b px-6">
       {/* Command palette, not a filter — the placeholder names both behaviours. */}
-      <label className="border-input hover:border-input-hover focus-within:outline-ring flex h-9 w-full max-w-md items-center gap-2 border px-3 transition-colors duration-normal ease-out focus-within:outline-2 focus-within:outline-offset-2">
+      <label className="border-input hover:border-input-hover focus-within:outline-ring flex h-9 w-full max-w-md items-center gap-2 border px-3 transition-[color,background-color,border-color] duration-normal ease-out focus-within:outline-2 focus-within:outline-offset-2">
         <MagnifyingGlassIcon size={16} className="text-muted-foreground shrink-0" />
         <input
           className="text-body-sm placeholder:text-muted-foreground w-full bg-transparent focus:outline-hidden"
@@ -170,19 +170,19 @@ function TopCommandBar() {
       </label>
 
       <div className="ml-auto flex items-center gap-1">
-        <button className="hover:bg-accent focus-visible:outline-ring relative flex size-9 items-center justify-center transition-colors duration-normal focus-visible:outline-2 focus-visible:-outline-offset-2" aria-label="Quick actions">
+        <button className="hover:bg-accent focus-visible:outline-ring relative flex size-9 items-center justify-center transition-[color,background-color,border-color] duration-normal focus-visible:outline-2 focus-visible:-outline-offset-2" aria-label="Quick actions">
           <LightningIcon size={20} />
           {/* A dot is a state indicator, never a count — §21.4 */}
           <span className="bg-primary absolute top-2 right-2 size-1.5" aria-hidden="true" />
         </button>
-        <button className="hover:bg-accent focus-visible:outline-ring flex size-9 items-center justify-center transition-colors duration-normal focus-visible:outline-2 focus-visible:-outline-offset-2" aria-label="Add business">
+        <button className="hover:bg-accent focus-visible:outline-ring flex size-9 items-center justify-center transition-[color,background-color,border-color] duration-normal focus-visible:outline-2 focus-visible:-outline-offset-2" aria-label="Add business">
           <UserPlusIcon size={20} />
         </button>
-        <button className="hover:bg-accent focus-visible:outline-ring flex size-9 items-center justify-center transition-colors duration-normal focus-visible:outline-2 focus-visible:-outline-offset-2" aria-label="Notifications">
+        <button className="hover:bg-accent focus-visible:outline-ring flex size-9 items-center justify-center transition-[color,background-color,border-color] duration-normal focus-visible:outline-2 focus-visible:-outline-offset-2" aria-label="Notifications">
           <BellIcon size={20} />
         </button>
         <span className="bg-border mx-2 h-6 w-px" aria-hidden="true" />
-        <button className="hover:bg-accent focus-visible:outline-ring flex items-center gap-2 py-1 pr-2 pl-1 transition-colors duration-normal focus-visible:outline-2 focus-visible:-outline-offset-2" aria-label="Account">
+        <button className="hover:bg-accent focus-visible:outline-ring flex items-center gap-2 py-1 pr-2 pl-1 transition-[color,background-color,border-color] duration-normal focus-visible:outline-2 focus-visible:-outline-offset-2" aria-label="Account">
           <Avatar initials="OK" size="sm" />
           <CaretDownIcon size={14} className="text-muted-foreground" />
         </button>
@@ -213,7 +213,7 @@ export function DashboardShell({ children, dark, onToggleTheme }: { children: Re
           type="button"
           onClick={() => setCollapsed((c) => !c)}
           aria-label={collapsed ? "Expand navigation" : "Collapse navigation"}
-          className="border-border bg-background hover:border-input-hover focus-visible:outline-ring absolute top-20 -right-3 flex size-6 items-center justify-center border transition-colors duration-normal focus-visible:outline-2 focus-visible:outline-offset-2"
+          className="border-border bg-background hover:border-input-hover focus-visible:outline-ring absolute top-20 -right-3 flex size-6 items-center justify-center border transition-[color,background-color,border-color] duration-normal focus-visible:outline-2 focus-visible:outline-offset-2"
         >
           <CaretLeftIcon size={12} className={cx("transition-transform duration-emphasis", collapsed && "rotate-180")} />
         </button>

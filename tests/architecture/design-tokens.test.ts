@@ -97,6 +97,20 @@ describe("design tokens — no arbitrary visual values", () => {
     expect(offenders).toEqual([]);
   });
 
+  it("never uses transition-colors, which animates the focus ring", () => {
+    // Found by visual review on 2026-08-31: Tailwind v4 includes outline-color in the
+    // `transition-colors` shorthand, so a focused control carried its LABEL colour at
+    // 0ms and only reached --ring at ~150ms. Always visible, so not a WCAG failure, but
+    // a focus indicator is the one signal a keyboard user navigates by.
+    //
+    // packages/ui/src/motion.ts exports COLOR_TRANSITION, which names the properties.
+    const offenders: string[] = [];
+    for (const file of UI_SOURCES) {
+      if (/\btransition-colors\b/.test(code(file))) offenders.push(relative(ROOT, file));
+    }
+    expect(offenders).toEqual([]);
+  });
+
   it("sets no inline pixel style", () => {
     const offenders: string[] = [];
     for (const file of UI_SOURCES) {

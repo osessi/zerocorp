@@ -101,7 +101,7 @@ export function Button({
       {...props}
       className={cx(
         "text-label inline-flex h-9 shrink-0 items-center gap-2 border px-3",
-        "transition-colors duration-normal ease-out",
+        "transition-[color,background-color,border-color] duration-normal ease-out",
         "focus-visible:outline-ring focus-visible:outline-2 focus-visible:outline-offset-2",
         "disabled:cursor-not-allowed disabled:opacity-60",
         tone,
@@ -201,7 +201,7 @@ export function Tabs({
             onClick={() => onSelect(t.id)}
             className={cx(
               "text-label -mb-px flex shrink-0 items-center gap-2 border-b-2 py-3",
-              "transition-colors duration-normal ease-out",
+              "transition-[color,background-color,border-color] duration-normal ease-out",
               "focus-visible:outline-ring focus-visible:outline-2 focus-visible:outline-offset-2",
               on ? "border-foreground text-foreground" : "text-muted-foreground border-transparent",
             )}
