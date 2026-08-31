@@ -1698,6 +1698,11 @@ integrations
 
 Stateful business processes should use explicit states.
 
+> **The formation state machines are now decided.** They live in
+> `packages/contracts/src/formation.ts` and are documented in `DATABASE.md` §5 (D2,
+> 2026-08-31). The list below was always labelled an *example*; it is kept as the
+> illustration it was and must not be implemented.
+
 Example formation:
 
 ```text

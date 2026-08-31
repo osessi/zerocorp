@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ArrowRightIcon, BuildingsIcon, CurrencyDollarIcon, FileTextIcon, StackIcon } from "@phosphor-icons/react/dist/ssr";
 import { PageHeader } from "../../_prototype/shell";
 import { ActivityPanel, Button, MetricGrid, SectionHeader, StatusBadge, Avatar } from "../../_prototype/primitives";
+import { FORMATION_ORDER_TERMINAL } from "@zerocorp/contracts";
 import { ACTIVITY, BUSINESSES, FORMATION_LABEL, FORMATION_TONE, money } from "../../_prototype/data";
 
 /**
@@ -17,7 +18,10 @@ import { ACTIVITY, BUSINESSES, FORMATION_LABEL, FORMATION_TONE, money } from "..
  */
 export default function OverviewScreen() {
   const mrr = BUSINESSES.reduce((s, b) => s + b.mrrCents, 0);
-  const inFlight = BUSINESSES.filter((b) => !["complete", "ein_issued"].includes(b.formation));
+  // "In flight" is "not in a terminal state", read from the contract rather than from a
+  // hand-written list. The list here named `complete` and `ein_issued`, two states D2
+  // retired — the count would have been silently wrong.
+  const inFlight = BUSINESSES.filter((b) => !FORMATION_ORDER_TERMINAL.includes(b.formation));
 
   return (
     <>

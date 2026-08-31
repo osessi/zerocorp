@@ -129,6 +129,59 @@ describe("design tokens — no arbitrary visual values", () => {
   });
 });
 
+describe("formation states — one source of truth", () => {
+  /**
+   * D2, 2026-08-31. The repository carried three different formation state lists for
+   * months, and a fourth was hiding in a dashboard prototype that quietly contradicted
+   * the decision the moment it was made.
+   *
+   * `packages/contracts/src/formation.ts` owns these strings. Nothing else may spell out
+   * a state that no longer exists.
+   */
+  const RETIRED = [
+    "documents_collected",
+    "kyc_passed",
+    "kyc_or_identity_check",
+    "ready_to_submit",
+    "ein_pending",
+    "ein_issued",
+    "verification_complete",
+  ];
+
+  it("names no retired formation state anywhere in the source", () => {
+    const sources = [
+      ...sourceFiles("packages"),
+      ...sourceFiles("apps"),
+      ...sourceFiles("tests"),
+    ].filter(
+      (f) =>
+        // Three files legitimately name the retired states: the contract's own docblock
+        // explaining why they went, its test, and this rule's own list.
+        !f.includes("formation.test.ts") &&
+        !f.includes("contracts/src/formation.ts") &&
+        !f.includes("design-tokens.test.ts"),
+    );
+    const offenders: string[] = [];
+    for (const file of sources) {
+      const hits = RETIRED.filter((r) => new RegExp(`["'\`]${r}["'\`]`).test(code(file)));
+      if (hits.length) offenders.push(`${relative(ROOT, file)} → ${hits.join(", ")}`);
+    }
+    expect(offenders).toEqual([]);
+  });
+
+  it("declares the state unions only in contracts", () => {
+    // A second declaration is a second machine, and it will drift.
+    const sources = [...sourceFiles("packages"), ...sourceFiles("apps")].filter(
+      (f) => !f.startsWith("packages/contracts"),
+    );
+    const offenders: string[] = [];
+    for (const file of sources) {
+      if (/["'`]collecting_documents["'`]\s*\|/.test(code(file))) offenders.push(relative(ROOT, file));
+    }
+    expect(offenders).toEqual([]);
+  });
+});
+
 describe("design tokens — the two systems stay separate", () => {
   it("site-renderer never imports the ZeroCorp product component library", () => {
     // DESIGN_SYSTEM.md §15/§16: a customer website theme must never alter the ZeroCorp

@@ -159,6 +159,73 @@ This can eventually improve AI truth control.
 
 ## 5. Company Formation
 
+### State machines — RESOLVED 2026-08-31 (D2)
+
+> **`packages/contracts/src/formation.ts` is the source of truth for these enums and for
+> the transitions between them.** This section documents the model; it does not define it.
+> Every other document references this one rather than restating the states — three
+> restatements is exactly how the repository ended up with three different lists.
+
+**Two machines, not one.** The nine-state list this repository kept re-deriving was a
+single list trying to be two: `draft → … → formed` describes the ORDER, while
+`ein_issued → complete` describes the COMPANY. Nobody could settle it because it had no
+single subject.
+
+#### `formation_orders.status` — the filing job
+
+```text
+draft
+→ collecting_documents
+→ verifying_identity
+→ operator_review
+→ ready_to_file
+→ filed
+→ formed          (terminal)
+
+filed → rejected → collecting_documents      rejected is REPARABLE, not terminal
+* → cancelled     (terminal)                 until filed; after that the outcome is the state's
+```
+
+`rejected` exists because a state rejecting a filing is ordinary — a PO box given as the
+registered agent address, a name already taken. **None of the three earlier lists had this
+state**, so a rejection had nowhere to go.
+
+`operator_review` exists because `PRODUCT_SPEC.md` §21 says V1 is a manually assisted
+operator workflow. It is where the work happens in V1, and it was dropped when the list
+was shortened.
+
+**No EIN state appears here.** See below.
+
+#### `companies.status` — the legal entity
+
+```text
+pending → active → delinquent → dissolved (terminal)
+delinquent → active                        reinstatement is real
+```
+
+A different question from "how is the filing going", and it outlives the order by years.
+`delinquent` is a US concept, not a soft warning: miss an annual report and the state
+marks the entity delinquent, then administratively dissolves it.
+
+The two enums share **no state name**, so a value can never be read against the wrong
+machine. A test asserts it.
+
+#### `ein_status` — its own track
+
+```text
+not_started → requested → issued (terminal)
+requested → rejected → requested            reparable, like a state rejection
+```
+
+Separate because it is a separate filing, with a separate authority, on a separate clock,
+that fails separately. The EIN is an **IRS** filing, not a state filing, and usually lands
+two to six weeks after formation. Keeping it inside `formation_orders.status` would hold
+the order open for weeks after the company legally exists — the company is active, the
+filing job is done.
+
+`not_started` is a real state, not a null: "we have not asked yet" and "we asked and are
+waiting" are different things to show a founder.
+
 ### `companies`
 
 ```text
@@ -167,8 +234,11 @@ tenant_id
 legal_name
 entity_type
 state
-status
+status                    CompanyStatus — see above
 ein
+ein_status                EinStatus — see above
+ein_requested_at
+ein_issued_at
 formation_date
 registered_agent_until
 provider
@@ -184,7 +254,8 @@ id
 company_id
 provider
 provider_ref
-status
+status                    FormationOrderStatus — see above
+rejection_reason          set when status is `rejected`, cleared on the next attempt
 cost_cents
 price_cents
 currency

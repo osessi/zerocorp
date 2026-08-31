@@ -2,6 +2,7 @@
 
 import { Tabs } from "@base-ui/react/tabs";
 import { CaretRightIcon, CaretLeftIcon, HouseIcon } from "@phosphor-icons/react/dist/ssr";
+import type { FormationOrderStatus } from "@zerocorp/contracts";
 import { Button, IconButton, StatusBadge } from "@zerocorp/ui";
 import { Demo, cx } from "./shell";
 
@@ -155,67 +156,121 @@ export function PaginationDemo() {
 /* ── Progress and Stepper ─────────────────────────────────────────────────── */
 
 /**
- * ProgressStepper — §17 names the states: completed · current · locked · optional ·
- * failed · in-progress. Its primary use is Launch Your Business.
+ * ProgressStepper — Launch Your Business.
  *
- * Every step carries an icon of a DIFFERENT SHAPE and a text status, so the state is
- * never read from the dot colour alone. Same reasoning as StatusBadge.
+ * The steps are DERIVED from `formation_orders.status`, not written out beside it. This
+ * screen is that state machine rendered, and a hand-kept parallel list is how the
+ * repository ended up with three of them (D2).
+ *
+ * `cancelled` and `rejected` are not steps. A stepper shows a path forward; `rejected`
+ * is a detour the founder must clear and is surfaced as an Alert on the step that caused
+ * it, and `cancelled` ends the journey rather than advancing it.
+ *
+ * **The EIN is not a step either** — that is the whole point of D2. It is an IRS filing
+ * on its own clock, and putting it in this line would make the founder think the company
+ * is not finished when it legally is. It sits beside the stepper as its own track.
  */
-const STEPS = [
-  { label: "Business details", state: "completed", note: "Completed 2 Mar" },
-  { label: "Identity check", state: "completed", note: "Verified" },
-  { label: "State filing", state: "current", note: "Submitted to Wyoming" },
-  { label: "EIN", state: "locked", note: "Unlocks after filing" },
-  { label: "Bank account", state: "optional", note: "Optional" },
-] as const;
+/*
+  `satisfies`, not a type annotation. It proves every entry is a real contract state while
+  keeping the narrow literal union — so the label and note maps below are checked against
+  the seven STEPS, not against all nine statuses. Annotating it FormationOrderStatus[]
+  demanded labels for `rejected` and `cancelled`, which is the compiler correctly refusing
+  to let a stepper pretend a detour is a step.
+*/
+const STEP_ORDER = [
+  "draft",
+  "collecting_documents",
+  "verifying_identity",
+  "operator_review",
+  "ready_to_file",
+  "filed",
+  "formed",
+] as const satisfies readonly FormationOrderStatus[];
+
+type Step = (typeof STEP_ORDER)[number];
+
+const STEP_LABEL: Record<Step, string> = {
+  draft: "Business details",
+  collecting_documents: "Documents",
+  verifying_identity: "Identity check",
+  operator_review: "Review",
+  ready_to_file: "Ready to file",
+  filed: "Filed with the state",
+  formed: "Formed",
+};
+
+const STEP_NOTE: Record<Step, string> = {
+  draft: "Name, state and members",
+  collecting_documents: "Passport and proof of address",
+  verifying_identity: "Verified 1 Mar",
+  operator_review: "A ZeroCorp operator checks the filing",
+  ready_to_file: "Queued for Wyoming",
+  filed: "Submitted 2 Mar · ref WY-2026-88214",
+  formed: "Certificate issued",
+};
 
 export function StepperDemo() {
+  // Where this founder actually is.
+  const current: Step = "filed";
+  const at = STEP_ORDER.indexOf(current);
+
   return (
-    <Demo>
-      <ol className="flex flex-col gap-0">
-        {STEPS.map((s, i) => {
-          const last = i === STEPS.length - 1;
-          const tone =
-            s.state === "completed" ? "success"
-            : s.state === "current" ? "processing"
-            : s.state === "optional" ? "info"
-            : "neutral";
-          return (
-            <li key={s.label} className="flex gap-3">
-              <div className="flex flex-col items-center">
-                {/* The rail is a border, not a gradient. It stops at the last step. */}
-                <span
-                  className={cx(
-                    "flex size-6 shrink-0 items-center justify-center border",
-                    s.state === "completed" && "bg-success border-success text-background",
-                    s.state === "current" && "bg-processing border-processing text-background",
-                    s.state === "locked" && "border-input text-muted-foreground",
-                    s.state === "optional" && "border-info text-info",
-                  )}
-                  aria-hidden="true"
-                >
-                  <span className="text-overline font-mono">{i + 1}</span>
-                </span>
-                {!last ? <span className="bg-border w-px flex-1" /> : null}
-              </div>
-              <div className="flex flex-col gap-1 pb-6">
-                <div className="flex flex-wrap items-center gap-2">
+    <div className="flex flex-col gap-4">
+      <Demo>
+        <ol className="flex flex-col gap-0">
+          {STEP_ORDER.map((step, i) => {
+            const last = i === STEP_ORDER.length - 1;
+            const state = i < at ? "completed" : i === at ? "current" : "locked";
+            const tone = state === "completed" ? "success" : state === "current" ? "processing" : "neutral";
+            return (
+              <li key={step} className="flex gap-3">
+                <div className="flex flex-col items-center">
                   <span
                     className={cx(
-                      "text-label",
-                      s.state === "locked" ? "text-muted-foreground" : "text-foreground",
+                      "flex size-6 shrink-0 items-center justify-center border",
+                      state === "completed" && "bg-success border-success text-background",
+                      state === "current" && "bg-processing border-processing text-background",
+                      state === "locked" && "border-input text-muted-foreground",
                     )}
+                    aria-hidden="true"
                   >
-                    {s.label}
+                    <span className="text-overline font-mono">{i + 1}</span>
                   </span>
-                  <StatusBadge tone={tone}>{s.state}</StatusBadge>
+                  {!last ? <span className="bg-border w-px flex-1" /> : null}
                 </div>
-                <span className="text-caption text-muted-foreground">{s.note}</span>
-              </div>
-            </li>
-          );
-        })}
-      </ol>
-    </Demo>
+                <div className="flex flex-col gap-1 pb-6">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className={cx("text-label", state === "locked" ? "text-muted-foreground" : "text-foreground")}>
+                      {STEP_LABEL[step]}
+                    </span>
+                    <StatusBadge tone={tone}>{state}</StatusBadge>
+                    <span className="text-caption text-muted-foreground font-mono">{step}</span>
+                  </div>
+                  <span className="text-caption text-muted-foreground">{STEP_NOTE[step]}</span>
+                </div>
+              </li>
+            );
+          })}
+        </ol>
+      </Demo>
+
+      {/*
+        The EIN track, deliberately outside the stepper. D2: it is an IRS filing on its
+        own clock and it fails on its own. A founder whose company is formed but whose EIN
+        is still pending must be able to see both facts at once, not one blocking the
+        other.
+      */}
+      <Demo className="flex flex-wrap items-center gap-x-6 gap-y-2">
+        <span className="text-caption text-muted-foreground w-40 shrink-0">EIN — separate track</span>
+        <div className="flex flex-wrap items-center gap-3">
+          <StatusBadge tone="neutral">not_started</StatusBadge>
+          <CaretRightIcon size={12} className="text-muted-foreground" aria-hidden="true" />
+          <StatusBadge tone="processing">requested</StatusBadge>
+          <CaretRightIcon size={12} className="text-muted-foreground" aria-hidden="true" />
+          <StatusBadge tone="success">issued</StatusBadge>
+          <span className="text-caption text-muted-foreground">· usually 2–6 weeks after formation</span>
+        </div>
+      </Demo>
+    </div>
   );
 }

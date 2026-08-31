@@ -572,7 +572,27 @@ Daily email digest:
 
 V1 may use a manually assisted operator workflow.
 
-Internal lifecycle:
+### Internal lifecycle — SUPERSEDED 2026-08-31 (D2)
+
+> **The state machines live in `packages/contracts/src/formation.ts` and are documented in
+> `DATABASE.md` §5.** This section no longer defines them.
+
+The nine-state list previously written here was one list trying to be two machines, and it
+had no state for a rejected filing. It is replaced by:
+
+```text
+formation_orders.status   draft → collecting_documents → verifying_identity
+                          → operator_review → ready_to_file → filed → formed
+                          filed → rejected → collecting_documents   (reparable)
+companies.status          pending → active → delinquent → dissolved
+ein_status                not_started → requested → issued          (its own track)
+```
+
+Three things changed and each has a reason recorded in `DATABASE.md` §5: a rejected filing
+now has somewhere to go, the operator review this section calls for now has a state, and
+the EIN no longer holds the order open for the weeks it takes the IRS to answer.
+
+The old list is preserved below for traceability. **It is not current.**
 
 ```text
 draft

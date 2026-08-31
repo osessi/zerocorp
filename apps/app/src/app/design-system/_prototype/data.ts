@@ -5,39 +5,45 @@
  * reviewed against realistic ZeroCorp content — formation states, plans, documents and
  * agent activity — rather than against lorem ipsum, which hides density problems.
  */
+import type { FormationOrderStatus } from "@zerocorp/contracts";
 
-export type FormationState =
-  | "draft"
-  | "documents_collected"
-  | "submitted"
-  | "filed"
-  | "formed"
-  | "ein_pending"
-  | "ein_issued"
-  | "complete";
+/*
+  The formation states are IMPORTED, never re-declared.
+
+  This file used to spell out its own eight-state list, and it silently contradicted the
+  new machine the moment D2 was decided — a prototype quietly teaching a state that no
+  longer exists. Found by the contradiction sweep, 2026-08-31.
+
+  packages/contracts/src/formation.ts is the source of truth. A CI rule now forbids
+  hard-coding these strings anywhere else.
+*/
+export type FormationState = FormationOrderStatus;
 
 export const FORMATION_LABEL: Record<FormationState, string> = {
   draft: "Draft",
-  documents_collected: "Docs collected",
-  submitted: "Submitted",
+  collecting_documents: "Collecting documents",
+  verifying_identity: "Verifying identity",
+  operator_review: "In review",
+  ready_to_file: "Ready to file",
   filed: "Filed",
   formed: "Formed",
-  ein_pending: "EIN pending",
-  ein_issued: "EIN issued",
-  complete: "Complete",
+  rejected: "Rejected",
+  cancelled: "Cancelled",
 };
 
 export type Tone = "success" | "warning" | "danger" | "info" | "neutral" | "processing";
 
 export const FORMATION_TONE: Record<FormationState, Tone> = {
   draft: "neutral",
-  documents_collected: "info",
-  submitted: "processing",
+  collecting_documents: "info",
+  verifying_identity: "processing",
+  operator_review: "processing",
+  ready_to_file: "info",
   filed: "processing",
   formed: "success",
-  ein_pending: "warning",
-  ein_issued: "success",
-  complete: "success",
+  // Reparable, not terminal — but it needs the founder to act, so it reads as danger.
+  rejected: "danger",
+  cancelled: "neutral",
 };
 
 export type Plan = "Launch" | "Growth" | "Autopilot";
@@ -57,13 +63,13 @@ export interface Business {
 }
 
 export const BUSINESSES: Business[] = [
-  { id: "b1", name: "Northbridge Studio LLC", founder: "Amara Osei", email: "amara@northbridge.studio", phone: "+234 803 555 0142", state: "Wyoming", plan: "Growth", mrrCents: 39900, progress: 82, formation: "ein_pending", owners: ["AO", "TK"] },
-  { id: "b2", name: "Kaya Collective LLC", founder: "Rafael Duarte", email: "rafael@kayacollective.co", phone: "+55 11 95555 0118", state: "Delaware", plan: "Autopilot", mrrCents: 79900, progress: 100, formation: "complete", owners: ["RD"] },
-  { id: "b3", name: "Meridian Advisory LLC", founder: "Priya Raghunathan", email: "priya@meridian.advisory", phone: "+91 98 5555 0173", state: "Wyoming", plan: "Launch", mrrCents: 9900, progress: 34, formation: "documents_collected", owners: ["PR", "SM", "JL"] },
+  { id: "b1", name: "Northbridge Studio LLC", founder: "Amara Osei", email: "amara@northbridge.studio", phone: "+234 803 555 0142", state: "Wyoming", plan: "Growth", mrrCents: 39900, progress: 82, formation: "filed", owners: ["AO", "TK"] },
+  { id: "b2", name: "Kaya Collective LLC", founder: "Rafael Duarte", email: "rafael@kayacollective.co", phone: "+55 11 95555 0118", state: "Delaware", plan: "Autopilot", mrrCents: 79900, progress: 100, formation: "formed", owners: ["RD"] },
+  { id: "b3", name: "Meridian Advisory LLC", founder: "Priya Raghunathan", email: "priya@meridian.advisory", phone: "+91 98 5555 0173", state: "Wyoming", plan: "Launch", mrrCents: 9900, progress: 34, formation: "collecting_documents", owners: ["PR", "SM", "JL"] },
   { id: "b4", name: "Atlas Freight Partners LLC", founder: "Deniz Yilmaz", email: "deniz@atlasfreight.io", phone: "+90 532 555 0190", state: "New Mexico", plan: "Growth", mrrCents: 39900, progress: 61, formation: "filed", owners: ["DY", "MK"] },
   { id: "b5", name: "Sable & Vine LLC", founder: "Chiara Bellini", email: "chiara@sableandvine.com", phone: "+39 340 555 0126", state: "Florida", plan: "Launch", mrrCents: 9900, progress: 12, formation: "draft", owners: ["CB"] },
-  { id: "b6", name: "Halcyon Labs LLC", founder: "Tobias Lindqvist", email: "tobias@halcyonlabs.dev", phone: "+46 70 555 0155", state: "Delaware", plan: "Autopilot", mrrCents: 79900, progress: 94, formation: "ein_issued", owners: ["TL", "AO"] },
-  { id: "b7", name: "Verano Trading LLC", founder: "Lucía Fernández", email: "lucia@veranotrading.mx", phone: "+52 55 5555 0134", state: "Wyoming", plan: "Growth", mrrCents: 39900, progress: 47, formation: "submitted", owners: ["LF", "RD"] },
+  { id: "b6", name: "Halcyon Labs LLC", founder: "Tobias Lindqvist", email: "tobias@halcyonlabs.dev", phone: "+46 70 555 0155", state: "Delaware", plan: "Autopilot", mrrCents: 79900, progress: 94, formation: "formed", owners: ["TL", "AO"] },
+  { id: "b7", name: "Verano Trading LLC", founder: "Lucía Fernández", email: "lucia@veranotrading.mx", phone: "+52 55 5555 0134", state: "Wyoming", plan: "Growth", mrrCents: 39900, progress: 47, formation: "operator_review", owners: ["LF", "RD"] },
 ];
 
 export interface ActivityEvent {

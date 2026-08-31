@@ -134,20 +134,52 @@ Closes the width half of `DESIGN_SYSTEM.md` §24.13. Motion is still open.
 
 ---
 
-## D2 — Company formation state machine: three different versions 🔴 BLOCKING
+## D2 — Company formation state machine ✅ RESOLVED 2026-08-31
 
-| Source | States |
+**The finding that unblocked it.** These were never three competing specifications.
+`PRODUCT_VISION.md` §32 labels its own list *"Example formation"* and says *"the exact
+state machine must reflect the actual provider and legal workflow; the principle is what
+matters"*. So there was one spec (§21), one illustration (§32), and one archived
+predecessor — and `DATABASE.md` declared **two** `status` columns while enumerating
+neither.
+
+**The real problem.** The nine-state list was one list trying to be two machines:
+`draft → … → formed` describes the ORDER, `ein_issued → complete` describes the COMPANY.
+Nobody could settle it because it had no single subject.
+
+**Three gaps none of the three lists covered:**
+
+| Gap | Why it matters |
 |---|---|
-| `PRODUCT_VISION.md` §32 | `draft → documents_collected → review_required → kyc_or_identity_check → ready_to_submit → submitted → filed → formed → ein_pending → ein_issued → complete` (11) |
-| `PRODUCT_SPEC.md` §21 | `draft → documents_collected → kyc_passed / verification_complete → submitted → filed → formed → ein_pending → ein_issued → complete` (9) |
-| `archive` §6.3 | `draft → documents_collected → kyc_passed → submitted → filed → formed → ein_pending → ein_issued → complete` (9) |
+| No rejected state | A state rejecting a filing is ordinary — a PO box as the agent address, a name already taken. A rejection had nowhere to go |
+| EIN inside the order | An IRS filing, not a state filing, landing 2–6 weeks later and failing on its own. It held the order open for weeks after the company legally existed |
+| No operator review | §21 says V1 is a manually assisted operator workflow. That review is where the work happens, and the state had been dropped |
 
-`DATABASE.md` §5 defines `companies.status` and `formation_orders.status` but
-**enumerates no states at all**, so the enum has no canonical home.
+**Decision — two machines plus a separate EIN track.**
 
-**Recommendation (not applied):** the state enum is code and belongs in
-`packages/contracts`. Pick one list, put it in `DATABASE.md`, and have the other two
-documents reference it instead of restating it.
+```text
+formation_orders.status   draft → collecting_documents → verifying_identity
+                          → operator_review → ready_to_file → filed → formed
+                          filed → rejected → collecting_documents    reparable
+                          → cancelled, until filed                   terminal
+companies.status          pending → active → delinquent → dissolved
+ein_status                not_started → requested → issued
+                          requested → rejected → requested           reparable
+```
+
+**Source of truth:** `packages/contracts/src/formation.ts` — the enums **and the allowed
+transitions**. A union type stops a typo; it does not stop `formed → draft`.
+`DATABASE.md` §5 documents the model. `PRODUCT_SPEC.md` §21 and `PRODUCT_VISION.md` §32
+now reference it and keep their old lists marked as superseded, for traceability.
+
+**Enforced mechanically.** 28 structural tests (no unreachable state, nothing leaves a
+terminal state, no self-transition, the two enums share no name) plus a CI rule that
+fails if any retired state string appears in the source.
+
+> **That rule earned its place immediately.** The contradiction sweep found a fourth list
+> hiding in a dashboard prototype and a screen filtering on `["complete", "ein_issued"]` —
+> two states this decision retired. The count would have been silently wrong. Both now
+> read from the contract.
 
 ---
 

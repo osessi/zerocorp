@@ -1269,6 +1269,34 @@ current.
 
 ---
 
+## 43b. Enumerations live in code, and prose references them
+
+Added 2026-08-31, after D2.
+
+The formation state machine was written out in three documents and none of them agreed.
+It stayed that way for months because prose has no compiler: a Markdown list cannot
+contradict another Markdown list loudly enough for anyone to notice.
+
+```text
+packages/contracts     declares the enum AND its allowed transitions
+DATABASE.md            documents the model, and says it does not define it
+every other document   references it — never restates the values
+```
+
+**A union type is not a state machine.** It stops a typo; it does not stop
+`formed → draft`. Ship the transition map with the enum, and test it: no unreachable
+state, nothing leaves a terminal state, no self-transition.
+
+**When a state is retired, add it to the CI rule that forbids naming it.** The D2 sweep
+found a fourth list hiding in a dashboard prototype and a screen filtering on two states
+that no longer existed — the count was silently wrong. Neither would have been found by
+reading, and neither can happen again.
+
+> If three documents can disagree about a value, the value belongs in code and the
+> documents belong downstream of it.
+
+---
+
 ## 44. Golden Rules
 
 > **Build the system we designed, not the system you imagine.**
