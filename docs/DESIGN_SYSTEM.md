@@ -995,14 +995,22 @@ Radio · RadioGroup             circle — the one deliberate exception to --rad
    square radio in one form would be genuinely ambiguous.
    RadioGroup takes its accessible name from the surrounding Field's <legend>.
 
-Switch                         rectangle with a square thumb, --radius-none
+Switch                         labelled rectangle, 56×20, --radius-none
 → packages/ui/src/field/Switch.tsx  ·  Base UI Switch
-→ VALIDATED — implemented and visually reviewed 2026-08-31
+→ VALIDATED — variant B chosen and visually reviewed 2026-08-31
 → MIT · reviewed 2026-08-31
-   Dropping the conventional pill creates no ambiguity: a switch is still a switch.
-   One of the few places radius 0 produces something distinctive rather than merely
-   restrained. A switch applies immediately; when a change needs confirming, use a
-   Checkbox and a submit action.
+   The state WORD sits inside the track: ON left when on, OFF right when off.
+   Not decoration — §14 requires that colour never be the only carrier of meaning,
+   and the first implementation read only through colour and thumb position. That
+   failed for a colour-blind reader scanning a settings list, which is exactly where
+   a toggle like Autopilot lives.
+   OFF uses --foreground, not --muted-foreground: at 11px bold on --muted the muted
+   token measures 4.35:1 and 11px bold is not large text, so AA needs 4.5:1.
+   labelOn / labelOff are props with English defaults, so a caller supplies translated
+   values once an i18n layer exists. The words are aria-hidden — role="switch" and
+   aria-checked already announce the state.
+   A switch applies immediately and stays immediately reversible. No confirmation.
+   When a change is not reversible, use a Checkbox and a submit action instead.
 
 control-styles.ts              the shared visual contract
 → packages/ui/src/field/control-styles.ts
@@ -1574,6 +1582,34 @@ Reads as *"Your business is running."*
 **Never expose raw JSON to a normal customer.**
 
 **Settings** — section navigation · settings panel · save states · danger zone.
+
+---
+
+#### Switch — variant review, 2026-08-31
+
+The first Switch read its state from colour and thumb position alone. Three variants
+were prototyped in the review surface and compared side by side, in both states,
+disabled, inside a settings list, and under a greyscale filter — the test colour cannot
+pass.
+
+| Variant | Width | Second signal | Greyscale |
+|---|---|---|---|
+| Original | 36px | none | weak — only fill density changes |
+| A — iconic thumb | 36px | check / minus | good |
+| **B — labelled track** | **56px** | **the word** | **excellent** |
+| C — two-cell track | 40px | hairline + filled cell | fails in dark |
+
+**B chosen.** It is the only one that survives greyscale, a screenshot pasted into a
+ticket, and a printed page. Its costs are 20px of width and two translatable strings.
+
+Measured, not assumed, during the comparison:
+
+- B's OFF label at `--muted-foreground` measured **4.35:1** — a fail, since 11px bold is
+  not large text. Shipped with `--foreground`.
+- B's disabled-on state rendered the word invisible (`--primary-foreground` on a muted
+  track). Fixed before the comparison so the judgement was fair.
+- C loses almost all separation in dark greyscale: both cells read as dark grey. The
+  most visually "Lyra" option was the weakest on the criterion that prompted the work.
 
 ---
 

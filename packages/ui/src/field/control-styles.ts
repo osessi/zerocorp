@@ -96,16 +96,19 @@ export const CHOICE_CHECKED =
 export const CHOICE_CIRCLE = "rounded-full";
 
 /**
- * Switch track — a rectangle, not a pill.
+ * Switch track — a labelled rectangle, not a pill.
  *
  * Unlike the radio, a rectangular switch creates no semantic ambiguity: a switch is
  * still a switch. It is one of the few places where radius 0 produces something
  * distinctive rather than merely restrained.
  *
- * 36×20 gives the thumb a full 16px of travel.
+ * 56×20 makes room for the state word. The extra 20px over an unlabelled track buys
+ * the one thing colour cannot: a state that survives greyscale, a colour-blind reader
+ * and a screenshot pasted into a ticket. DESIGN_SYSTEM.md §14 — colour is never the
+ * only carrier of meaning.
  */
 export const SWITCH_TRACK = [
-  "relative inline-flex h-5 w-9 shrink-0 items-center",
+  "relative inline-flex h-5 w-14 shrink-0 items-center",
   "border bg-muted",
   "transition-colors duration-normal ease-out",
   "data-checked:bg-primary data-checked:border-primary",
@@ -115,5 +118,20 @@ export const SWITCH_TRACK = [
 export const SWITCH_THUMB = [
   "block size-4 bg-background",
   "transition-transform duration-normal ease-out",
-  "translate-x-0.5 data-checked:translate-x-4",
+  "translate-x-0.5 data-checked:translate-x-9",
+].join(" ");
+
+/**
+ * The state word inside the track.
+ *
+ * OFF uses --foreground, not --muted-foreground: at 11px bold on --muted the muted
+ * token measures 4.35:1, and 11px bold is not "large text", so the AA threshold is
+ * 4.5:1 and it fails. Measured 2026-08-31.
+ *
+ * A disabled control is exempt from contrast requirements (WCAG 1.4.3, incidental
+ * text in an inactive component), so it may drop to --muted-foreground.
+ */
+export const SWITCH_LABEL = [
+  "text-overline absolute uppercase select-none",
+  "pointer-events-none",
 ].join(" ");

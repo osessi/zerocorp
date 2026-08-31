@@ -292,6 +292,45 @@ describe("Switch — rectangle", () => {
     expect(screen.getByRole("switch").className).not.toContain("rounded-full");
   });
 
+  it("writes the state in the track, so colour is never the only signal", () => {
+    // §14. A switch that reads only through colour and thumb position fails for a
+    // colour-blind user scanning a settings list — exactly where Autopilot lives.
+    render(
+      <Choice label="Autopilot">
+        <Switch />
+      </Choice>,
+    );
+    const sw = screen.getByRole("switch");
+    expect(sw).toHaveTextContent("On");
+    expect(sw).toHaveTextContent("Off");
+  });
+
+  it("takes its state words as props, so they can be translated", () => {
+    // No i18n layer exists yet (ARCHITECTURE §28). Props keep English out of the
+    // component so a caller can supply t("switch.on") the day it does.
+    render(
+      <Choice label="Pilote automatique">
+        <Switch labelOn="Oui" labelOff="Non" />
+      </Choice>,
+    );
+    const sw = screen.getByRole("switch");
+    expect(sw).toHaveTextContent("Oui");
+    expect(sw).toHaveTextContent("Non");
+    expect(sw).not.toHaveTextContent("On");
+  });
+
+  it("hides the state word from assistive technology", () => {
+    // role="switch" plus aria-checked already announce the state. Exposing the word
+    // again would make a screen reader say it twice.
+    render(
+      <Choice label="Autopilot">
+        <Switch />
+      </Choice>,
+    );
+    const words = screen.getByRole("switch").querySelectorAll("span[aria-hidden='true']");
+    expect(words.length).toBeGreaterThanOrEqual(2);
+  });
+
   it("is inert when disabled", async () => {
     const user = userEvent.setup();
     render(
