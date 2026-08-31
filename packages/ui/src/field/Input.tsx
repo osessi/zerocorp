@@ -1,8 +1,8 @@
 "use client";
 
 import { Field as BaseField } from "@base-ui/react/field";
-import { CircleNotchIcon } from "@phosphor-icons/react/dist/ssr";
 import type { ComponentPropsWithoutRef } from "react";
+import { Spinner } from "../feedback/Spinner";
 import { useFieldState } from "./field-state";
 import {
   CONTROL_BASE,
@@ -61,11 +61,7 @@ export function Input({ loading, className, ...props }: InputProps) {
           className="pointer-events-none absolute inset-y-0 right-3 flex items-center"
           aria-hidden="true"
         >
-          <CircleNotchIcon
-            size={16}
-            weight="regular"
-            className="text-muted-foreground motion-safe:animate-spin"
-          />
+          <Spinner size={16} className="text-muted-foreground" />
         </span>
       ) : null}
     </div>

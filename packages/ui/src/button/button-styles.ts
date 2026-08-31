@@ -6,6 +6,7 @@
  *
  * Every value here is a token. docs/DESIGN_SYSTEM.md §17.
  */
+import type { IconSize } from "../icon";
 import { COLOR_TRANSITION } from "../motion";
 
 /**
@@ -141,4 +142,4 @@ export const ICON_BUTTON_SIZE: Record<ButtonSize, string> = {
 };
 
 /** §11: 20px is the standard UI size. 16px inside a 32px control, 24px inside 48px. */
-export const ICON_PX: Record<ButtonSize, number> = { sm: 16, md: 20, lg: 24 };
+export const ICON_PX: Record<ButtonSize, IconSize> = { sm: 16, md: 20, lg: 24 };

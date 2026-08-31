@@ -1,7 +1,7 @@
 "use client";
 
-import { CircleNotchIcon } from "@phosphor-icons/react/dist/ssr";
 import type { ComponentPropsWithoutRef, ComponentType } from "react";
+import { Spinner } from "../feedback/Spinner";
 import { cx } from "../field/control-styles";
 import {
   BUTTON_BASE,
@@ -76,12 +76,8 @@ export function Button({
     a button without one grows once, by 22px, and keeps its label throughout.
   */
   const glyph = loading ? (
-    <CircleNotchIcon
-      size={px}
-      weight="regular"
-      aria-hidden="true"
-      className="shrink-0 motion-safe:animate-spin"
-    />
+    // No label: the button carries aria-busy, so announcing it here would say it twice.
+    <Spinner size={px} />
   ) : Icon ? (
     <Icon size={px} weight="regular" aria-hidden="true" className="shrink-0" />
   ) : null;

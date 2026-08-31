@@ -12,5 +12,7 @@
  * without a licence review and adaptation to ZeroCorp tokens.
  */
 export * from "./button/index";
+export type { IconSize } from "./icon";
+export * from "./feedback/index";
 export * from "./field/index";
 export * from "./status-badge/index";

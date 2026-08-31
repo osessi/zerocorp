@@ -1,8 +1,8 @@
 "use client";
 
 import { Field as BaseField } from "@base-ui/react/field";
-import { CircleNotchIcon } from "@phosphor-icons/react/dist/ssr";
 import type { ComponentPropsWithoutRef } from "react";
+import { Spinner } from "../feedback/Spinner";
 import { useFieldState } from "./field-state";
 import {
   CONTROL_BASE,
@@ -69,11 +69,7 @@ export function Textarea({ rows = 4, loading, className, ...props }: TextareaPro
 
       {isLoading ? (
         <span className="pointer-events-none absolute top-3 right-3" aria-hidden="true">
-          <CircleNotchIcon
-            size={16}
-            weight="regular"
-            className="text-muted-foreground motion-safe:animate-spin"
-          />
+          <Spinner size={16} className="text-muted-foreground" />
         </span>
       ) : null}
     </div>

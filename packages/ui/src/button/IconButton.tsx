@@ -1,7 +1,7 @@
 "use client";
 
-import { CircleNotchIcon } from "@phosphor-icons/react/dist/ssr";
 import type { ComponentPropsWithoutRef } from "react";
+import { Spinner } from "../feedback/Spinner";
 import { cx } from "../field/control-styles";
 import type { GlyphComponent } from "./Button";
 import {
@@ -71,12 +71,7 @@ export function IconButton({
       {...props}
     >
       {loading ? (
-        <CircleNotchIcon
-          size={px}
-          weight="regular"
-          aria-hidden="true"
-          className="shrink-0 motion-safe:animate-spin"
-        />
+        <Spinner size={px} />
       ) : (
         <Icon size={px} weight="regular" aria-hidden="true" className="shrink-0" />
       )}
