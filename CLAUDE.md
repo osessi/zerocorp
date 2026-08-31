@@ -171,6 +171,17 @@ always an icon and a label too. `--border` and `--input` are not interchangeable
 
 Hierarchy comes from **borders, spacing and typography** — not shadows or gradients.
 
+### Screen layout
+
+`DESIGN_SYSTEM.md` §21 is the Dashboard Visual Language — thirteen named patterns:
+`DashboardShell` · `SidebarNavigation` · `TopCommandBar` · `PageHeader` · `SectionHeader`
+· `TabbedDetailView` · `DataTableLayout` · `DetailLayout` · `SplitDetailLayout` ·
+`ActivityPanel` · `MetricGrid` · `RecordCardList` · `RightDrawer`.
+
+**Name the patterns a screen uses before building it.** Needing a new one is a design
+decision — propose it. A reference settles structure and density, never rounding, colour
+or shape.
+
 ### Status markers
 
 `DESIGN_SYSTEM.md` marks every value **VALIDATED**, **PROPOSED** or **TO VALIDATE**.

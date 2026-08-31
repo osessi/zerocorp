@@ -1092,14 +1092,441 @@ introduce fonts, introduce colours, create uncontrolled layout behaviour.
 
 ---
 
-## 21. Layout patterns
+## 21. ZeroCorp Dashboard Visual Language
 
-Canonical layouts are defined before individual screens. Do not invent a page architecture
-per feature.
+Derived from reference screenshots adopted 2026-08-31 as the official structural
+reference for ZeroCorp's dashboard.
+
+### 21.0 What we take and what we refuse
+
+> **The reference is a source of STRUCTURE, DENSITY, HIERARCHY, NAVIGATION and
+> COMPOSITION. It is never a source of brand, copy, colour or shape.**
+
+**Taken:** shell topology · navigation organisation · page anatomy · information density ·
+column and panel proportions · the rhythm of sections · where actions live.
+
+**Refused, explicitly:**
+
+| The reference does | ZeroCorp does | Why |
+|---|---|---|
+| Rounded search pill, ~6px buttons, ~8px cards | `--radius-none` everywhere | Radius 0 is our signature (§7). This is the single most visible divergence — do not import the rounding |
+| Soft-tinted pastel status badges (lavender, mint, butter, rose) | The five validated status colours (§4.3) | We have no subtle/tint scale. Inventing one is forbidden — see §21.18 |
+| Its wordmark, product names, loan-domain copy | ZeroCorp identity and copy | Never copied |
+| Coloured square action buttons (blue Mail, green Call) | Neutral controls, teal reserved for primary | One accent (§2) |
+
+Everything below is marked **VALIDATED** (already our system, confirmed by the
+reference), **PROPOSED** (clearly observable, needs your decision) or **TO VALIDATE**
+(not determinable from a screenshot — do not guess).
+
+### 21.1 Philosophy — VALIDATED
+
+> **Structured, sharp, dense, calm, premium, operational.**
+
+Hierarchy comes from **typography, spacing, borders, alignment and density**. Never from
+heavy shadows, gradients, rounded cards or decorative effects. The reference confirms the
+direction already set in §1: large white surfaces, thin rules, almost no shadow, and a
+lot of information held together by alignment rather than by containers.
+
+---
+
+### 21.2 `DashboardShell` — PROPOSED
+
+```text
+┌────────────┬──────────────────────────────────────────────┐
+│            │  TopCommandBar                               │
+│  Sidebar   ├──────────────────────────────────────────────┤
+│  fixed     │                                              │
+│  240px     │  Content — fluid, scrolls independently      │
+│            │                                              │
+│  ────────  │                                              │
+│  Settings  │                                              │
+│  Help      │                                              │
+└────────────┴──────────────────────────────────────────────┘
+```
+
+- Sidebar **fixed**, full height, does not scroll with content.
+- **The top bar spans the content column only** — it does not cross the sidebar. The
+  sidebar carries its own logo header at the same height. This is a deliberate
+  observation from the reference and it differs from the more common full-width top bar.
+- A single vertical 1px `--border` rule separates sidebar from content. No shadow, no
+  elevation change.
+- Content column is fluid and owns its own scroll.
+
+**Sidebar width:** the reference sits at roughly 18.5% of the application width,
+consistently across every screenshot — about 265px at a 1440px viewport. Our validated
+`--spacing-sidebar: 240px` (§12) sits inside that band and **is not changed**.
+
+---
+
+### 21.3 `SidebarNavigation` — PROPOSED
+
+```text
+  ▸ Logo                      brand mark, generous top padding
+  ────────────────────────    (no rule in the reference; the gap does the work)
+  ▪ Overview                  icon 20px + label, single line
+  ▪ Contacts            ⌄     expandable group
+      Leads                   sub-item, indented
+      Referral Partners
+  ▪ Deals               ⌃     expanded group
+      └ Active Deals          active sub-item
+        Closed Deals
+  ▪ Integration
+  ▪ Tasks
+  ────────────────────────    1px --border rule, pushed to the bottom
+  ▪ Settings
+  ▪ Help & Support      [8]   badge
+```
+
+| Element | Rule |
+|---|---|
+| Item | Phosphor icon at 20px (§11 standard size) + label at `text-label`. Left-aligned, one line, never wrapping |
+| Group | Expandable, chevron right-aligned, rotates on open |
+| Sub-item | Indented under its parent, no icon |
+| Active item | Filled block using `--accent`. Text goes to `--foreground`; weight does not change |
+| Active sub-item | Same fill, text at `--foreground`; its siblings stay at `--muted-foreground` |
+| Bottom zone | Settings and Help pinned to the bottom, separated by a full-width `--border` rule |
+| Badge | Count on Help & Support. **The reference shows it in two different colours across screenshots — badge colour is TO VALIDATE.** Use `--muted` until decided |
+| Collapse | A circular chevron control sits on the sidebar's right edge, vertically near the top, straddling the rule |
+
+**TO VALIDATE:** the collapsed width and what it shows (icons only? tooltips?). No
+screenshot shows the collapsed state. Do not invent it.
+
+**PROPOSED, flagged:** the reference draws a small `└` tree connector before the first
+active sub-item. It is a decorative device that appears inconsistently across the
+screenshots. Recommend **omitting it** — indentation already carries the relationship,
+and a glyph that appears on some items and not others reads as a bug.
+
+---
+
+### 21.4 `TopCommandBar` — PROPOSED
+
+```text
+[ ⌕  Search or type a command          ]        ⚡•  ⊕  ⌂  │  ⬤ ⌄
+```
+
+- **Left:** a single wide search input, `⌕` icon inside, placeholder naming both
+  behaviours — *"Search or type a command"*. This is a command palette, not a filter.
+  It is the first element in the bar and takes roughly a third of the content width.
+- **Right cluster:** icon actions in a fixed order — quick action (carrying a dot when
+  something is pending), add-record, notifications — then a vertical `--border` rule,
+  then the account avatar with a chevron.
+- The dot on an icon is a state indicator, never a count. Counts go in badges.
+- Height matches the sidebar's logo header so the two align across the rule.
+
+**Divergence:** the reference's search field is a pill. Ours is `--radius-none` with a
+`--input` border like every other control (§9). Do not import the pill.
+
+**TO VALIDATE:** mobile behaviour. No narrow screenshot exists.
+
+---
+
+### 21.5 `PageHeader` — PROPOSED
+
+Two stacked rows, then a rule.
+
+```text
+←  Active Deals  ›  Ronald Richards              ● Last Activity 2 Nov 2024, 09:00
+────────────────────────────────────────────────────────────────────────────────
+⬤  Ronald Richards                          ⬤⬤+2  │  [ Mail ] [ Call ] [ ⋯ More ]
+    Created On: 2 Mar, 2025
+────────────────────────────────────────────────────────────────────────────────
+```
+
+| Row | Contents |
+|---|---|
+| **Breadcrumb row** | Back arrow + breadcrumb trail, `text-body-sm`. Right-aligned contextual metadata (last activity, status) with a small status dot |
+| **Object row** | Avatar, object name at `text-h3`/`text-h2`, a secondary metadata line at `text-body-sm text-muted-foreground` beneath. Right: participant avatar stack, then primary actions |
+| **Rule** | Full-width `--border`, separating header from content |
+
+- **Actions are right-aligned and ordered least-to-most destructive**, ending in an
+  overflow `⋯ More`.
+- The avatar stack shows up to three faces then a `+N` counter.
+- The back arrow is part of the breadcrumb, not a separate button.
+
+---
+
+### 21.6 `SectionHeader` — PROPOSED
+
+```text
+Upcoming Tasks                                        [ + Create Task ]
+```
+
+Section title at `text-h4` on the left, its single primary action right-aligned on the
+same baseline. Nothing between them. A subtitle, when present, sits under the title at
+`text-caption text-muted-foreground` (the reference uses this for a date grouping:
+*Task History / 12th November, 2024*).
+
+Small section labels inside panels use `text-overline`, uppercase, `--muted-foreground` —
+observed as `RECENT ACTIVITY`, `DEAL INFO`, `LOAN REQUESTED`.
+
+---
+
+### 21.7 `TabbedDetailView` — PROPOSED
+
+- Underline tabs. Active tab: `--foreground` text with a 2px underline. Inactive:
+  `--muted-foreground`, no underline.
+- A tab may carry a count as a **filled dark circle with white text**, immediately after
+  the label (`Tasks ⑦`).
+- The tab strip sits directly above its content with a full-width rule beneath.
+- **Two independent tab strips may coexist on one screen** — one for the context column,
+  one for the main column. They are separate navigations and must not be visually merged.
+
+---
+
+### 21.8 `DataTableLayout` — PROPOSED
+
+```text
+Contacts                                       [ Settings ] [ Export All ]
+My Leads  (29 Leads)
+────────────────────────────────────────────────────────────────────────
+Leads | Referral Partners                                     ← view tabs
+────────────────────────────────────────────────────────────────────────
+[ ⌕ Search…                          ]   ⧩1  ▤ ▦ ▤   [ Options ⌄ ]
+────────────────────────────────────────────────────────────────────────
+☐ │ NAME │ CONTACTS │ PURPOSE │ AMOUNT │ LEAD OWNER │ PROGRESS │ STAGES
+────────────────────────────────────────────────────────────────────────
+☐ │ ⬤ Jenny Wilson │ email      │ Home Loan │ $978,878 │ ⬤⬤ │ ▬▬▬ 70% │ [New]
+  │                │ (603) 555… │           │          │    │         │
+────────────────────────────────────────────────────────────────────────
+                    ‹ Previous   1  [2]  …  8  9   Next ›
+```
+
+**Toolbar** — one row above the table: search input taking the full remaining width on
+the left; on the right, view-mode toggles, a filter control **carrying its active count**,
+and an `Options ⌄` menu. This order is fixed.
+
+**Header row** — `text-overline`, uppercase, `--muted-foreground`, left-aligned. Not bold.
+
+**Rows**
+
+| Property | Rule |
+|---|---|
+| Selection | Checkbox as the first column, plus one in the header for select-all |
+| Height | Tall. Rows carry an avatar plus up to two lines of content |
+| Identity cell | Avatar + name, always the first data column |
+| Multi-value cell | Primary value on line one, secondary at `text-caption text-muted-foreground` on line two (email over phone) |
+| Numeric cell | **Geist Mono** (§5). Amounts and percentages are comparable values |
+| People cell | Overlapping avatar stack, newest first |
+| Progress cell | Thin horizontal bar + numeric percentage to its right. Bar height is hairline, not a chunky meter |
+| Status cell | `StatusBadge` (§17), one system across the whole product |
+| Separators | Full-width 1px `--border` between rows. **No zebra striping, no card per row** |
+
+**Pagination** — centred beneath the table: `‹ Previous`, page numbers with ellipsis for
+gaps, `Next ›`. The active page is a **filled dark square**, not an underline.
+
+**TO VALIDATE:** exact row height, column widths and minimum column widths. Screenshots
+give proportions, not pixels. Also: row hover treatment, and whether rows are clickable
+in full or only on the identity cell.
+
+---
+
+### 21.9 `DetailLayout` and `SplitDetailLayout` — PROPOSED
+
+Two variants observed.
+
+**`SplitDetailLayout`** — a context column beside a working column.
+
+```text
+│ Context column (~30%)      │ Main column (~70%)                      │
+│ ── tabs: Deal Info | Activity                                        │
+│ Activity timeline          │ ── tabs: Details | Documents | Tasks …  │
+│ ────────────               │                                         │
+│ DEAL INFO                  │ Section content                         │
+│ ▪ Loan Purpose             │                                         │
+│ ▪ Loan Amount              │                                         │
+```
+
+- Context column ≈ **30%** of the content area, consistently across screenshots.
+- A vertical `--border` rule separates the two. No background change, no elevation.
+- The context column holds: its own tab strip, an activity timeline, and a labelled
+  metadata list. It is a summary, never a form.
+- **Metadata list item**: a small square icon tile, then a label at
+  `text-caption text-muted-foreground` above a value at `text-body`.
+
+**`DetailLayout`** — a third column variant appears when the record is a person: a narrow
+profile column between the sidebar and the main column, carrying avatar, name, an
+identifier line, a row of icon actions, last-activity, then the same tabs and timeline.
+
+**TO VALIDATE:** the breakpoint at which the context column collapses, and where it goes
+— above the main content, or into a drawer.
+
+---
+
+### 21.10 `ActivityPanel` — PROPOSED
+
+```text
+RECENT ACTIVITY
+
+⬤──  Andrew tagged you in a comment
+ │    Today 12:00 PM
+ │    [ ✓ Accepted ]
+ │
+⬤──  Jenny Cook shared deal progress
+ │    Today 14:30 PM
+ │    [New] → [In progress]
+ │
+◆──  Eleanor Pena commented on Documents update
+      Today 12:00 PM
+```
+
+- A vertical connector line runs between events. The last event has no trailing line.
+- The node is an **avatar** when a person acted, an **icon badge** when the system did.
+- Line one: actor name at `--foreground`, the rest of the sentence at
+  `--muted-foreground`. The object of the action is emphasised.
+- Line two: timestamp at `text-caption text-muted-foreground`.
+- Optional payload beneath: a status chip, or a state transition rendered as
+  `[from] → [to]`.
+- Header uses `text-overline` uppercase; a count badge and a `View All Activity` link may
+  sit on the same row.
+
+---
+
+### 21.11 `MetricGrid` — PROPOSED
+
+```text
+┌──────────────────┬──────────────────────┬──────────────────────┐
+│ ⓘ Docs Owed      │ ⏱ Docs Pending       │ 🗎 Docs Accepted     │
+│ 5                │ 4                    │ 12 /13               │
+└──────────────────┴──────────────────────┴──────────────────────┘
+  Go To Deals ›
+```
+
+- Equal-width cells inside **one bordered container**, divided by internal rules — not
+  three separate floating cards.
+- Each cell: a small icon + label at `text-body-sm text-muted-foreground` on one line,
+  the value beneath at `text-h3`/`text-h2` in **Geist Mono**.
+- A ratio renders the denominator smaller and muted (`12 /13`).
+- An optional text link sits below the container, left-aligned, with a `›` chevron.
+
+Three cells is the observed default. **TO VALIDATE:** behaviour at 4+ metrics and on
+narrow viewports.
+
+---
+
+### 21.12 `RecordCardList` — PROPOSED
+
+Used for tasks and documents. Distinct from `DataTableLayout`: **each record is its own
+bordered box with a gap between them**, because each carries multiple lines and its own
+actions.
+
+```text
+┌────────────────────────────────────────────────────────────────┐
+│ ○  Confirmation of income tax payment      Due Date: Today 12:00│
+│    Confirmation of property tax payment made up to date         │
+│    ⬤ Created by Wade Warren        [ • Important ] [ ⏱ Reminder ]│
+└────────────────────────────────────────────────────────────────┘
+```
+
+| Row zone | Contents |
+|---|---|
+| Leading | Status control — a circle, filled with a check when complete |
+| Title | `text-body`, `--foreground`. Right-aligned metadata on the same line (due date) |
+| Description | `text-body-sm text-muted-foreground`, one line |
+| Footer | Attribution (avatar + name) left; contextual action chips right |
+
+- A completed record fills its whole box with `--muted` and keeps a filled check.
+- Document rows use the same anatomy with a file icon, a `filename • size • date` meta
+  line, and trailing accept / reject / overflow controls.
+- Above the list: a segmented control for scope (`All Documents | Portal Milestones`) with
+  right-aligned bulk actions.
+
+---
+
+### 21.13 `RightDrawer` — PROPOSED
+
+```text
+                    ┌──────────────────────────────────┐
+   page, veiled     │ ✕  Lead Detail   [ View Details ]│
+                    ├──────────────────────────────────┤
+                    │ ⬤ Dorthy Halloway   ⌂ ✉ ☏ ⋯     │
+                    │ ┌────────┬────────┬──────┬─────┐ │
+                    │ │ Owner  │Location│Partner│Income│ │
+                    │ └────────┴────────┴──────┴─────┘ │
+                    │ ┌──────────────────────────────┐ │
+                    │ │ Progress            76%      │ │
+                    │ └──────────────────────────────┘ │
+                    ├──────────────────────────────────┤
+                    │ Latest Activities ③   View All › │
+                    │ …timeline…                       │
+                    ├──────────────────────────────────┤
+                    │ Notes ④              + Add Note  │
+```
+
+- Enters **from the right**, roughly **40%** of the application width.
+- The page behind is covered by a **white veil**, not a dark scrim — content stays faintly
+  legible so the user keeps their place. This matches "calm" better than a dark overlay.
+- **Header:** `✕` close on the left, title beside it, single filled primary action on the
+  right. The close control is on the left, opposite the action.
+- **Body scrolls**; the header does not.
+- Sections are divided by full-width rules, each introduced by a `SectionHeader` with an
+  optional count badge and a right-aligned link.
+- **Metadata grid:** equal cells in one bordered box, label above value — the same device
+  as `MetricGrid`, at a smaller scale.
+
+**TO VALIDATE:** minimum and maximum width, behaviour below the `lg` breakpoint (full
+screen? bottom sheet?), and the enter/exit motion. Durations must come from §10.
+
+> ⚠️ **The theme class must be on `document.documentElement`** (§13). A drawer or popup
+> rendered through a portal escapes any wrapper and will render light-mode tokens on a
+> dark page. Verified failure, 2026-08-31.
+
+---
+
+### 21.14 Overview composition — TO VALIDATE
+
+The overview screen is only visible in a perspective composite, so it is described at low
+confidence and **nothing here is a rule yet**.
+
+Observed: a page title with a period label; a headline metric pair (total amount, total
+count) with the amount dominant; a large time-series chart with a legend of state chips,
+a Line/Bar toggle and a period toggle; a secondary revenue metric; and a recent-records
+table beneath.
+
+**Do not build the overview from this description.** Charts need their own token work —
+series colours, axes, grid, empty and loading states — none of which is derivable from a
+screenshot at an angle.
+
+---
+
+### 21.15 Rhythm, width and density — PROPOSED
+
+| | Rule |
+|---|---|
+| Content max width | `--container-content` 1280px, centred (§12, VALIDATED) |
+| Page padding | Desktop gutter 32px (§12, VALIDATED) |
+| Between major sections | 32px |
+| Between a section header and its content | 16px |
+| Inside a card or row | 12–16px |
+| Between sibling cards in a list | 16px |
+| Containers | 1px `--border`, `--radius-none`, no shadow. `--shadow-floating` only for portalled surfaces (§8) |
+
+**Density** is high but never cramped: rows are tall enough for two lines and an avatar,
+while margins stay tight. The whitespace lives *between* sections, not inside rows.
+
+---
+
+### 21.16 Responsive — TO VALIDATE
+
+No narrow-viewport reference exists. Nothing about mobile behaviour may be inferred from
+these screenshots.
+
+What is already binding from §12 and §14 regardless: breakpoints 640 / 1024 / 1280,
+gutters 16 / 24 / 32, controls at 16px type below `sm` so iOS does not zoom, and every
+component defining its desktop, tablet and mobile behaviour.
+
+Open questions: sidebar behaviour below `lg`; where the context column of
+`SplitDetailLayout` goes; whether `DataTableLayout` becomes cards or scrolls
+horizontally; whether `RightDrawer` becomes full-screen.
+
+---
+
+### 21.17 Canonical layouts
+
+Defined before individual screens. Do not invent a page architecture per feature.
 
 **Marketing site** — header · hero · content sections · social proof · CTA · footer
 
-**Authenticated product** — sidebar (240px) · top bar · content · contextual actions
+**Authenticated product** — `DashboardShell`: sidebar 240px · `TopCommandBar` · content
 
 **Command Center** — business health · activity · pending actions · automation · metrics.
 Reads as *"Your business is running."*
@@ -1111,6 +1538,34 @@ Reads as *"Your business is running."*
 **Never expose raw JSON to a normal customer.**
 
 **Settings** — section navigation · settings panel · save states · danger zone.
+
+---
+
+### 21.18 Building a new screen
+
+```text
+ZeroCorp Design System  (tokens §4–§14)
+        +
+Approved components     (registry §19)
+        +
+Dashboard Visual Language  (this section)
+        +
+ZeroCorp product requirements
+        ↓
+a ZeroCorp composition
+```
+
+**Never a pixel-for-pixel copy.** The reference settles *where things go and how tight
+they are*. It never settles what they look like — that is §4 to §14, and it is already
+decided.
+
+Three refusals worth repeating, because they are the easiest to import by accident:
+
+1. **No rounding.** The reference rounds almost everything. We do not.
+2. **No pastel status tints.** We have five status colours (§4.3) and no subtle scale.
+   Creating one is a token decision, not a screen decision — raise it, do not invent it.
+3. **No colour on utility controls.** The reference paints Mail blue and Call green. Teal
+   is our only accent and it marks the primary action, nothing else.
 
 ---
 
@@ -1176,6 +1631,9 @@ problem, the current value, the proposal, the alternatives, the trade-offs and t
 Resolved 2026-08-31: semantic status colours (§4.3), form control boundaries (§4.4, now `#949494` at 3.03:1),
 and the primitive layer (§2 — Base UI, now the shadcn/ui default).
 
+Added 2026-08-31: the Dashboard Visual Language (§21). Adopting a structural reference
+raises seven questions a screenshot cannot answer — they are items 8 to 14 below.
+
 | # | Item | Blocks |
 |---|---|---|
 | 1 | **Styling engine — Tailwind v4** — adopted during the Field implementation because Shadcn Studio, the declared primary source (§18), ships Tailwind. Structural: it is not trivially reversible | Recorded for confirmation, not blocking |
@@ -1185,6 +1643,13 @@ and the primitive layer (§2 — Base UI, now the shadcn/ui default).
 | 5 | **Flaticon licence** (§11) | Animated icons |
 | 6 | **Border hover in dark mode** (§9) | Dark mode components |
 | 7 | **`dashboard columns` and `editor widths`** (§12) | Dashboard grid, block editor |
+| 8 | **The twelve PROPOSED dashboard patterns** (§21.2–21.13) | Every new screen. None may be built until approved |
+| 9 | **Sidebar collapsed state** (§21.3) — width and contents; no reference shows it | The collapse control |
+| 10 | **Status badge tints** (§21.0) — the reference fills badges with pastels; we have five solid colours and no subtle scale | `StatusBadge`, table stage cells |
+| 11 | **Responsive behaviour of the dashboard patterns** (§21.16) — no narrow reference exists | Sidebar, split detail, tables and drawer below `lg` |
+| 12 | **Table row height, column widths, hover and click target** (§21.8) | `DataTableLayout` |
+| 13 | **Drawer min/max width and motion** (§21.13) | `RightDrawer` |
+| 14 | **Overview and chart tokens** (§21.14) — series colours, axes, grid, empty and loading states | The Overview screen |
 
 ---
 

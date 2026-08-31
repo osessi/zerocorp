@@ -1202,6 +1202,30 @@ custom and third-party.
 
 Format: `Option A / Option B / Option C`, then `Pros`, `Cons`, `Recommendation` — then wait.
 
+### Screens compose named patterns
+
+`DESIGN_SYSTEM.md` §21 is the ZeroCorp Dashboard Visual Language: thirteen named layout
+patterns — `DashboardShell`, `SidebarNavigation`, `TopCommandBar`, `PageHeader`,
+`SectionHeader`, `TabbedDetailView`, `DataTableLayout`, `DetailLayout`,
+`SplitDetailLayout`, `ActivityPanel`, `MetricGrid`, `RecordCardList`, `RightDrawer`.
+
+**Before building a screen, name the patterns it uses.** A screen that needs a
+fourteenth is a design decision, not an implementation detail — propose it.
+
+The section was derived from adopted reference screenshots. A reference settles **where
+things go and how tight they are**. It never settles what they look like: that is §4–§14,
+already decided. Three things are never imported from a reference:
+
+```text
+rounding                      our signature is --radius-none
+pastel status tints           five solid status colours, no subtle scale exists
+colour on utility controls    teal marks the primary action, nothing else
+```
+
+Every pattern is marked VALIDATED, PROPOSED or TO VALIDATE. A **PROPOSED** pattern may be
+built once the product owner approves it. A **TO VALIDATE** value was not determinable
+from the reference — do not guess it.
+
 ### Pages are compositions, never copies
 
 Full pages and dashboards are **not** lifted from a component library. References inspire;
