@@ -69,6 +69,71 @@ longer treated as blocking. The quality bar does not move.
 
 ---
 
+## D9 — Design source policy ✅ RESOLVED 2026-08-31
+
+**Question.** `DESIGN_SYSTEM.md` §18 names Shadcn Studio as the primary source, but §2
+resolved the primitive layer to Base UI. Shadcn Studio ships Tailwind blocks built on
+Radix. Which wins?
+
+**Decision.** Both, in different roles.
+
+```text
+Base UI          the official technical primitive     code
+shadcn / Studio  structure, density, hierarchy        reference only
+```
+
+Their code is **not copied when the underlying primitive differs** — a Radix block
+rewired to Base UI is a rewrite wearing someone else's licence, and §18's licence gate
+applies before anything enters the repository.
+
+**Consequence.** An external library that is not a primitive (calendar, chart, table
+engine) is an explicit exception, licence-checked, and recorded in the §19 registry.
+
+---
+
+## D10 — Calendar and date picker ✅ RESOLVED 2026-08-31
+
+**Decision.** `react-day-picker` 10.0.1 (MIT) as the engine, with a ZeroCorp wrapper.
+
+Base UI has no calendar primitive and §2 forbids a silent second headless library, so
+this is a recorded exception. It is a **date engine, not a design**: the wrapper owns
+every visual, and it consumes the `Field` shell like any other control.
+
+---
+
+## D11 — Charts ✅ RESOLVED (engine) 🟠 BLOCKED (tokens) 2026-08-31
+
+**Decision.** `recharts` 3.10.1 (MIT) as the engine, with a ZeroCorp wrapper and token
+system.
+
+**Still blocked.** `DESIGN_SYSTEM.md` §24.14 leaves series colours, axes, grid, empty and
+loading states open. A chart library left to its own defaults decides the palette, which
+is the inversion `CLAUDE_CODE_RULES.md` forbids. **Tokens first, then the wrapper.** No
+chart ships before both.
+
+---
+
+## D12 — Data table ✅ RESOLVED 2026-08-31
+
+**Decision.** `@tanstack/react-table` 9.2.4 (MIT) as the engine, ZeroCorp rendering.
+
+Headless: it owns sorting, filtering, pagination, selection and column-sizing state and
+renders nothing. The markup and every visual stay ours, which is why it does not conflict
+with §18.
+
+**Not settled by this.** §24.12 still owns row height, column widths, hover and click
+target. The exploration pass measured sort buttons at 11px high — under WCAG 2.5.8.
+
+---
+
+## D13 — Drawer width ✅ RESOLVED 2026-08-31
+
+**Decision.** Base UI `Drawer`. Width `min(40vw, 640px)` on desktop, `100vw` on mobile.
+
+Closes the width half of `DESIGN_SYSTEM.md` §24.13. Motion is still open.
+
+---
+
 ## D2 — Company formation state machine: three different versions 🔴 BLOCKING
 
 | Source | States |

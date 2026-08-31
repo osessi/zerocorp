@@ -27,7 +27,11 @@
   --secondary-foreground: #18181b;
 
   --muted: #f5f5f5;
-  --muted-foreground: #737373;
+  /* #737373 measured 4.35:1 on --muted and --accent — both #F5F5F5 — and failed the
+     4.5:1 floor everywhere muted text sat on a muted surface: table headers, hover rows,
+     the Switch's OFF word. #707070 gives 4.54:1 there and 4.95:1 on the page. The dark
+     value is unchanged; it was already 6.0:1 on --muted. Decided 2026-08-31, §4.1. */
+  --muted-foreground: #707070;
 
   --accent: #f5f5f5;
   --accent-foreground: #18181b;

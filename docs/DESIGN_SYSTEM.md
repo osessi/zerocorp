@@ -83,8 +83,20 @@ Base UI. Shadcn Studio publishes for both and documents migration between them.
 Base UI is MIT, ~10.8k stars, and maintained by a team that includes the creators of
 Radix. Choosing it aligns ZeroCorp with the ecosystem default rather than diverging from it.
 
-**Rule:** Base UI primitives only. A component that exists solely on Radix requires an
-explicit decision recorded here — never a silent second headless library.
+**Rule — DECIDED 2026-08-31.** Base UI is the **official technical primitive layer**.
+shadcn and Shadcn Studio are **design and pattern references**: structure, density,
+hierarchy, composition. Their code is not copied when the underlying primitive differs,
+because a Radix block rewired to Base UI is a rewrite wearing someone else's licence.
+
+```text
+Base UI          the primitive              code
+shadcn / Studio  structure and patterns     reference only
+```
+
+A component that exists solely on Radix requires an explicit decision recorded here —
+never a silent second headless library. An external library that is not a primitive
+(a calendar, a chart, a table engine) goes through §18's licence gate and is recorded in
+the §19 registry.
 
 ---
 
@@ -124,7 +136,7 @@ They share the token *architecture*, never the token *values*. See §15 and §16
 | `--secondary` | `#F4F4F5` | Secondary surfaces and buttons |
 | `--secondary-foreground` | `#18181B` | Text on `--secondary` |
 | `--muted` | `#F5F5F5` | Low-emphasis surfaces |
-| `--muted-foreground` | `#737373` | Low-emphasis text, help, placeholders |
+| `--muted-foreground` | `#707070` | Low-emphasis text, help, placeholders — see §4.4 |
 | `--accent` | `#F5F5F5` | Hover surfaces, selected rows |
 | `--border` | `#E5E5E5` | Dividers, card edges |
 | `--input` | `#949494` | Form control borders — see §4.4 |
@@ -259,6 +271,25 @@ every decorative line while giving controls a boundary that can actually be perc
 
 `--input` at **3.03:1** clears WCAG 2.1 SC 1.4.11 (3:1 for the boundary that identifies a
 user interface component).
+
+#### Muted text on a muted surface — RESOLVED 2026-08-31
+
+`--muted-foreground` was `#737373`. On `--muted` and `--accent` — which §4.1 already
+notes are the same `#F5F5F5` — it measured **4.35:1** and failed the 4.5:1 floor. Not a
+corner case: table headers, hovered rows and the Switch's `OFF` word all sit muted-on-muted,
+and the all-components sweep found nine live failures on one page.
+
+```text
+              on --muted   on --background
+#737373          4.35 ✗        4.74 ✓
+#707070          4.54 ✓        4.95 ✓
+```
+
+Dark is unchanged at `#A3A3A3` — it was already 6.0:1 on `--muted`. Verified after the
+change: 430 text nodes swept in both themes, **zero contrast failures**.
+
+The Switch had hit this exact number and worked around it locally by using `--foreground`
+(§19). A local workaround for a systemic value is a patch, not a fix.
 
 `#959595` was measured at **2.995:1** and rejected: 0.005 below the threshold is a
 reported failure that no human can see, and one hex step fixes it at zero visual cost.
@@ -1179,6 +1210,36 @@ control-styles.ts              the shared visual contract
    SWITCH_LABEL — the choice controls compose these the same way.
    Select, Combobox, DatePicker and FileUpload compose these. A control that
    restyles itself instead of composing them is a defect.
+
+react-day-picker               Calendar and DatePicker
+→ react-day-picker 10.0.1
+→ APPROVED as the engine — 2026-08-31. Wrapper not yet built.
+→ MIT · licence read and recorded 2026-08-31
+   Base UI has no calendar primitive and §2 forbids a silent second headless library,
+   so this is an explicit exception, recorded. It is a DATE ENGINE, not a design: the
+   ZeroCorp wrapper owns every visual — radius 0, --primary for the selected day, the
+   §11 glyphs for navigation, --input for the boundary. Nothing renders react-day-picker's
+   default stylesheet.
+   It must consume the Field shell like every other control (§17), so a date field gets
+   label, description, error and aria wiring for free.
+
+recharts                       Chart
+→ recharts 3.10.1
+→ APPROVED as the engine — 2026-08-31. BLOCKED on tokens: see §24.
+→ MIT · licence read and recorded 2026-08-31
+   The library is chosen; the palette is NOT. §24 leaves series colours, axes, grid,
+   empty and loading states open, and a chart library left to its own defaults decides
+   the palette — the inversion CLAUDE_CODE_RULES.md forbids. Tokens first, then the
+   wrapper. No chart ships before both.
+
+@tanstack/react-table          Data table engine
+→ @tanstack/react-table 9.2.4
+→ APPROVED as the engine — 2026-08-31.
+→ MIT · licence read and recorded 2026-08-31
+   Headless: it owns sorting, filtering, pagination, selection and column sizing state
+   and renders NOTHING. The markup and every visual stay ZeroCorp — which is exactly why
+   it does not conflict with §18. §24 still owns row height, column widths, hover and
+   click target; the engine choice does not settle them.
 
 Phosphor icons                 CircleNotch used for the loading state
 → @phosphor-icons/react 2.1.10
@@ -2143,6 +2204,47 @@ So the teal stays in the box and the tick badge, and the label takes `--foregrou
 selected and unselected labels are now identical, which is the point: selection rests
 entirely on the box and the badge, and both are shapes.
 
+### 21.23 All components — exploration pass, 2026-08-31
+
+Twenty-six components previewed on one page to compare, not to validate. Base UI 1.7
+covered more than expected: tooltip, menu, dialog, drawer, toast, popover, tabs, progress,
+meter, combobox. Breadcrumb, pagination and Card need no primitive at all — the platform
+gives the semantics free, and a bordered div is not an abstraction worth a file.
+
+**Reuse over invention.** Menu, Popover and the command palette all compose the Select
+popup idiom — same item rules, same selected treatment, same edge. Alert, Toast and
+StatusBadge share ONE tone → colour → glyph map, so a warning is the same warning on all
+three surfaces. That map lives in one file; three surfaces read it.
+
+Three findings.
+
+**1. `--muted-foreground` on `--muted` was 4.35:1, in nine live places.** Fixed at the
+token, §4.4. The Switch had already hit this exact number and worked around it locally.
+
+> A local workaround for a systemic value is a patch, not a fix. The second time the same
+> number appears, it is not a coincidence — it is the token.
+
+**2. At 375px the whole page scrolled sideways by 345px, and every ancestor said it was
+fine.** A wide `<table>` inside `overflow-x-auto` propagated its layout overflow past the
+scroll container to the root. The wrapper was clipping correctly at 326px and every
+ancestor reported `scrollWidth === clientWidth` — the DOM measurements said there was no
+problem while unrelated content moved 346px.
+
+Isolated by hiding one section at a time: this one accounted for all 345px. Of the fixes
+tried, only `contain: paint` and `table-layout: fixed` worked. `contain-paint` changes
+nothing visible and keeps the wrapper's own scroll. §24.18 asks whether it should be a
+CI rule.
+
+> `scrollWidth === clientWidth` on every ancestor is not proof the page does not scroll.
+> The test that settled it was moving an unrelated element and watching it move.
+
+**3. `Choice` requires a visible label**, so a table selection column cannot use it. §24.17.
+
+**Decided the same day, on the strength of this pass:** `--muted-foreground` `#707070`,
+the source policy (§2), and the engines for calendar, chart and data table (§19). Calendar
+and Chart were deliberately NOT coded during the pass — neither had a primitive, and
+guessing would have made the choice by accident.
+
 ---
 
 ## 24. Open items
@@ -2154,6 +2256,11 @@ the primitive layer (§2 — Base UI, now the shadcn/ui default), and the status
 Added 2026-08-31: the Dashboard Visual Language (§21). Adopting a structural reference
 raises seven questions a screenshot cannot answer — they are items 8 to 14 below.
 Items 15 and 16 were raised by the `Button` implementation review (§21.21).
+Items 17 and 18 were raised by the all-components exploration pass (§21.23).
+
+Resolved 2026-08-31 (second batch): muted text on a muted surface (§4.4, `--muted-foreground`
+now `#707070`), the source policy (§2 — Base UI is the primitive, shadcn is a reference),
+and the engines for calendar, chart and data table (§19). Drawer width (was item 13).
 Also resolved 2026-08-31: the animated focus ring — `COLOR_TRANSITION` replaced
 `transition-colors` in every control and a CI rule now forbids it (§21.21).
 
@@ -2170,9 +2277,11 @@ Also resolved 2026-08-31: the animated focus ring — `COLOR_TRANSITION` replace
 | 9 | **Sidebar collapsed state** (§21.3) — width and contents; no reference shows it | The collapse control |
 | 10 | **Status badge tints** (§21.0) — the reference fills badges with pastels; we have five solid colours and no subtle scale | `StatusBadge`, table stage cells |
 | 11 | **Responsive behaviour of the dashboard patterns** (§21.16) — no narrow reference exists | Sidebar, split detail, tables and drawer below `lg` |
-| 12 | **Table row height, column widths, hover and click target** (§21.8) | `DataTableLayout` |
-| 13 | **Drawer min/max width and motion** (§21.13) | `RightDrawer` |
-| 14 | **Overview and chart tokens** (§21.14) — series colours, axes, grid, empty and loading states | The Overview screen |
+| 12 | **Table row height, column widths, hover and click target** (§21.8) — engine now decided (TanStack), these are still open. The exploration pass measured sort buttons at 11px high, under the 24×24 of WCAG 2.5.8 | `DataTableLayout` |
+| 13 | ~~Drawer width~~ **RESOLVED 2026-08-31** — `min(40vw, 640px)` desktop, `100vw` mobile. Motion still open | `RightDrawer` |
+| 14 | **Chart tokens** (§21.14) — series colours, axes, grid, empty and loading states. Recharts is approved as the ENGINE; this blocks the wrapper | The Overview screen. No chart ships before this |
+| 17 | **`Choice` has no visually-hidden-label mode**, so a table selection column cannot use it — the exploration pass worked around it with a bare `Checkbox` and `aria-label` | Any table or toolbar with an unlabelled control |
+| 18 | **A scrollable container needs `contain-paint`** — without it a wide `<table>` propagated its overflow past the scroll container to the root and scrolled the whole page 345px at 375px. Should this be a CI rule, like `outline-none`? | Every `overflow-x-auto` in the product |
 | 15 | **`--primary` has no dark value** — teal TEXT measures 3.69:1 on `#0A0A0A`, below the 4.5:1 floor. Fine as a fill or a border. `--processing` already carries a lighter dark teal, but it is a status token | Any teal text or teal link in dark. `Button` tertiary works around it today |
 | 16 | **`--primary-hover` and `--destructive-hover`** (§4.1) — PROPOSED, deliberately not validated yet | Any future filled surface with a hover state |
 
