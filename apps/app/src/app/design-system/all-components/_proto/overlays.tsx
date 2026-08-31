@@ -157,8 +157,16 @@ export function PopoverDemo() {
           <Popover.Portal>
             <Popover.Positioner sideOffset={4} align="end" className="z-50">
               <Popover.Popup className={cx(SURFACE, "w-80", OVERLAY_MOTION)}>
-                <div className="border-border flex items-center justify-between border-b px-3 py-2">
-                  <Popover.Title className="text-label">Notifications</Popover.Title>
+                {/*
+                  The same band as Invoices and Agent runs. Popover.Title renders the
+                  heading, so the accessible name still comes from the primitive.
+                */}
+                <div className="border-border bg-muted flex items-center justify-between gap-3 border-b px-4 py-3">
+                  <Popover.Title className="text-label text-foreground inline-flex items-center gap-2">
+                    <BellIcon size={16} aria-hidden="true" className="text-muted-foreground" />
+                    Notifications
+                    <span className="text-caption text-muted-foreground font-mono">3</span>
+                  </Popover.Title>
                   <Popover.Close render={<IconButton label="Close" icon={XIcon} size="sm" />} />
                 </div>
                 <div className="max-h-72 overflow-y-auto">

@@ -2348,6 +2348,27 @@ bare word on white, filled status badges where the status is the column being sc
 a filled tick for an included feature rather than a loose check mark that reads as a
 bullet, and toast copy carrying a name, a number and a next step instead of a category.
 
+**`PanelHeader`, extracted the same day.** The anchored header was approved on the
+Invoices block and then asked for on the others — so it was extracted rather than copied
+into each. Three slots, and the order is the point:
+
+```text
+icon + title + count    what this is, and how much of it there is
+meta                    a qualifier the user does not act on — "last 24 h"
+action                  the one thing they can do to the whole panel
+```
+
+`count` is Geist Mono (§5). Applied to Invoices, Agent runs, Activity and the
+notification popover; verified identical in Chrome — same `#F5F5F5` ground, same 12/16px
+padding, title at 18.16:1.
+
+> A bare 14px word on white gives the eye nothing to land on. That is not a typography
+> problem; it is a missing ground.
+
+It is **adjacent to §21.6 `SectionHeader`**, one of the twelve patterns §24.8 still holds
+as PROPOSED. This is a PANEL header rather than a page-section header, and it stays in
+the prototypes until that item is settled — promoting it means touching §24.8.
+
 **Decided the same day, on the strength of this pass:** `--muted-foreground` `#707070`,
 the source policy (§2), and the engines for calendar, chart and data table (§19). Calendar
 and Chart were deliberately NOT coded during the pass — neither had a primitive, and

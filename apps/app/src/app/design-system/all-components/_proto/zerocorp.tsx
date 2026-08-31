@@ -13,7 +13,7 @@ import {
   XIcon,
 } from "@phosphor-icons/react/dist/ssr";
 import { Alert, Button, IconButton, StatusBadge, type StatusTone } from "@zerocorp/ui";
-import { Demo, cx } from "./shell";
+import { Demo, PanelHeader, cx } from "./shell";
 
 /* ── Credit / usage meter ─────────────────────────────────────────────────── */
 
@@ -158,21 +158,16 @@ export function BillingDemo() {
       </div>
 
       <div className="border-border flex flex-col border">
-        {/*
-          The header is anchored: --muted ground, an icon, and the count. A bare 14px
-          word floating on white gives the eye nothing to land on, which is exactly what
-          the review reported.
-        */}
-        <div className="border-border bg-muted flex flex-wrap items-center justify-between gap-3 border-b px-4 py-3">
-          <span className="text-label text-foreground inline-flex items-center gap-2">
-            <ReceiptIcon size={16} weight="regular" aria-hidden="true" className="text-muted-foreground" />
-            Invoices
-            <span className="text-caption text-muted-foreground font-mono">3</span>
-          </span>
-          <Button size="sm" variant="secondary" icon={DownloadSimpleIcon}>
-            Download all
-          </Button>
-        </div>
+        <PanelHeader
+          icon={ReceiptIcon}
+          title="Invoices"
+          count={INVOICES.length}
+          action={
+            <Button size="sm" variant="secondary" icon={DownloadSimpleIcon}>
+              Download all
+            </Button>
+          }
+        />
         {INVOICES.map((inv) => (
           <div
             key={inv.date}
@@ -278,10 +273,7 @@ export function AIReviewDemo() {
           Agents draft and queue work, but nothing publishes until you approve it.
         </Alert>
         <div className="border-border flex flex-col border">
-          <div className="border-border flex items-center justify-between border-b px-3 py-2">
-            <span className="text-label">Agent runs</span>
-            <span className="text-caption text-muted-foreground font-mono">last 24 h</span>
-          </div>
+          <PanelHeader icon={RobotIcon} title="Agent runs" count={3} meta="last 24 h" />
           {[
             ["Content agent", "4 posts drafted", "success", "18 credits"],
             ["SEO agent", "Keyword refresh", "processing", "running"],

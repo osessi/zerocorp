@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactNode } from "react";
+import type { ComponentType, ReactNode } from "react";
 import { WarningIcon } from "@phosphor-icons/react/dist/ssr";
 
 /**
@@ -80,6 +80,57 @@ export function Arbitration({ title, children }: { title: string; children: Reac
         {title}
       </div>
       <div className="text-body-sm text-muted-foreground flex flex-col gap-2">{children}</div>
+    </div>
+  );
+}
+
+/**
+ * PanelHeader — the top band of a bordered container.
+ *
+ * Validated on the Invoices block, 2026-08-31, then extracted rather than copied. A bare
+ * 14px word floating on white gives the eye nothing to land on; the --muted band, the
+ * glyph and the count together make the panel findable when five of them share a screen.
+ *
+ * Three slots, and the order is the point:
+ *
+ *   icon + title + count   what this is, and how much of it there is
+ *   meta                   a qualifier the user does not act on — "last 24 h"
+ *   action                 the one thing they can do to the whole panel
+ *
+ * `count` is rendered in Geist Mono. §5: any number a user compares.
+ *
+ * ADJACENT TO §21.6 `SectionHeader`, which is one of the twelve patterns §24.8 still
+ * holds as PROPOSED. This is a PANEL header, not a page-section header, and it lives in
+ * the prototypes until that item is settled — promoting it means touching §24.8.
+ */
+export function PanelHeader({
+  icon: Icon,
+  title,
+  count,
+  meta,
+  action,
+}: {
+  icon?: ComponentType<{ size?: number; weight?: "regular"; className?: string; "aria-hidden"?: boolean }>;
+  title: string;
+  count?: number;
+  meta?: string;
+  action?: ReactNode;
+}) {
+  return (
+    <div className="border-border bg-muted flex flex-wrap items-center justify-between gap-3 border-b px-4 py-3">
+      <span className="text-label text-foreground inline-flex items-center gap-2">
+        {Icon ? (
+          <Icon size={16} weight="regular" aria-hidden className="text-muted-foreground" />
+        ) : null}
+        {title}
+        {count !== undefined ? (
+          <span className="text-caption text-muted-foreground font-mono">{count}</span>
+        ) : null}
+      </span>
+      <span className="flex items-center gap-3">
+        {meta ? <span className="text-caption text-muted-foreground font-mono">{meta}</span> : null}
+        {action}
+      </span>
     </div>
   );
 }

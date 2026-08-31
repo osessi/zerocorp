@@ -6,11 +6,12 @@ import {
   CaretUpDownIcon,
   DotsThreeIcon,
   FileTextIcon,
+  PulseIcon,
   RobotIcon,
   UserIcon,
 } from "@phosphor-icons/react/dist/ssr";
 import { Button, Checkbox, IconButton, StatusBadge, type StatusTone } from "@zerocorp/ui";
-import { Demo, cx } from "./shell";
+import { Demo, PanelHeader, cx } from "./shell";
 import { TONE_GLYPH, TONE_INK, type Tone } from "./feedback";
 
 /* ── Card ─────────────────────────────────────────────────────────────────── */
@@ -244,6 +245,13 @@ const ACTIVITY: { actor: string; agent: boolean; event: string; at: string; tone
 export function ActivityFeedDemo() {
   return (
     <Demo className="p-0">
+      <PanelHeader
+        icon={PulseIcon}
+        title="Activity"
+        count={ACTIVITY.length}
+        meta="today"
+        action={<Button size="sm" variant="ghost">View all</Button>}
+      />
       <ul className="flex flex-col">
         {ACTIVITY.map((a) => (
           <li key={a.event} className="border-border hover:bg-accent flex items-start gap-3 border-b p-3 last:border-b-0">
