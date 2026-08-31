@@ -187,11 +187,24 @@ describe("CommandMenu — a combobox, not a list of buttons", () => {
     expect(screen.queryByText("Actions")).toBeNull();
   });
 
-  it("never removes the input's focus ring", async () => {
+  it("indicates focus on the header rule, not as a ring around the input", async () => {
+    // The input is auto-focused and keeps DOM focus for the palette's whole life —
+    // Combobox drives the list through aria-activedescendant. A ring that is always on
+    // indicates nothing; it just draws a teal box around the search field.
+    render(<CommandMenu items={COMMANDS} open onOpenChange={() => {}} />);
+    const input = await screen.findByRole("combobox");
+    const row = input.parentElement;
+    expect(row?.className).toContain("has-[:focus-visible]:border-b-primary");
+    expect(row?.className).toContain("has-[:focus-visible]:border-b-2");
+  });
+
+  it("hides that ring without removing it", async () => {
+    // outline-hidden, not outline-none. Tailwind v4 renamed it for exactly this case: it
+    // keeps a transparent outline so Windows High Contrast Mode still renders one.
     render(<CommandMenu items={COMMANDS} open onOpenChange={() => {}} />);
     const input = await screen.findByRole("combobox");
     expect(input.className).not.toContain("outline-none");
-    expect(input.className).toContain("focus-visible:outline-ring");
+    expect(input.className).toContain("outline-hidden");
   });
 
   it("takes a translated empty message rather than hard-coding English", async () => {

@@ -1257,6 +1257,15 @@ CommandMenu                    ⌘K
    Top-anchored, not centred: a palette that grows and shrinks while you type would jump
    around a vertical centre.
    emptyMessage is a prop, so the empty state is translatable.
+   NO focus ring on the input. It is auto-focused when the palette opens and keeps DOM
+   focus for the whole life of the component — Combobox drives the list through
+   aria-activedescendant — so a ring is always on and indicates nothing; it just draws a
+   teal box around the search field. Reported 2026-08-31.
+   The indicator is the header's bottom RULE turning --primary at 2px. Because it is
+   :focus-visible, a mouse-opened palette shows a clean 1px --border rule and a
+   keyboard-opened one shows the teal. Verified in Chrome on both paths.
+   The input uses outline-hidden, NOT outline-none: Tailwind v4 renamed it for exactly
+   this case, keeping the outline for forced-colors mode.
 
 overlay-styles.ts              one floating surface, not five
 → packages/ui/src/overlay/overlay-styles.ts

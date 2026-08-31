@@ -6,6 +6,7 @@ import { CheckIcon, MagnifyingGlassIcon } from "@phosphor-icons/react/dist/ssr";
 import { useEffect } from "react";
 import type { GlyphComponent } from "../button/Button";
 import { cx } from "../field/control-styles";
+import { COLOR_TRANSITION } from "../motion";
 import {
   OVERLAY_BACKDROP,
   OVERLAY_GROUP_LABEL,
@@ -111,7 +112,25 @@ export function CommandMenu({
             }}
             itemToStringLabel={(item: CommandItem) => item.label}
           >
-            <div className="border-border flex items-center gap-2 border-b px-3">
+            {/*
+              The focus indicator is this row's bottom RULE, not a ring around the input.
+
+              The input is auto-focused when the palette opens and keeps DOM focus for its
+              whole life — Combobox drives the list through aria-activedescendant, so focus
+              never moves. A ring that is always on indicates nothing; it just draws a teal
+              box around the search field. Reported in review 2026-08-31.
+
+              The rule turning --primary is a real indicator: it appears on focus, it is
+              2px against a 1px resting border, and it reads as "this is where you type"
+              rather than as a frame. §1 — hierarchy from borders.
+            */}
+            <div
+              className={cx(
+                "border-border flex items-center gap-2 border-b px-3",
+                "has-[:focus-visible]:border-b-primary has-[:focus-visible]:border-b-2",
+                COLOR_TRANSITION,
+              )}
+            >
               <MagnifyingGlassIcon
                 size={16}
                 className="text-muted-foreground shrink-0"
@@ -122,13 +141,16 @@ export function CommandMenu({
                 placeholder={placeholder}
                 aria-label="Search"
                 /*
-                  Inset ring, never outline-none. The input fills the popup edge to edge,
-                  so an outset ring would spill past the border.
+                  outline-hidden, NOT outline-none. Tailwind v4 renamed it for exactly this
+                  case: it hides the ring visually while keeping a transparent outline, so
+                  Windows High Contrast Mode still renders one. outline-none would remove
+                  the indicator outright, which is the defect the CI rule catches.
+
+                  The indicator lives on the wrapper's rule instead — see above.
                 */
                 className={cx(
                   "text-body sm:text-body-sm text-foreground placeholder:text-muted-foreground",
-                  "h-12 w-full bg-transparent",
-                  "focus-visible:outline-ring focus-visible:outline-2 focus-visible:-outline-offset-2",
+                  "h-12 w-full bg-transparent outline-hidden",
                 )}
               />
             </div>
