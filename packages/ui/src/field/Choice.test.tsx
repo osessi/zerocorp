@@ -331,6 +331,21 @@ describe("Switch — rectangle", () => {
     expect(words.length).toBeGreaterThanOrEqual(2);
   });
 
+  it("never paints the thumb with the page colour", () => {
+    // bg-background put a #0A0A0A thumb on a #262626 track in dark — 1.31:1 — on the
+    // one element that carries the position signal. Light was no better: 1.05:1.
+    // The thumb takes the same ink as the state word beside it. Measured 2026-08-31.
+    render(
+      <Choice label="Autopilot">
+        <Switch />
+      </Choice>,
+    );
+    const thumb = screen.getByRole("switch").querySelector("span:not([aria-hidden])");
+    expect(thumb?.className).not.toContain("bg-background");
+    expect(thumb?.className).toContain("bg-foreground");
+    expect(thumb?.className).toContain("[[data-checked]_&]:bg-primary-foreground");
+  });
+
   it("is inert when disabled", async () => {
     const user = userEvent.setup();
     render(

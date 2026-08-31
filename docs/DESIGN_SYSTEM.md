@@ -1010,6 +1010,8 @@ Switch                         labelled rectangle, 56×20, --radius-none
    labelOn / labelOff are props with English defaults, so a caller supplies translated
    values once an i18n layer exists. The words are aria-hidden — role="switch" and
    aria-checked already announce the state.
+   The thumb is the same ink as the state word: --foreground off, --primary-foreground
+   on. Never --background — the page colour makes the thumb vanish in both themes.
    A switch applies immediately and stays immediately reversible. No confirmation.
    When a change is not reversible, use a Checkbox and a submit action instead.
 
@@ -1623,7 +1625,7 @@ radius 0, radio 16×16 round, switch 36×20 radius 0, control border `#949494` l
 `#6B6B6B` dark — the same boundary token as every text control. The switch was later
 widened to 56×20 by the variant review above; the rest of this record still holds.
 
-**Four findings — the fourth from a second pass in dark mode.**
+**Five findings — the last two from a second pass in dark mode.**
 
 | | Finding | Fix |
 |---|---|---|
@@ -1631,10 +1633,16 @@ widened to 56×20 by the variant review above; the rest of this record still hol
 | 2 | **A group's description rendered after its options.** It explains the choice, so it has to arrive before the choices do | In group mode the description sits under the legend; the error still comes last |
 | 3 | **happy-dom reported that no key toggles a checkbox.** Space, Enter, every variant — all false | **Not a defect.** Chrome confirms Space toggles false → true → false, the switch toggles, and ArrowDown moves the radio selection. happy-dom does not run Base UI's key handling on a `span[role=checkbox]`. The unit test now asserts what happy-dom can observe — Tab reachability — and records that actuation is browser-verified |
 | 4 | **In dark mode an unchecked checkbox and radio were unreadable.** `CHOICE_BOX` filled the control with `--background` — the page colour. On white that is invisible-by-accident and harmless; on `#0A0A0A` the control became a hole, and only a thin `#6B6B6B` border said anything was there at all | `bg-background` → `bg-muted`. The control now sits on `#262626` in dark and `#F5F5F5` in light, so it reads as a surface to hit in both. The Switch already used `--muted` for its off track and never had the problem — the fix also makes all three choice controls agree |
+| 5 | **The switch thumb was still the page colour.** Fixing the box did not fix the toggle: `SWITCH_THUMB` kept `bg-background`, so the thumb measured **1.31:1** against its off track in dark and **1.05:1** in light. It is the one element that carries the position signal | The thumb takes the same ink as the state word beside it: `--foreground` off, `--primary-foreground` on. Now 14.5:1 off in dark, 18.2:1 off in light, 5.14:1 on in both. Guarded by a unit test |
 
 Finding 3 is the one worth keeping. **A simulated DOM reporting a missing behaviour is
 not evidence that the behaviour is missing.** Asserting the negative would have recorded
 an accessibility bug that does not exist, and someone would have "fixed" it later.
+
+Finding 5 is the sharper lesson: **fixing the rule is not the same as fixing every place
+the rule was broken.** Finding 4 changed `CHOICE_BOX` and stopped there. `SWITCH_THUMB`
+carried the identical mistake, one constant lower in the same file, and shipped. The user
+had to report the same defect twice.
 
 Finding 4 is the reason the review is done twice. Every contrast rule in §4 was satisfied:
 the border cleared WCAG 1.4.11 at 3.72:1 in dark, and 1.4.11 says nothing about the fill.

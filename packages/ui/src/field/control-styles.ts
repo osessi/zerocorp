@@ -118,9 +118,18 @@ export const SWITCH_TRACK = [
   "data-checked:bg-primary data-checked:border-primary",
 ].join(" ");
 
-/** Switch thumb — square, and it slides. Motion communicates the state change (§10). */
+/**
+ * Switch thumb — square, and it slides. Motion communicates the state change (§10).
+ *
+ * The thumb is the same ink as the state word beside it: --foreground when off,
+ * --primary-foreground when on. It was --background, the page colour, which put a
+ * #0A0A0A thumb on a #262626 track in dark — 1.31:1, invisible, on the one element
+ * that carries the position signal. Light was no better: #FFFFFF on #F5F5F5, 1.05:1.
+ * Reported in review 2026-08-31.
+ */
 export const SWITCH_THUMB = [
-  "block size-4 bg-background",
+  "block size-4 bg-foreground",
+  "[[data-checked]_&]:bg-primary-foreground",
   "transition-transform duration-normal ease-out",
   "translate-x-0.5 data-checked:translate-x-9",
 ].join(" ");
