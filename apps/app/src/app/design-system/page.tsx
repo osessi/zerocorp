@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Field, Input, Textarea, Select, Choice, Checkbox, Radio, RadioGroup, Switch, type SelectOption } from "@zerocorp/ui";
+import { SwitchCurrent, SwitchIconic, SwitchLabelled, SwitchTwoCell } from "./_prototype/switch-variants";
 
 /**
  * Design system review surface.
@@ -317,6 +318,88 @@ function ChoiceMatrix() {
   );
 }
 
+const VARIANTS = [
+  { id: "current", name: "Current (validated)", note: "36×20 · colour + position only", Comp: SwitchCurrent },
+  { id: "a", name: "A — Iconic thumb", note: "36×20 · check / minus in the thumb", Comp: SwitchIconic },
+  { id: "b", name: "B — Labelled track", note: "56×20 · the word is inside", Comp: SwitchLabelled },
+  { id: "c", name: "C — Two-cell track", note: "40×20 · mechanical two-position", Comp: SwitchTwoCell },
+] as const;
+
+function SwitchVariants() {
+  return (
+    <div className="flex flex-col gap-6">
+      {/* Side by side, both states, so the OFF/ON difference is judged at a glance. */}
+      <div className="border-border overflow-x-auto border">
+        <table className="w-full min-w-[40rem] border-collapse">
+          <thead>
+            <tr className="border-border border-b">
+              {["Variant", "Off", "On", "Disabled off", "Disabled on"].map((h) => (
+                <th key={h} className="text-overline text-muted-foreground px-4 py-3 text-left font-medium uppercase">{h}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {VARIANTS.map(({ id, name, note, Comp }, i) => (
+              <tr key={id} className={i > 0 ? "border-border border-t" : ""}>
+                <td className="px-4 py-4">
+                  <span className="flex flex-col">
+                    <span className="text-body-sm">{name}</span>
+                    <span className="text-caption text-muted-foreground">{note}</span>
+                  </span>
+                </td>
+                <td className="px-4 py-4"><Comp /></td>
+                <td className="px-4 py-4"><Comp defaultChecked /></td>
+                <td className="px-4 py-4"><Comp disabled /></td>
+                <td className="px-4 py-4"><Comp disabled defaultChecked /></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* In context: a consequential toggle inside a settings list. */}
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        {VARIANTS.map(({ id, name, Comp }) => (
+          <div key={id} className="border-border flex flex-col gap-3 border p-4">
+            <span className="text-overline text-muted-foreground uppercase">{name} — in context</span>
+            <div className="flex flex-col gap-1">
+              {[
+                { label: "Autopilot", desc: "Agents act without waiting for your approval", on: true },
+                { label: "Publish articles automatically", desc: "New posts go live without review", on: false },
+                { label: "Outbound email sequences", desc: "Send from your warmed domain", on: false },
+              ].map((r) => (
+                <label key={r.label} className="hover:bg-accent flex cursor-pointer items-start gap-3 py-1 transition-colors duration-fast">
+                  <span className="mt-0.5"><Comp defaultChecked={r.on} /></span>
+                  <span className="flex min-w-0 flex-col">
+                    <span className="text-body-sm">{r.label}</span>
+                    <span className="text-caption text-muted-foreground">{r.desc}</span>
+                  </span>
+                </label>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Greyscale: the test colour cannot pass. */}
+      <div className="border-border flex flex-col gap-3 border p-4">
+        <span className="text-overline text-muted-foreground uppercase">
+          Greyscale — can you still read the state?
+        </span>
+        <div className="flex flex-wrap items-center gap-8 grayscale">
+          {VARIANTS.map(({ id, name, Comp }) => (
+            <span key={id} className="flex items-center gap-3">
+              <span className="text-caption text-muted-foreground">{name.split(" ")[0]}</span>
+              <Comp />
+              <Comp defaultChecked />
+            </span>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function DesignSystemPage() {
   const [dark, setDark] = useState(false);
 
@@ -382,6 +465,15 @@ export default function DesignSystemPage() {
               the control, the whole row is the click target.
             </p>
             <ChoiceMatrix />
+          </section>
+
+          <section className="flex flex-col gap-4">
+            <h2 className="text-h4">Switch variants — proposals</h2>
+            <p className="text-body-sm text-muted-foreground">
+              The validated switch reads its state from colour and thumb position only,
+              which conflicts with §14. Three proposals, all Lyra, radius 0, teal.
+            </p>
+            <SwitchVariants />
           </section>
 
           <footer className="border-border text-caption text-muted-foreground border-t pt-6">
