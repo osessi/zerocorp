@@ -618,7 +618,13 @@ content and CRM. Status meaning is consistent everywhere:
 success · warning · danger · info · neutral · processing
 ```
 
-Blocked on §4.3 — these have no colour values yet.
+**RESOLVED 2026-08-31.** §4.3 gives colours to five of the six; `StatusBadge` is
+implemented and in the registry (§19).
+
+`neutral` is the exception: it has no status colour of its own and takes the muted pair
+(`--muted-foreground`). That is deliberate — a sixth colour would compete with the five,
+and "no status yet" is genuinely the absence of one. It is the only tone whose border is
+not a status colour.
 
 ### Every component defines five states
 
@@ -1014,6 +1020,25 @@ Switch                         labelled rectangle, 56×20, --radius-none
    on. Never --background — the page colour makes the thumb vanish in both themes.
    A switch applies immediately and stays immediately reversible. No confirmation.
    When a change is not reversible, use a Checkbox and a submit action instead.
+
+StatusBadge                    one status system for the whole product
+→ packages/ui/src/status-badge/StatusBadge.tsx
+→ VALIDATED — A + C chosen and visually reviewed 2026-08-31
+→ MIT · reviewed 2026-08-31
+   ONE component, two emphases — never two components.
+     default    outlined, the page shows through. Repeats eight times in a table
+                without taking it over.
+     prominent  solid fill. For the few places where the status is the point.
+   Six tones: success · processing · warning · danger · info · neutral.
+   Every tone carries a Phosphor glyph of a DIFFERENT SHAPE, Regular weight in both
+   emphases. This is not decoration: §4.3 tuned the five colours to 4.83:1–5.36:1,
+   a deliberately even set, so in greyscale they collapse to one grey. The glyph is
+   the only thing a colour-blind reader gets.
+   The label is a required prop. There is no icon-only badge and no way to build one.
+   prominent inks with --background, which flips with the theme exactly as the status
+   colours do. A theme-stable near-white measured 1.78:1–3.61:1 on the dark tones.
+   neutral outlines with --muted-foreground, never --border (1.26:1 / 1.31:1).
+   The label wraps; no whitespace-nowrap. §5 — no layout may depend on a string length.
 
 control-styles.ts              the shared visual contract
 → packages/ui/src/field/control-styles.ts
@@ -1800,10 +1825,55 @@ problem, the current value, the proposal, the alternatives, the trade-offs and t
 
 ---
 
+### 21.20 StatusBadge — treatment review, 2026-08-31
+
+Three treatments of the same six tones, compared on a dense eight-row table, a detail
+header and a greyscale panel. Only the container varied — same labels, same icons.
+
+| | Treatment | Outcome |
+|---|---|---|
+| A | **Outlined chip** — border and label in the status colour | **Chosen as `default`.** Repeats without taking a table over |
+| B | **Bare line** — icon in colour, label at `--foreground` | **Not built.** Best label contrast by far (19.8:1 against 4.74–5.36:1) and the calmest table, but too light beside an `h3`. Kept on record; it is the natural third emphasis if a denser surface ever needs one |
+| C | **Solid fill** — the container is the colour | **Chosen as `prominent`** |
+
+**What the comparison actually settled.**
+
+*Greyscale is not a side test — it is the test.* §4.3 tuned the five status colours to
+sit between 4.83:1 and 5.36:1, a deliberately even set so no status shouts louder than
+another. Even contrast has a consequence nobody had written down: **in greyscale all six
+tones collapse to nearly the same grey, in every treatment.** Colour separates nothing
+for a colour-blind reader. The glyph is the whole system. §14's "colour is never the only
+carrier" is not a precaution here — remove the icon and the component stops working.
+
+*A fixed ink cannot sit on a flipping fill.* C was first built with `--primary-foreground`,
+the only theme-stable near-white. Measured on the dark-mode tones it gave **1.78:1 to
+3.61:1 — all six below the 4.5:1 floor.** The status colours flip with the theme, so the
+ink has to flip with them. `--background` already does, and needed no new token:
+
+```text
+prominent, ink = --background      light  4.74 – 5.36:1      dark  5.26 – 10.64:1
+```
+
+*The review prototype carried a live accessibility defect.* Its `neutral` tone outlined
+with `--border` — **1.26:1 light, 1.31:1 dark**, the same WCAG 1.4.11 failure §4.4 had
+already fixed for form controls. It had been copied forward before that fix. `neutral`
+now outlines with `--muted-foreground` (4.74:1 / 7.85:1), which also makes it consistent
+with the other five, where border and label are the same colour.
+
+**Verified in Chrome.** 24 combinations — 2 emphases × 6 tones × 2 themes — all clear
+4.5:1 for the label and 3:1 for the border. At 375px the page has no horizontal overflow.
+A French label 60% longer than its English original wraps to three lines in a 128px
+column with the icon held on the first line; badge height goes 22px → 54px, so nothing is
+a fixed-height container holding translatable text (§5). No badge is focusable, none
+claims a role, every icon is `aria-hidden`, and a table cell reads "Status: Active".
+
+---
+
 ## 24. Open items
 
 Resolved 2026-08-31: semantic status colours (§4.3), form control boundaries (§4.4, now `#949494` at 3.03:1),
-and the primitive layer (§2 — Base UI, now the shadcn/ui default).
+the primitive layer (§2 — Base UI, now the shadcn/ui default), and the status badge treatment
+(was item 15 — outlined default plus a solid prominent variant, §19 and §21.20).
 
 Added 2026-08-31: the Dashboard Visual Language (§21). Adopting a structural reference
 raises seven questions a screenshot cannot answer — they are items 8 to 14 below.
@@ -1824,7 +1894,6 @@ raises seven questions a screenshot cannot answer — they are items 8 to 14 bel
 | 12 | **Table row height, column widths, hover and click target** (§21.8) | `DataTableLayout` |
 | 13 | **Drawer min/max width and motion** (§21.13) | `RightDrawer` |
 | 14 | **Overview and chart tokens** (§21.14) — series colours, axes, grid, empty and loading states | The Overview screen |
-| 15 | **Status badge treatment** (§21.19) — outlined with a marker is a proposal, not an observation | `StatusBadge`, every status surface |
 
 ---
 

@@ -12,3 +12,4 @@
  * without a licence review and adaptation to ZeroCorp tokens.
  */
 export * from "./field/index";
+export * from "./status-badge/index";
