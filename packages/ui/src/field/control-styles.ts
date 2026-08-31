@@ -67,3 +67,53 @@ export function controlTone(state: { invalid: boolean; valid: boolean }): string
 export function cx(...parts: Array<string | false | undefined>): string {
   return parts.filter(Boolean).join(" ");
 }
+
+/* ──────────────────────────────────────────────────────────────────────────────
+   Choice controls — Checkbox, Radio, Switch.
+   ────────────────────────────────────────────────────────────────────────────── */
+
+/**
+ * The 16px control surface.
+ *
+ * A checkbox border is a control boundary, so it uses `--input` and inherits the same
+ * WCAG 1.4.11 guarantee as a text field. Using `--border` here would reintroduce the
+ * 1.26:1 failure §4.4 fixed.
+ *
+ * 16px pairs with the 14px label and its 20px line box. The 24×24 target required by
+ * WCAG 2.5.8 comes from the label row wrapping the control, not from the box itself.
+ */
+export const CHOICE_BOX = [
+  "relative inline-flex size-4 shrink-0 items-center justify-center",
+  "border bg-background",
+  "transition-colors duration-normal ease-out",
+].join(" ");
+
+/** Checked: filled with the accent. Teal marks the chosen state. */
+export const CHOICE_CHECKED =
+  "data-checked:bg-primary data-checked:border-primary data-checked:text-primary-foreground";
+
+/** Radio only — the semantic exception to --radius-none, decided 2026-08-31. */
+export const CHOICE_CIRCLE = "rounded-full";
+
+/**
+ * Switch track — a rectangle, not a pill.
+ *
+ * Unlike the radio, a rectangular switch creates no semantic ambiguity: a switch is
+ * still a switch. It is one of the few places where radius 0 produces something
+ * distinctive rather than merely restrained.
+ *
+ * 36×20 gives the thumb a full 16px of travel.
+ */
+export const SWITCH_TRACK = [
+  "relative inline-flex h-5 w-9 shrink-0 items-center",
+  "border bg-muted",
+  "transition-colors duration-normal ease-out",
+  "data-checked:bg-primary data-checked:border-primary",
+].join(" ");
+
+/** Switch thumb — square, and it slides. Motion communicates the state change (§10). */
+export const SWITCH_THUMB = [
+  "block size-4 bg-background",
+  "transition-transform duration-normal ease-out",
+  "translate-x-0.5 data-checked:translate-x-4",
+].join(" ");

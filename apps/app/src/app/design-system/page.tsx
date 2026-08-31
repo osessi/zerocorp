@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Field, Input, Textarea, Select, type SelectOption } from "@zerocorp/ui";
+import { Field, Input, Textarea, Select, Choice, Checkbox, Radio, RadioGroup, Switch, type SelectOption } from "@zerocorp/ui";
 
 /**
  * Design system review surface.
@@ -221,6 +221,102 @@ function SelectMatrix() {
   );
 }
 
+function ChoiceMatrix() {
+  return (
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <Case title="Checkbox" note="square · radius 0 · click the text">
+        <Choice label="Send me the daily business report">
+          <Checkbox />
+        </Choice>
+      </Case>
+
+      <Case title="Checkbox + description" note="indented under the label">
+        <Choice
+          label="I confirm the information is accurate"
+          description="This is a legal declaration made under penalty of perjury"
+        >
+          <Checkbox />
+        </Choice>
+      </Case>
+
+      <Case title="Checkbox error" note="standalone owns its message">
+        <Choice label="I accept the terms" error="You must accept the terms to continue">
+          <Checkbox />
+        </Choice>
+      </Case>
+
+      <Case title="Checkbox disabled" note="aria-disabled, still discoverable">
+        <Choice label="Locked after filing" disabled>
+          <Checkbox disabled defaultChecked />
+        </Choice>
+      </Case>
+
+      <Case title="Switch" note="rectangle · square thumb · radius 0">
+        <Choice label="Publish articles automatically">
+          <Switch defaultChecked />
+        </Choice>
+      </Case>
+
+      <Case title="Switch + description" note="applies immediately">
+        <Choice
+          label="Autopilot"
+          description="Agents act without waiting for your approval"
+        >
+          <Switch />
+        </Choice>
+      </Case>
+
+      <Case title="Radio group" note="circle — the deliberate exception">
+        <Field as="group" label="State of formation" description="Wyoming is the usual choice">
+          <RadioGroup defaultValue="wy">
+            <Choice label="Wyoming"><Radio value="wy" /></Choice>
+            <Choice label="Delaware"><Radio value="de" /></Choice>
+            <Choice label="New Mexico"><Radio value="nm" /></Choice>
+          </RadioGroup>
+        </Field>
+      </Case>
+
+      <Case title="Radio group error" note="one message for the whole group">
+        <Field as="group" label="Entity type" error="Choose an entity type">
+          <RadioGroup>
+            <Choice label="LLC — single member"><Radio value="llc" /></Choice>
+            <Choice label="C Corporation"><Radio value="ccorp" /></Choice>
+          </RadioGroup>
+        </Field>
+      </Case>
+
+      <Case title="Checkbox group" note="Field as=group with checkboxes">
+        <Field as="group" label="Notify me about" description="Choose as many as you like">
+          <Choice label="Formation status changes"><Checkbox defaultChecked /></Choice>
+          <Choice label="Documents awaiting review"><Checkbox /></Choice>
+          <Choice label="Agent activity"><Checkbox /></Choice>
+        </Field>
+      </Case>
+
+      <Case title="Long option label" note="i18n — wraps, control stays aligned">
+        <Field as="group" label="Type d'entité">
+          <RadioGroup defaultValue="a">
+            <Choice label="Société à responsabilité limitée à membre unique détenue par un non-résident">
+              <Radio value="a" />
+            </Choice>
+            <Choice label="Corporation"><Radio value="b" /></Choice>
+          </RadioGroup>
+        </Field>
+      </Case>
+
+      <Case title="All three together" note="same box size, same focus ring">
+        <Field as="group" label="Mixed controls">
+          <Choice label="Checkbox"><Checkbox /></Choice>
+          <Choice label="Switch"><Switch /></Choice>
+          <RadioGroup defaultValue="one">
+            <Choice label="Radio"><Radio value="one" /></Choice>
+          </RadioGroup>
+        </Field>
+      </Case>
+    </div>
+  );
+}
+
 export default function DesignSystemPage() {
   const [dark, setDark] = useState(false);
 
@@ -277,6 +373,15 @@ export default function DesignSystemPage() {
               aria-labelledby from the Field.
             </p>
             <SelectMatrix />
+          </section>
+
+          <section className="flex flex-col gap-4">
+            <h2 className="text-h4">Choice controls</h2>
+            <p className="text-body-sm text-muted-foreground">
+              Checkbox square, Radio circle, Switch rectangle. Same Field shell, label beside
+              the control, the whole row is the click target.
+            </p>
+            <ChoiceMatrix />
           </section>
 
           <footer className="border-border text-caption text-muted-foreground border-t pt-6">

@@ -934,7 +934,9 @@ Format:
 ```text
 Field                          the form shell — THE REFERENCE IMPLEMENTATION
 → packages/ui/src/field/Field.tsx  ·  built on Base UI Field (@base-ui/react 1.7.0)
-→ VALIDATED — implemented 2026-08-31
+→ VALIDATED — implemented 2026-08-31, group mode added 2026-08-31
+   as="control"  label above a full-width control
+   as="group"    a <fieldset> with a <legend> — a <label> cannot label a set of radios
 → MIT · reviewed 2026-08-31
    label (required) · description · error · success · required · disabled · loading
    aria-describedby wired · role=alert on error · role=status on success
@@ -967,6 +969,40 @@ Select                         the single-choice control
    Popup: at least trigger width, free to grow for a long option, capped at
    --available-width. Options are never truncated; they wrap when the popup runs out
    of room.
+
+Choice                         the inline label row for choice controls
+→ packages/ui/src/field/Choice.tsx
+→ VALIDATED — implemented and visually reviewed 2026-08-31
+→ MIT · reviewed 2026-08-31
+   Not a second shell: same field-state context, same message layer as Field, only
+   the arrangement differs. The label WRAPS the control, so the whole row is the
+   click target. Standalone it opens a Field.Root and owns its own message; inside a
+   group it opens a Field.Item and stays quiet — the group owns the message.
+
+Checkbox                       square, --radius-none
+→ packages/ui/src/field/Checkbox.tsx  ·  Base UI Checkbox
+→ VALIDATED — implemented and visually reviewed 2026-08-31
+→ MIT · reviewed 2026-08-31
+   Supports indeterminate. Border uses --input, so it inherits the same WCAG 1.4.11
+   guarantee as a text field.
+
+Radio · RadioGroup             circle — the one deliberate exception to --radius-none
+→ packages/ui/src/field/Radio.tsx  ·  Base UI Radio + RadioGroup
+→ VALIDATED — implemented and visually reviewed 2026-08-31
+→ MIT · reviewed 2026-08-31
+   §7 already allows it: a circle is a component decision, not a scale value. Square
+   means many, round means one — a forty-year-old signal. A square checkbox and a
+   square radio in one form would be genuinely ambiguous.
+   RadioGroup takes its accessible name from the surrounding Field's <legend>.
+
+Switch                         rectangle with a square thumb, --radius-none
+→ packages/ui/src/field/Switch.tsx  ·  Base UI Switch
+→ VALIDATED — implemented and visually reviewed 2026-08-31
+→ MIT · reviewed 2026-08-31
+   Dropping the conventional pill creates no ambiguity: a switch is still a switch.
+   One of the few places radius 0 produces something distinctive rather than merely
+   restrained. A switch applies immediately; when a change needs confirming, use a
+   Checkbox and a submit action.
 
 control-styles.ts              the shared visual contract
 → packages/ui/src/field/control-styles.ts
@@ -1538,6 +1574,26 @@ Reads as *"Your business is running."*
 **Never expose raw JSON to a normal customer.**
 
 **Settings** — section navigation · settings panel · save states · danger zone.
+
+---
+
+#### Visual review — Choice, Checkbox, Radio, Switch, 2026-08-31
+
+Reviewed at 1440px and 375px, both themes. Geometry measured in Chrome: checkbox 16×16
+radius 0, radio 16×16 round, switch 36×20 radius 0, control border `#949494` light and
+`#6B6B6B` dark — the same boundary token as every text control.
+
+**Three findings.**
+
+| | Finding | Fix |
+|---|---|---|
+| 1 | **The click target was 20px tall, under the WCAG 2.5.8 minimum of 24×24.** Wrapping the label gave the target its width, not its height: a 14px/20px line box is a 20px row | `py-1` on the label row takes it to 28px. All 19 rows now measure ≥24px. Load-bearing padding, commented as such |
+| 2 | **A group's description rendered after its options.** It explains the choice, so it has to arrive before the choices do | In group mode the description sits under the legend; the error still comes last |
+| 3 | **happy-dom reported that no key toggles a checkbox.** Space, Enter, every variant — all false | **Not a defect.** Chrome confirms Space toggles false → true → false, the switch toggles, and ArrowDown moves the radio selection. happy-dom does not run Base UI's key handling on a `span[role=checkbox]`. The unit test now asserts what happy-dom can observe — Tab reachability — and records that actuation is browser-verified |
+
+Finding 3 is the one worth keeping. **A simulated DOM reporting a missing behaviour is
+not evidence that the behaviour is missing.** Asserting the negative would have recorded
+an accessibility bug that does not exist, and someone would have "fixed" it later.
 
 ---
 

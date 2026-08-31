@@ -31,6 +31,14 @@ export interface FieldState {
    * rather than growing a parallel one.
    */
   labelId: string;
+  /**
+   * True when the surrounding Field is a <fieldset> group.
+   *
+   * A Choice needs to know: standalone it must open its own Field.Root, because
+   * Field.Label requires one; inside a group the Root already exists and each option
+   * opens a Field.Item instead.
+   */
+  inGroup: boolean;
 }
 
 const EMPTY: FieldState = {
@@ -39,6 +47,7 @@ const EMPTY: FieldState = {
   loading: false,
   describedBy: undefined,
   labelId: "",
+  inGroup: false,
 };
 
 export const FieldStateContext = createContext<FieldState>(EMPTY);
