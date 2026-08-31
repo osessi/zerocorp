@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Field, Input } from "@zerocorp/ui";
+import { Field, Input, Textarea } from "@zerocorp/ui";
 
 /**
  * Design system review surface.
@@ -106,6 +106,52 @@ function Matrix() {
   );
 }
 
+function TextareaMatrix() {
+  return (
+    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <Case title="Default" note="4 rows · vertical resize only">
+        <Field label="Business description">
+          <Textarea placeholder="We help agencies launch faster…" />
+        </Field>
+      </Case>
+
+      <Case title="Filled + description" note="same shell as Input">
+        <Field label="Positioning" description="Two or three sentences is enough">
+          <Textarea defaultValue="We give non-resident founders a US company and a working digital foundation in days, not months." />
+        </Field>
+      </Case>
+
+      <Case title="Rows override" note="rows={8} — grows with content">
+        <Field label="Voice transcript">
+          <Textarea rows={8} defaultValue="Transcribed from the onboarding call…" />
+        </Field>
+      </Case>
+
+      <Case title="Loading" note="spinner sits at the top, not centred">
+        <Field label="Positioning" loading description="Extracting your Business Brain">
+          <Textarea defaultValue="We help agencies…" />
+        </Field>
+      </Case>
+
+      <Case title="Disabled" note="inert · resize also disabled">
+        <Field label="Positioning" disabled description="Available after onboarding">
+          <Textarea disabled defaultValue="Pending" />
+        </Field>
+      </Case>
+
+      <Case title="Error" note="--destructive · role=alert">
+        <Field
+          label="Positioning"
+          description="Two or three sentences"
+          error="Describe what makes you different from competitors"
+        >
+          <Textarea defaultValue="We are the best" />
+        </Field>
+      </Case>
+    </div>
+  );
+}
+
 export default function DesignSystemPage() {
   const [dark, setDark] = useState(false);
 
@@ -129,7 +175,18 @@ export default function DesignSystemPage() {
             </button>
           </header>
 
-          <Matrix />
+          <section className="flex flex-col gap-4">
+            <h2 className="text-h4">Input</h2>
+            <Matrix />
+          </section>
+
+          <section className="flex flex-col gap-4">
+            <h2 className="text-h4">Textarea</h2>
+            <p className="text-body-sm text-muted-foreground">
+              Same Field shell, same tokens, same states. No new pattern.
+            </p>
+            <TextareaMatrix />
+          </section>
 
           <footer className="border-border text-caption text-muted-foreground border-t pt-6">
             Development surface. Not a product feature — see docs/DESIGN_SYSTEM.md §22.

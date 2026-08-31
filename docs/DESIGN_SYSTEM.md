@@ -712,6 +712,15 @@ is the review surface: the real components, not a mockup. Screenshots in
 Both were invisible to typecheck, lint, boundaries and 41 unit tests. **A design system
 needs a human looking at it.** Every component added to the registry gets this pass.
 
+#### Visual review — Textarea, 2026-08-31
+
+Reviewed at 1440px in both themes. **No defects.** The Input fixes hold on a different
+element: focus ring `solid 2px #00786F` at 2px offset, control border `#6B6B6B` in dark
+on both controls, `resize: vertical` and `resize: none` when disabled.
+
+That is the return on extracting `control-styles.ts` — Textarea inherited two fixes it
+never had to be told about.
+
 #### The field shell — IMPLEMENTED, the reference for every form control
 
 ```text
@@ -897,12 +906,28 @@ Field                          the form shell — THE REFERENCE IMPLEMENTATION
    label (required) · description · error · success · required · disabled · loading
    aria-describedby wired · role=alert on error · role=status on success
 
-Input                          the text control
+Input                          the single-line text control
 → packages/ui/src/field/Input.tsx  ·  Base UI Field.Control
-→ VALIDATED — implemented 2026-08-31
+→ VALIDATED — implemented and visually reviewed 2026-08-31
 → MIT · reviewed 2026-08-31
    default · hover · focus · loading · disabled · error · success
    16px type on mobile, 14px from sm — below 16px iOS Safari zooms on focus
+
+Textarea                       the multi-line text control
+→ packages/ui/src/field/Textarea.tsx  ·  Base UI Field.Control rendered as <textarea>
+→ VALIDATED — implemented and visually reviewed 2026-08-31
+→ MIT · reviewed 2026-08-31
+   No new pattern: same Field shell, same context, same style fragments.
+   rows default 4 · vertical resize only · resize disabled when the control is
+   spinner sits at the top, because a tall control has no meaningful middle
+
+control-styles.ts              the shared visual contract
+→ packages/ui/src/field/control-styles.ts
+→ VALIDATED — extracted 2026-08-31 when Textarea arrived
+   CONTROL_BASE · CONTROL_NEUTRAL · CONTROL_FOCUS · CONTROL_DISABLED
+   CONTROL_INVALID · CONTROL_VALID · CONTROL_HEIGHT · controlTone()
+   Select, Combobox, DatePicker and FileUpload compose these. A control that
+   restyles itself instead of composing them is a defect.
 
 Phosphor icons                 CircleNotch used for the loading state
 → @phosphor-icons/react 2.1.10
