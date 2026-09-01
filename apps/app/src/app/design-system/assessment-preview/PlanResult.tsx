@@ -76,18 +76,34 @@ interface Phase {
   id: PlanStep["phase"];
   label: string;
   edge: string;
+  /** Behind the whole card. Very light. */
+  wash: string;
+  /** Behind the icon tile only. Twice the card, so the tile still reads as a tile. */
   tint: string;
   text: string;
   hoverEdge: string;
+  hoverWash: string;
   hoverFill: string;
 }
 
+/**
+ * Three strengths of the same hue, and the ladder is the point.
+ *
+ *   5%   the card. Enough to say "this one belongs to Build" from across the page,
+ *        not enough to touch the contrast of anything written on it.
+ *   10%  the icon tile. Twice the card, so it still reads as a tile ON the card
+ *        rather than as a hole in it.
+ *   100% the tile on hover, and the border.
+ *
+ * Every variant written out. A derived name never reaches Tailwind's scanner, so the
+ * colour silently never appears.
+ */
 const PHASES: Phase[] = [
-  { id: "understand", label: "Understand", edge: "border-chart-1", tint: "bg-chart-1/10", text: "text-chart-1", hoverEdge: "hover:border-chart-1", hoverFill: "group-hover:bg-chart-1 group-hover:text-background" },
-  { id: "plan", label: "Plan", edge: "border-chart-2", tint: "bg-chart-2/10", text: "text-chart-2", hoverEdge: "hover:border-chart-2", hoverFill: "group-hover:bg-chart-2 group-hover:text-background" },
-  { id: "build", label: "Build", edge: "border-chart-3", tint: "bg-chart-3/10", text: "text-chart-3", hoverEdge: "hover:border-chart-3", hoverFill: "group-hover:bg-chart-3 group-hover:text-background" },
-  { id: "launch", label: "Launch", edge: "border-chart-4", tint: "bg-chart-4/10", text: "text-chart-4", hoverEdge: "hover:border-chart-4", hoverFill: "group-hover:bg-chart-4 group-hover:text-background" },
-  { id: "find_customers", label: "Find customers", edge: "border-chart-5", tint: "bg-chart-5/10", text: "text-chart-5", hoverEdge: "hover:border-chart-5", hoverFill: "group-hover:bg-chart-5 group-hover:text-background" },
+  { id: "understand", label: "Understand", edge: "border-chart-1", wash: "bg-chart-1/5", tint: "bg-chart-1/10", text: "text-chart-1", hoverEdge: "hover:border-chart-1", hoverWash: "hover:bg-chart-1/10", hoverFill: "group-hover:bg-chart-1 group-hover:text-background" },
+  { id: "plan", label: "Plan", edge: "border-chart-2", wash: "bg-chart-2/5", tint: "bg-chart-2/10", text: "text-chart-2", hoverEdge: "hover:border-chart-2", hoverWash: "hover:bg-chart-2/10", hoverFill: "group-hover:bg-chart-2 group-hover:text-background" },
+  { id: "build", label: "Build", edge: "border-chart-3", wash: "bg-chart-3/5", tint: "bg-chart-3/10", text: "text-chart-3", hoverEdge: "hover:border-chart-3", hoverWash: "hover:bg-chart-3/10", hoverFill: "group-hover:bg-chart-3 group-hover:text-background" },
+  { id: "launch", label: "Launch", edge: "border-chart-4", wash: "bg-chart-4/5", tint: "bg-chart-4/10", text: "text-chart-4", hoverEdge: "hover:border-chart-4", hoverWash: "hover:bg-chart-4/10", hoverFill: "group-hover:bg-chart-4 group-hover:text-background" },
+  { id: "find_customers", label: "Find customers", edge: "border-chart-5", wash: "bg-chart-5/5", tint: "bg-chart-5/10", text: "text-chart-5", hoverEdge: "hover:border-chart-5", hoverWash: "hover:bg-chart-5/10", hoverFill: "group-hover:bg-chart-5 group-hover:text-background" },
 ];
 
 const RECOMMENDATION = {
@@ -112,17 +128,21 @@ function AnalysisCard({
   eyebrow,
   body,
   accent,
+  wash,
+  edge,
 }: {
   icon: typeof MapPinIcon;
   eyebrow: string;
   body: string;
   accent: string;
+  wash: string;
+  edge: string;
 }) {
   return (
-    <article className="border-border flex flex-col gap-3 border p-5">
+    <article className={cx("flex flex-col gap-3 border p-5", edge, wash)}>
       <div className="flex items-center gap-2">
-        <Icon size={16} weight="regular" className={accent} />
-        <h3 className="text-overline text-muted-foreground">{eyebrow}</h3>
+        <Icon size={16} weight="regular" className={accent} aria-hidden="true" />
+        <h3 className={cx("text-overline", accent)}>{eyebrow}</h3>
       </div>
       <p className="text-body-sm text-pretty">{body}</p>
     </article>
@@ -166,7 +186,9 @@ function StepCard({ step, index, phase }: { step: PlanStep; index: number; phase
       className={cx(
         "group border-border relative flex flex-col border",
         "transition-[border-color,background-color] duration-normal ease-out",
+        phase.wash,
         phase.hoverEdge,
+        phase.hoverWash,
       )}
     >
       <button
@@ -263,8 +285,22 @@ export function PlanResult({ output }: { output: ArchitectOutput }) {
 
       {/* ── Where you are, where you want to go ─────────────────────────── */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <AnalysisCard icon={MapPinIcon} eyebrow="Where you are" body={analysis.whereYouAre} accent="text-chart-2" />
-        <AnalysisCard icon={TargetIcon} eyebrow="Where you want to go" body={analysis.whereYouWantToGo} accent="text-chart-4" />
+        <AnalysisCard
+          icon={MapPinIcon}
+          eyebrow="Where you are"
+          body={analysis.whereYouAre}
+          accent="text-chart-2"
+          edge="border-chart-2"
+          wash="bg-chart-2/5"
+        />
+        <AnalysisCard
+          icon={TargetIcon}
+          eyebrow="Where you want to go"
+          body={analysis.whereYouWantToGo}
+          accent="text-chart-4"
+          edge="border-chart-4"
+          wash="bg-chart-4/5"
+        />
       </div>
 
       {/* ── What is missing ────────────────────────────────────────────── */}
