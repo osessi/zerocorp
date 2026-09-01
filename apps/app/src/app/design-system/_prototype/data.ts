@@ -31,21 +31,51 @@ export const FORMATION_LABEL: Record<FormationState, string> = {
   cancelled: "Cancelled",
 };
 
-export type Tone = "success" | "warning" | "danger" | "info" | "neutral" | "processing";
+export type Tone = "success" | "warning" | "danger" | "info" | "neutral" | "processing" | "ai";
 
+/**
+ * The formation states, and the colour each reads as.
+ *
+ * This is a JOURNEY, so the colours have to progress rather than be handed out. The first
+ * version used teal for four of the nine states, so "verifying identity", "in review" and
+ * "filed" all looked the same and the badge told you almost nothing.
+ *
+ *   grey     nothing has started
+ *   violet   we are gathering from you
+ *   teal     we are working on it
+ *   yellow   it is waiting on a human
+ *   blue     it is with the state, out of our hands
+ *   green    done
+ *   red      it came back
+ *
+ * The rule that makes it readable: the colour says WHO HOLDS IT. Yellow is always "a
+ * person must act", blue is always "an authority has it", teal is always "the machine is
+ * working". A founder learns three colours and can then read any stage.
+ */
 export const FORMATION_TONE: Record<FormationState, Tone> = {
   draft: "neutral",
-  collecting_documents: "info",
+  collecting_documents: "ai",
   verifying_identity: "processing",
-  operator_review: "processing",
-  ready_to_file: "info",
-  filed: "processing",
+  operator_review: "warning",
+  ready_to_file: "processing",
+  filed: "info",
   formed: "success",
-  // Reparable, not terminal — but it needs the founder to act, so it reads as danger.
+  // Reparable, not terminal, but it needs the founder to act, so it reads as danger.
   rejected: "danger",
   cancelled: "neutral",
 };
 
+/** The chip each formation state wears. One map, so the table, the detail and the drawer
+    cannot disagree. */
+export const FORMATION_CHIP: Record<Tone, string> = {
+  neutral: "border-border text-muted-foreground",
+  ai: "bg-ai-subtle border-ai text-ai-ink",
+  processing: "bg-processing-subtle border-processing text-processing-ink",
+  warning: "bg-warning-subtle border-warning text-warning-ink",
+  info: "bg-info-subtle border-info text-info-ink",
+  success: "bg-success-subtle border-success text-success-ink",
+  danger: "bg-destructive-subtle border-destructive text-destructive-ink",
+};
 export type Plan = "Launch" | "Growth" | "Autopilot";
 
 export interface Business {

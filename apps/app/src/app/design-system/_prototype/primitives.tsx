@@ -26,12 +26,15 @@ export const cx = (...p: Array<string | false | undefined>) => p.filter(Boolean)
 /* ── StatusBadge ─────────────────────────────────────────────────────────────
    One status system for the whole product (§4.3, §17). Colour is never the only
    carrier of meaning: the label always states the status.                      */
+/* Tinted, matching the shipped StatusBadge: the badge was border and label only, which is
+   how the whole dashboard came to read monotone. §4.5. */
 const TONE: Record<Tone, string> = {
-  success: "text-success border-success",
-  warning: "text-warning border-warning",
-  danger: "text-destructive border-destructive",
-  info: "text-info border-info",
-  processing: "text-processing border-processing",
+  success: "bg-success-subtle text-success-ink border-success",
+  warning: "bg-warning-subtle text-warning-ink border-warning",
+  danger: "bg-destructive-subtle text-destructive-ink border-destructive",
+  info: "bg-info-subtle text-info-ink border-info",
+  processing: "bg-processing-subtle text-processing-ink border-processing",
+  ai: "bg-ai-subtle text-ai-ink border-ai",
   neutral: "text-muted-foreground border-border",
 };
 
@@ -69,6 +72,7 @@ const AVATAR_TONE: Record<Tone, string> = {
   info: "bg-info-subtle text-info-ink",
   processing: "bg-processing-subtle text-processing-ink",
   neutral: "bg-secondary text-secondary-foreground",
+  ai: "bg-ai-subtle text-ai-ink",
 };
 
 export function Avatar({
@@ -251,6 +255,7 @@ const METRIC_WASH: Record<Tone, string> = {
   info: "bg-info-wash",
   processing: "bg-processing-wash",
   neutral: "",
+  ai: "bg-ai-wash",
 };
 
 const METRIC_TILE: Record<Tone, string> = {
@@ -260,6 +265,7 @@ const METRIC_TILE: Record<Tone, string> = {
   info: "bg-info-subtle border-info text-info-ink",
   processing: "bg-processing-subtle border-processing text-processing-ink",
   neutral: "border-border text-muted-foreground",
+  ai: "bg-ai-subtle border-ai text-ai-ink",
 };
 
 export function MetricGrid({
@@ -349,6 +355,7 @@ const TAB_COUNT_ON: Record<Tone, string> = {
   info: "bg-info border-info text-background",
   processing: "bg-processing border-processing text-background",
   neutral: "bg-foreground border-foreground text-background",
+  ai: "bg-ai border-ai text-background",
 };
 
 const TAB_COUNT_OFF: Record<Tone, string> = {
@@ -358,6 +365,7 @@ const TAB_COUNT_OFF: Record<Tone, string> = {
   info: "bg-info-subtle border-info text-info-ink",
   processing: "bg-processing-subtle border-processing text-processing-ink",
   neutral: "border-border text-muted-foreground",
+  ai: "bg-ai-subtle border-ai text-ai-ink",
 };
 
 export function Tabs({

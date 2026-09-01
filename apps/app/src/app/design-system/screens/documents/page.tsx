@@ -140,11 +140,11 @@ export default function DocumentsScreen() {
                 <span className="flex shrink-0 items-center gap-1">
                   {/* Accept and reject were two grey glyphs side by side, which is the one
                       place on this screen where a mis-click costs something. */}
-                  <button aria-label={`Accept ${d.title}`} disabled={d.state === "owed"} className="bg-success-subtle border-success text-success-ink focus-visible:outline-ring flex size-9 items-center justify-center border transition-[color,background-color,border-color] duration-normal focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-40">
-                    <CheckCircleIcon size={20} />
+                  <button aria-label={`Accept ${d.title}`} disabled={d.state === "owed"} className="bg-success-subtle border-success text-success-ink focus-visible:outline-ring flex size-8 items-center justify-center border transition-[color,background-color,border-color] duration-normal focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-40">
+                    <CheckCircleIcon size={16} />
                   </button>
-                  <button aria-label={`Reject ${d.title}`} disabled={d.state === "owed"} className="bg-destructive-subtle border-destructive text-destructive-ink focus-visible:outline-ring flex size-9 items-center justify-center border transition-[color,background-color,border-color] duration-normal focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-40">
-                    <XCircleIcon size={20} />
+                  <button aria-label={`Reject ${d.title}`} disabled={d.state === "owed"} className="bg-destructive-subtle border-destructive text-destructive-ink focus-visible:outline-ring flex size-8 items-center justify-center border transition-[color,background-color,border-color] duration-normal focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-40">
+                    <XCircleIcon size={16} />
                   </button>
                   <button aria-label={`More actions for ${d.title}`} className="hover:bg-accent focus-visible:outline-ring flex size-9 items-center justify-center transition-[color,background-color,border-color] duration-normal focus-visible:outline-2 focus-visible:-outline-offset-2">
                     <DotsThreeVerticalIcon size={20} />

@@ -60,7 +60,10 @@ export default function OverviewScreen() {
               value: String(inFlight.length),
               sub: `of ${BUSINESSES.length}`,
               icon: <StackIcon size={14} />,
-              tone: "processing",
+              // Violet, not teal. MRR was green and this was teal, which sit next to each
+              // other and read as the same card twice. Violet also matches what the badge
+              // says: a formation in flight is mostly the collecting stage, which is violet.
+              tone: "ai",
               delta: { text: "1 needs your signature", direction: "flat" },
             },
           ]}
