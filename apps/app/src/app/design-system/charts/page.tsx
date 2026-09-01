@@ -18,7 +18,7 @@ import {
   YAxis,
 } from "recharts";
 import { Button } from "@zerocorp/ui";
-import { AXIS, ChartFrame, ChartTooltip, DASH, EmptyChart, GRID_STROKE, seriesColor, type Series } from "./chart";
+import { AREA_FILL_BOTTOM, AREA_FILL_TOP, AXIS, CURVE, ChartFrame, ChartTooltip, DASH, EmptyChart, GRID_STROKE, seriesColor, type Series } from "./chart";
 import { money } from "../_prototype/data";
 
 /**
@@ -39,7 +39,15 @@ const REVENUE = [
   { m: "Aug", launch: 693_00, growth: 2394_00, autopilot: 2397_00 },
 ];
 
+/* Stacked: position in the stack is the second channel, so the strokes stay solid. */
 const PLAN_SERIES: Series[] = [
+  { key: "launch", label: "Launch", slot: 1, pattern: "solid" },
+  { key: "growth", label: "Growth", slot: 2, pattern: "solid" },
+  { key: "autopilot", label: "Autopilot", slot: 3, pattern: "solid" },
+];
+
+/* Overlapping lines cross and share space, so here the dash earns its place. */
+const LINE_SERIES: Series[] = [
   { key: "launch", label: "Launch", slot: 1, pattern: "solid" },
   { key: "growth", label: "Growth", slot: 2, pattern: "dashed" },
   { key: "autopilot", label: "Autopilot", slot: 3, pattern: "dotted" },
@@ -89,11 +97,11 @@ export default function ChartsPage() {
           <div className="flex max-w-2xl flex-col gap-2">
             <h1 className="text-h2">Charts</h1>
             <p className="text-body-sm text-muted-foreground">
-              Recharts as the engine, ZeroCorp for every visual. Five series, all clearing
-              3:1 against the page. They do <span className="text-foreground">not</span> all
-              separate in greyscale and cannot, so every chart carries a second channel:
-              the stroke pattern, repeated in the legend and the tooltip. Turn on Greyscale
-              and the series are still tellable apart.
+              Recharts as the engine, ZeroCorp for every visual. Curves are smooth, area
+              gradients are strong, and strokes are solid. §14 asks that colour never be the
+              only carrier, and a stacked chart already answers it with position in the
+              stack. Dashes are kept for overlapping lines, which is the one case that has
+              no position to fall back on.
             </p>
           </div>
           <div className="flex shrink-0 gap-2">
@@ -127,8 +135,8 @@ export default function ChartsPage() {
                 <defs>
                   {PLAN_SERIES.map((s) => (
                     <linearGradient key={s.key} id={`fill-${s.key}`} x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor={seriesColor(s.slot)} stopOpacity={0.35} />
-                      <stop offset="100%" stopColor={seriesColor(s.slot)} stopOpacity={0.02} />
+                      <stop offset="0%" stopColor={seriesColor(s.slot)} stopOpacity={AREA_FILL_TOP} />
+                      <stop offset="100%" stopColor={seriesColor(s.slot)} stopOpacity={AREA_FILL_BOTTOM} />
                     </linearGradient>
                   ))}
                 </defs>
@@ -156,10 +164,9 @@ export default function ChartsPage() {
                     key={s.key}
                     dataKey={s.key}
                     stackId="revenue"
-                    type="linear"
+                    type={CURVE}
                     stroke={seriesColor(s.slot)}
                     strokeWidth={2}
-                    strokeDasharray={DASH[s.pattern]}
                     fill={`url(#fill-${s.key})`}
                   />
                 ))}
@@ -198,11 +205,11 @@ export default function ChartsPage() {
             </ChartFrame>
           </Section>
 
-          <Section title="Line" note="Trend without magnitude. The dash pattern is the second channel, visible in greyscale.">
+          <Section title="Line" note="Trend without magnitude. Lines cross and share space, so here the dash earns its place as the second channel.">
             <ChartFrame
               title="Revenue trend"
               subtitle="Per plan, last 6 months"
-              series={PLAN_SERIES}
+              series={LINE_SERIES}
             >
               <ResponsiveContainer width="100%" height={220}>
                 <LineChart data={REVENUE} margin={{ left: 4, right: 4, top: 4 }}>
@@ -217,18 +224,18 @@ export default function ChartsPage() {
                         <ChartTooltip
                           label={String(label)}
                           rows={payload.map((p) => {
-                            const s = PLAN_SERIES.find((x) => x.key === p.dataKey)!;
+                            const s = LINE_SERIES.find((x) => x.key === p.dataKey)!;
                             return { key: s.key, name: s.label, value: money(Number(p.value)), slot: s.slot, pattern: s.pattern };
                           })}
                         />
                       ) : null
                     }
                   />
-                  {PLAN_SERIES.map((s) => (
+                  {LINE_SERIES.map((s) => (
                     <Line
                       key={s.key}
                       dataKey={s.key}
-                      type="linear"
+                      type={CURVE}
                       stroke={seriesColor(s.slot)}
                       strokeWidth={2}
                       strokeDasharray={DASH[s.pattern]}

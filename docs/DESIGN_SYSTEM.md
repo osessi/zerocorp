@@ -345,16 +345,33 @@ will not ladder across 110 points of grey.
 > The honest consequence is not a sixth hex value. It is that **a chart may never rely on
 > colour alone**, which §14 already required.
 
-So the chart component carries a second channel and enforces it:
+So a chart carries a second channel. **Which channel depends on the chart**, and getting
+that wrong the first time is worth recording.
 
 ```text
-stroke pattern   solid · dashed · dotted, per series
-legend           shows the SWATCH AND THE STROKE, never a colour square alone
-tooltip          repeats both
+stacked area · stacked bar   position in the stack IS the channel. Strokes stay solid.
+overlapping lines            no position to fall back on, so the dash earns its place.
+legend                       shows the swatch AND the stroke, never a colour square alone.
 ```
 
-`Series.pattern` is a **required** field. A legend rendered from a colour alone would
-defeat the whole arrangement, so the type does not allow one.
+The first version dashed every series on every chart. The rule was right and the
+application was wrong: it turned each chart into a technical schematic and threw away what
+makes an area chart read at a glance.
+
+#### Three rules that were applied where they do not belong
+
+Recorded because each one made the result worse, and each was a correct rule in the wrong
+place.
+
+| Applied | Should be | Why |
+|---|---|---|
+| `type="linear"` on curves | **`natural`** | §7 radius 0 is about the corners of RECTANGLES. A data curve is not a corner, and forcing it angular made every trend a sawtooth |
+| gradient at `0.35 → 0.02` | **`0.85 → 0.05`** | §8 limits ELEVATION to one shadow, on UI surfaces. A gradient inside a data area is not elevation, it is how an area chart shows magnitude |
+| a dash on every series | dash only on **lines** | §14 asks for a second channel, not for that channel to always be a dash |
+
+> A design system rule has a domain. Applying it outside that domain is not discipline, it
+> is damage, and it is harder to notice than breaking the rule outright because the
+> reasoning sounds correct all the way through.
 
 #### What was not taken from the reference
 

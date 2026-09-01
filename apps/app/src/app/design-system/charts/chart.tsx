@@ -33,13 +33,46 @@ export interface Series {
 
 export const seriesColor = (slot: SeriesKey) => `var(--chart-${slot})`;
 
-/** "0" rather than undefined: exactOptionalPropertyTypes rejects the latter, and a
-    string everywhere means no caller has to special-case the solid stroke. */
+/**
+ * The stroke pattern is OPTIONAL and off by default.
+ *
+ * The first version dashed every series on every chart, on the grounds that colour cannot
+ * be the only carrier (§14). The rule is right and the application was wrong: it turned
+ * every chart into a technical schematic and threw away the thing that makes an area chart
+ * read at a glance.
+ *
+ * §14 asks for a second channel, not for that channel to be a dash. A STACKED area or bar
+ * already has one: position in the stack. Series sit in a fixed order, the legend repeats
+ * that order, and no two bands can be confused even in greyscale.
+ *
+ * Dashes are for the one case that genuinely needs them: overlapping LINES, which cross
+ * and share space and have no position to distinguish them.
+ */
 export const DASH: Record<Series["pattern"], string> = {
   solid: "0",
   dashed: "6 4",
   dotted: "2 3",
 };
+
+/**
+ * The area gradient. 0.85 at the top, 0.05 at the bottom.
+ *
+ * It was 0.35 to 0.02, which is nearly invisible, and that was the second mistake: §8
+ * limits ELEVATION to one shadow, on UI surfaces. A gradient inside a data area is not
+ * elevation, it is how an area chart shows magnitude, and weakening it removed the only
+ * thing that separated an area chart from a line chart.
+ */
+export const AREA_FILL_TOP = 0.85;
+export const AREA_FILL_BOTTOM = 0.05;
+
+/**
+ * Curves are `natural`, not `linear`.
+ *
+ * §7 is radius 0, and I applied it here, which was the third mistake. Radius 0 is a rule
+ * about the corners of RECTANGLES: a button, a card, an input. A data curve is not a
+ * corner, and forcing it angular made every trend look like a sawtooth.
+ */
+export const CURVE = "natural" as const;
 
 /**
  * The frame every chart sits in. Bordered, square, with the panel header idiom the
