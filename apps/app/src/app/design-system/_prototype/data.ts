@@ -129,3 +129,35 @@ export const DOCUMENTS: DocumentItem[] = [
 
 export const money = (cents: number) =>
   `$${(cents / 100).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+/* ── Record vocabulary ────────────────────────────────────────────────────────
+   These live here, not in a screen, because the table and the drawer must agree.
+   A founder who learns "Wyoming is violet" in the list and finds it grey in the drawer
+   has learned nothing; the mapping is only worth having if it is the same everywhere.  */
+
+/** Four states, four colours. Stable per state, so the mapping is learnable. */
+export const STATE_TONE: Record<string, string> = {
+  Wyoming: "bg-ai-subtle border-ai text-ai-ink",
+  Delaware: "bg-info-subtle border-info text-info-ink",
+  "New Mexico": "bg-warning-subtle border-warning text-warning-ink",
+  Florida: "bg-success-subtle border-success text-success-ink",
+};
+
+/** The plans ladder from quiet to loud, matching what each tier actually does. */
+export const PLAN_TONE: Record<string, string> = {
+  Launch: "border-border text-muted-foreground",
+  Growth: "bg-processing-subtle border-processing text-processing-ink",
+  Autopilot: "bg-ai-subtle border-ai text-ai-ink",
+};
+
+/** The ink each record field uses, so a heading and a drawer label agree. */
+export const FIELD_INK: Record<string, string> = {
+  Business: "text-foreground",
+  Founder: "text-info-on-muted",
+  State: "text-ai-ink",
+  Plan: "text-processing-ink",
+  MRR: "text-success-ink",
+  Team: "text-warning-ink",
+  Progress: "text-destructive-on-muted",
+  Formation: "text-muted-foreground",
+};

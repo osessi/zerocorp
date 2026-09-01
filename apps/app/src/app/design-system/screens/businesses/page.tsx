@@ -8,7 +8,7 @@ import {
 } from "@phosphor-icons/react/dist/ssr";
 import { PageHeader } from "../../_prototype/shell";
 import { AvatarStack, Button, Progress, StatusBadge, Avatar, Tabs, cx } from "../../_prototype/primitives";
-import { BUSINESSES, FORMATION_LABEL, FORMATION_TONE, money } from "../../_prototype/data";
+import { BUSINESSES, FIELD_INK, FORMATION_LABEL, FORMATION_TONE, PLAN_TONE, STATE_TONE, money } from "../../_prototype/data";
 
 /**
  * Screen 2 — DataTableLayout (§21.8).
@@ -17,36 +17,8 @@ import { BUSINESSES, FORMATION_LABEL, FORMATION_TONE, money } from "../../_proto
  * count, then Options. Rows are continuous with full-width rules — no zebra, no card
  * per row. Numbers are Geist Mono. Pagination is centred with a filled active page.
  */
-/**
- * The column legend. Each heading wears the hue its column uses, so the table can be read
- * by colour once the legend is learned.
- */
-const COLUMNS = [
-  { label: "Business", ink: "text-foreground" },
-  // -on-muted, not -ink: the heading sits on --muted, a third ground. See tokens.css.
-  { label: "Founder", ink: "text-info-on-muted" },
-  { label: "State", ink: "text-ai-ink" },
-  { label: "Plan", ink: "text-processing-ink" },
-  { label: "MRR", ink: "text-success-ink" },
-  { label: "Team", ink: "text-warning-ink" },
-  { label: "Progress", ink: "text-destructive-on-muted" },
-  { label: "Formation", ink: "text-muted-foreground" },
-] as const;
-
-/** Four states, four colours. Stable per state, so the mapping is learnable. */
-const STATE_TONE: Record<string, string> = {
-  Wyoming: "bg-ai-subtle border-ai text-ai-ink",
-  Delaware: "bg-info-subtle border-info text-info-ink",
-  "New Mexico": "bg-warning-subtle border-warning text-warning-ink",
-  Florida: "bg-success-subtle border-success text-success-ink",
-};
-
-/** The plans ladder from quiet to loud, matching what each tier actually does. */
-const PLAN_TONE: Record<string, string> = {
-  Launch: "border-border text-muted-foreground",
-  Growth: "bg-processing-subtle border-processing text-processing-ink",
-  Autopilot: "bg-ai-subtle border-ai text-ai-ink",
-};
+/** The column legend, read from the shared record vocabulary so the drawer agrees. */
+const COLUMNS = ["Business", "Founder", "State", "Plan", "MRR", "Team", "Progress", "Formation"] as const;
 
 export default function BusinessesScreen() {
   const [tab, setTab] = useState("all");
@@ -115,7 +87,7 @@ export default function BusinessesScreen() {
                   grey values under a coloured heading would be pure decoration.
                 */}
                 {COLUMNS.map((c) => (
-                  <th key={c.label} className={cx("text-overline px-4 py-3 text-left font-semibold uppercase", c.ink)}>{c.label}</th>
+                  <th key={c} className={cx("text-overline px-4 py-3 text-left font-semibold uppercase", FIELD_INK[c])}>{c}</th>
                 ))}
               </tr>
             </thead>

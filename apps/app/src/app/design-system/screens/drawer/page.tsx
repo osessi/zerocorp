@@ -7,7 +7,7 @@ import {
 } from "@phosphor-icons/react/dist/ssr";
 import { PageHeader } from "../../_prototype/shell";
 import { ActivityPanel, Avatar, Button, PanelLabel, SectionHeader, StatusBadge, cx } from "../../_prototype/primitives";
-import { ACTIVITY, BUSINESSES, FORMATION_LABEL, FORMATION_TONE, money } from "../../_prototype/data";
+import { ACTIVITY, BUSINESSES, FIELD_INK, FORMATION_LABEL, FORMATION_TONE, PLAN_TONE, STATE_TONE, money } from "../../_prototype/data";
 
 /**
  * Screen 5 — RightDrawer (§21.13).
@@ -101,26 +101,66 @@ export default function DrawerScreen() {
                     <p className="text-body-sm text-muted-foreground truncate">{business.email}</p>
                   </div>
                 </div>
+                {/*
+                  Four grey squares with grey glyphs, labelled "Action 1" through
+                  "Action 4". They read as one control repeated, and a screen reader got
+                  nothing at all. Each channel now carries its own tint and its own name,
+                  so message, mail and call are three things rather than three buttons.
+                */}
                 <span className="flex shrink-0 items-center gap-1">
-                  {[ChatCircleIcon, EnvelopeSimpleIcon, PhoneIcon, DotsThreeIcon].map((Icon, i) => (
-                    <button key={i} aria-label={`Action ${i + 1}`} className="border-input hover:border-input-hover focus-visible:outline-ring flex size-9 items-center justify-center border transition-[color,background-color,border-color] duration-normal focus-visible:outline-2 focus-visible:outline-offset-2">
+                  {([
+                    { Icon: ChatCircleIcon, label: "Send a message", tone: "bg-info-subtle border-info text-info-ink hover:bg-info-subtle" },
+                    { Icon: EnvelopeSimpleIcon, label: "Send an email", tone: "bg-processing-subtle border-processing text-processing-ink" },
+                    { Icon: PhoneIcon, label: "Call", tone: "bg-success-subtle border-success text-success-ink" },
+                    { Icon: DotsThreeIcon, label: "More actions", tone: "border-border text-muted-foreground hover:bg-accent" },
+                  ] as const).map(({ Icon, label, tone }) => (
+                    <button
+                      key={label}
+                      aria-label={label}
+                      title={label}
+                      className={cx(
+                        "focus-visible:outline-ring flex size-9 items-center justify-center border",
+                        "transition-[color,background-color,border-color] duration-normal",
+                        "focus-visible:outline-2 focus-visible:outline-offset-2",
+                        tone,
+                      )}
+                    >
                       <Icon size={16} />
                     </button>
                   ))}
                 </span>
               </div>
 
-              {/* Metadata grid — same device as MetricGrid, smaller scale */}
+              {/*
+                The same record vocabulary as the All businesses table, read from one map
+                in _prototype/data.ts. A founder who learns "Wyoming is violet" in the list
+                and finds it grey here has learned nothing: the mapping is only worth having
+                if it holds everywhere. The label wears the field ink; State and Plan wear
+                the same chips they wear in the table.
+              */}
               <div className="border-border grid grid-cols-2 divide-x divide-y divide-(--border) border sm:grid-cols-4 sm:divide-y-0">
-                {[
+                {([
                   { label: "Founder", value: business.founder },
-                  { label: "State", value: business.state },
-                  { label: "Plan", value: business.plan },
+                  { label: "State", value: business.state, chip: STATE_TONE[business.state] },
+                  { label: "Plan", value: business.plan, chip: PLAN_TONE[business.plan] },
                   { label: "MRR", value: money(business.mrrCents), mono: true },
-                ].map((m) => (
-                  <div key={m.label} className="flex flex-col gap-1 p-3">
-                    <span className="text-caption text-muted-foreground">{m.label}</span>
-                    <span className={cx("text-body-sm truncate", m.mono && "font-mono")}>{m.value}</span>
+                ] as const).map((m) => (
+                  <div key={m.label} className="flex flex-col gap-1.5 p-3">
+                    <span className={cx("text-overline uppercase", FIELD_INK[m.label])}>{m.label}</span>
+                    {"chip" in m && m.chip ? (
+                      <span className={cx("text-caption w-fit border px-2 py-0.5 whitespace-nowrap", m.chip)}>
+                        {m.value}
+                      </span>
+                    ) : (
+                      <span
+                        className={cx(
+                          "text-body-sm truncate",
+                          "mono" in m && m.mono ? "text-success-ink font-mono" : "text-foreground",
+                        )}
+                      >
+                        {m.value}
+                      </span>
+                    )}
                   </div>
                 ))}
               </div>
@@ -147,9 +187,15 @@ export default function DrawerScreen() {
 
               <div className="border-border flex flex-col gap-4 border-t pt-6">
                 <SectionHeader title="Notes" count={2} action={<Button><PlusIcon size={16} /> Add note</Button>} />
-                <article className="border-border flex flex-col gap-3 border p-4">
+                {/*
+                  A note is somebody's hand-written aside in a screen otherwise full of
+                  machine-generated fact, so it gets the wash rather than blending in.
+                  Warning-yellow because it is the colour of a sticky note, not because
+                  anything is wrong: the icon and the byline carry the meaning.
+                */}
+                <article className="border-warning bg-warning-wash flex flex-col gap-3 border p-4">
                   <div className="flex items-center justify-between gap-3">
-                    <span className="text-body-sm flex items-center gap-2"><NoteIcon size={16} className="text-muted-foreground" /> Note by Operations</span>
+                    <span className="text-body-sm text-foreground flex items-center gap-2"><NoteIcon size={16} className="text-warning-ink" /> Note by Operations</span>
                     <span className="text-caption text-muted-foreground">Today 08:40</span>
                   </div>
                   <p className="text-body-sm text-muted-foreground">
