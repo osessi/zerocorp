@@ -1,10 +1,12 @@
 /**
  * @zerocorp/integrations — Layer 3
  *
- * Every external SDK lives here and nowhere else: payments, company formation,
- * domains and DNS, email infrastructure, social publishers, identity verification.
+ * Provider adapters. Every external SDK usage is concentrated here, behind a port
+ * defined in @zerocorp/application. The business layer never imports a vendor SDK,
+ * which dependency-cruiser and ESLint both enforce.
  *
- * The rest of the codebase depends on the application-layer port, never on a
- * vendor SDK, so a provider can be replaced without touching the domain.
+ * D14: ZeroCorp owns the formation abstraction; these are replaceable execution
+ * adapters.
  */
-export const INTEGRATIONS_PACKAGE = "@zerocorp/integrations" as const;
+export { ManualOperatorProvider } from "./formation/manual-operator";
+export type { OperatorQueue, ManualOperatorOptions } from "./formation/manual-operator";

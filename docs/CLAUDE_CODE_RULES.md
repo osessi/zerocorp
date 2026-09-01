@@ -1297,7 +1297,67 @@ reading, and neither can happen again.
 
 ---
 
-## 44. Golden Rules
+## 44. Formation and Provider Discipline
+
+Decided 2026-09-01 (D14). Binding.
+
+### The four rules
+
+```text
+1. ZeroCorp owns the formation abstraction. Providers are replaceable execution adapters.
+2. Provider-specific detail must never reach the customer-facing product model.
+3. Supporting a new jurisdiction must be additive, never a restructuring.
+4. A capability is not real until a provider is verified TECHNICALLY and CONTRACTUALLY.
+```
+
+### What each one forbids
+
+**Rule 1.** The domain and application layers import no provider SDK. The port is
+`FormationProvider` in `@zerocorp/application`; adapters live in
+`@zerocorp/integrations`. Enforced by dependency-cruiser and by ESLint.
+
+**Rule 2.** A customer never sees a provider name, a provider status string or a
+provider error. `translateStatus()` on the adapter is the ONLY place a provider's
+vocabulary is allowed, and an untranslatable status leaves the order where it is:
+
+```text
+provider raw string  →  translateStatus()  →  FormationOrderStatus  →  UI
+                                     ↓ null
+                          recorded as an event, order NOT moved
+```
+
+Guessing turns missing information into a lie the customer reads.
+
+**Rule 3.** Data is open, behaviour is closed.
+
+```text
+OPEN    entity type codes, jurisdictions, fees, timelines   → rows in a table
+CLOSED  automation level, liability model, registration kind → enums in contracts
+```
+
+A country adds rows. Only a genuinely new KIND of thing adds an enum value, and that
+is a decision, not a seed.
+
+**Rule 4.** `formation_provider_coverage.verified` defaults to false and the router
+excludes an unverified coverage rather than scoring it low. A low score still wins when
+it is the only candidate, which is exactly how an unverified provider ends up filing
+someone's company. A public marketing page claiming an API is not verification.
+
+### Never
+
+```text
+Never name a provider in the domain, the application layer, or any customer-facing string.
+Never let a provider's status string reach the database as a ZeroCorp status.
+Never add a jurisdiction by adding a column.
+Never mark a coverage verified without a technical AND contractual check, with a date.
+Never automate a government website as a first solution.
+Never present a catalog note or a model output as legal advice.
+Never recommend forming a new entity as a default. "No new company is needed" must be sayable.
+```
+
+---
+
+## 45. Golden Rules
 
 > **Build the system we designed, not the system you imagine.**
 

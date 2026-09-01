@@ -647,11 +647,9 @@ Events should be:
 
 ## 15. Provider Abstractions
 
-Proposed:
-
 ```text
 BillingProvider
-FormationProvider
+FormationProvider     ← elaborated below; the others follow the same shape
 EmailProvider
 SocialProvider
 DomainProvider
@@ -664,6 +662,65 @@ IdentityProvider
 External SDK usage must be concentrated inside provider implementations.
 
 Do not scatter Stripe, Cloudflare, OpenRouter, fal.ai or social API calls throughout the domain modules.
+
+### The Business Formation Engine — RESOLVED 2026-09-01 (D14)
+
+> **ZeroCorp owns the formation abstraction. Providers are replaceable execution
+> adapters.** The four binding rules are in `CLAUDE_CODE_RULES.md` §44.
+
+This section previously named `FormationProvider` and stopped there, while
+`PRODUCT_SPEC.md` §21 already required that provider mechanics never become product
+architecture. The doctrine was written and never modelled.
+
+```text
+                     Business Formation Engine          ZeroCorp's own concept
+                              │
+        ┌─────────────────────┼─────────────────────┐
+        │                     │                     │
+   Catalog              Eligibility            Provider Router
+   jurisdictions        pure rules,            pure scoring,
+   entity types         three-valued           records WHY
+        │                     │                     │
+        └─────────────────────┴─────────────────────┘
+                              │
+                     FormationProvider (port)          packages/application
+                              │
+        ┌──────────────┬──────┴───────┬──────────────┐
+   US adapter      US adapter     UK partner    ManualOperator
+```
+
+**The operator is a provider, not a special case.** `ManualOperatorProvider` implements
+the same port, which is what lets any jurisdiction ship the day its catalog row exists:
+routing, orders, events, RFIs and documents all work, and only the execution is human.
+It makes §21's "manually assisted operator workflow" a routing outcome rather than a
+branch in the code.
+
+**Eligibility is three-valued.** True, false, or unknown. A founder may not have given
+us their nationality, and two-valued logic has no honest answer: unknown reading as
+false makes a `deny` rule silently allow, unknown reading as true blocks everyone who
+skipped an optional question. Unknown produces a warning naming the missing input.
+
+**Routing excludes before it scores.** A provider that cannot legally or technically do
+the work is excluded with a reason, never scored low, because a low score still wins
+when it is the only candidate.
+
+**The request/order split.** A `formation_request` is what the customer asked for and is
+provider-independent. A `formation_order` is one attempt to execute it against one
+provider. Without the split, a rejection had to either retry the same provider or invent
+a second request that pretended to be a second customer ask.
+
+Where each part lives:
+
+```text
+packages/contracts/src/jurisdiction.ts       catalog vocabulary
+packages/contracts/src/eligibility.ts        closed predicate language
+packages/contracts/src/provider.ts           capabilities, routing decision
+packages/contracts/src/formation-request.ts  request, events, RFIs, documents
+packages/domain/src/formation/               eligibility + routing, pure
+packages/application/src/formation/ports.ts  the FormationProvider port
+packages/integrations/src/formation/         the adapters
+packages/db/migrations/0003, 0004            schema and the V1 catalog
+```
 
 ---
 

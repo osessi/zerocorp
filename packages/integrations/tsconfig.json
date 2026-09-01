@@ -21,7 +21,7 @@
       "path": "../contracts"
     },
     {
-      "path": "../config"
+      "path": "../domain"
     }
   ],
   "exclude": [

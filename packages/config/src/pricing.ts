@@ -1,13 +1,17 @@
 import { z } from "zod";
+import { customerMoneySchema, type CustomerMoney } from "@zerocorp/contracts";
 
 /**
  * Commercial configuration.
  *
- * PRODUCT_SPEC.md §3 marks every price as a hypothesis to validate, and §29.3
- * requires the activation setup price to be "configurable, never hard-coded".
- * So prices live here, as data, with the defaults the spec states today.
+ * PRODUCT_SPEC.md §3 marks every price as a hypothesis to validate, and §29.3 requires
+ * the activation setup price to be "configurable, never hard-coded". So prices live
+ * here, as data, with the defaults decided on 2026-09-01.
  *
- * Money is integer minor units plus a currency, everywhere, with no exceptions.
+ * D15: everything a customer sees is CustomerMoney, which is USD in V1. Government and
+ * provider fees are CostMoney in their own currency and live in the catalog, not here —
+ * a cost is not a price, and putting them in the same file is how they get added
+ * together by accident.
  */
 
 export const SETUP_PATHS = ["launch", "activation"] as const;
@@ -16,39 +20,41 @@ export type SetupPath = (typeof SETUP_PATHS)[number];
 export const SUBSCRIPTION_PLANS = ["launch", "growth", "autopilot"] as const;
 export type SubscriptionPlan = (typeof SUBSCRIPTION_PLANS)[number];
 
-export const priceSchema = z.object({
-  amountCents: z.number().int().nonnegative(),
-  currency: z.literal("USD"),
-});
-export type Price = z.infer<typeof priceSchema>;
-
 export const pricingSchema = z.object({
-  setup: z.record(z.enum(SETUP_PATHS), priceSchema),
-  subscription: z.record(z.enum(SUBSCRIPTION_PLANS), priceSchema),
+  setup: z.record(z.enum(SETUP_PATHS), customerMoneySchema),
+  subscription: z.record(z.enum(SUBSCRIPTION_PLANS), customerMoneySchema),
 });
 export type Pricing = z.infer<typeof pricingSchema>;
 
 /**
- * PRODUCT_SPEC.md §3 and §29.3. The activation setup price is explicitly marked
- * 🟠 TO CONFIRM there; it is a default here precisely so confirming it is an edit
- * to configuration rather than a code change.
+ * PRODUCT_SPEC.md §3 and §29.3, with D16 for the activation price.
+ *
+ * Every one of these is a HYPOTHESIS. They are defaults precisely so that validating
+ * one is an edit to configuration rather than a change to code.
  */
 export const DEFAULT_PRICING: Pricing = {
   setup: {
-    launch: { amountCents: 99_700, currency: "USD" },
-    activation: { amountCents: 49_700, currency: "USD" },
+    launch: { amountMinor: 99_700, currency: "USD" },
+    // D16, 2026-09-01. Supersedes the "~$497 TO CONFIRM" marker and the $497-$697 range.
+    // Validate against willingness to pay and against the operator time a digital audit
+    // actually costs, which is the number most likely to move it.
+    activation: { amountMinor: 49_700, currency: "USD" },
   },
   subscription: {
-    launch: { amountCents: 9_900, currency: "USD" },
-    growth: { amountCents: 39_900, currency: "USD" },
-    autopilot: { amountCents: 79_900, currency: "USD" },
+    launch: { amountMinor: 9_900, currency: "USD" },
+    growth: { amountMinor: 39_900, currency: "USD" },
+    autopilot: { amountMinor: 79_900, currency: "USD" },
   },
 };
 
-/** Presentation only. Never use the result to compute anything. */
-export function formatPrice(price: Price): string {
-  const whole = Math.trunc(price.amountCents / 100);
-  const cents = price.amountCents % 100;
-  const body = cents === 0 ? whole.toLocaleString("en-US") : (price.amountCents / 100).toFixed(2);
-  return `$${body}`;
+export function setupPrice(pricing: Pricing, path: SetupPath): CustomerMoney {
+  const price = pricing.setup[path];
+  if (!price) throw new Error(`No setup price configured for "${path}"`);
+  return price;
+}
+
+export function subscriptionPrice(pricing: Pricing, plan: SubscriptionPlan): CustomerMoney {
+  const price = pricing.subscription[plan];
+  if (!price) throw new Error(`No subscription price configured for "${plan}"`);
+  return price;
 }

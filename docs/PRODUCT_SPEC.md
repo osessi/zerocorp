@@ -928,14 +928,22 @@ The answer to *"is this a new business or an existing one?"* decides the whole p
 
 ```text
 New business       → Business Launch Setup      $997
-Existing business  → Business Activation Setup  ~$497   🟠 TO CONFIRM
+Existing business  → Business Activation Setup  $497   D16, still a hypothesis
                      then a subscription: $99 / $399 / $799
 ```
 
-> 🟠 **The second setup price is a hypothesis, not a decision.** §3 already marks all
-> pricing as a hypothesis to validate against willingness-to-pay, gross margin and
-> conversion. `$497` is a placeholder for the activation path and must be **configurable,
-> never hard-coded**. Recorded as an open item.
+> **Resolved 2026-09-01 (D16): `$497`.** Still a pricing hypothesis, exactly like every
+> price in §3, and still **configurable rather than hard-coded** —
+> `packages/config/src/pricing.ts`. Validate it against willingness to pay and against
+> the operator time a digital audit actually costs, which is the number most likely to
+> move it.
+
+> **The question is what the customer HAS, not what we sell them.** A visitor with no
+> company has not thereby asked for one. `assessments.company_situation` records the fact
+> (`none` · `existing` · `in_progress`); the Business Architect produces the
+> recommendation (`form_new` · `use_existing` · `none_needed`), and **`none_needed` is a
+> permitted conclusion**. Recommending a new entity to everybody is forbidden as default
+> product logic — `CLAUDE_CODE_RULES.md` §44.
 
 **2 · Deep onboarding** — *after payment*
 
@@ -977,6 +985,26 @@ Existing business:
 
 The state machines are decided (D2), live in `packages/contracts/src/formation.ts` and are
 documented in `DATABASE.md` §5. See §21.
+
+**V1 entity catalog — decided 2026-09-01 (D14, D17).**
+
+```text
+United States    LLC (Wyoming)          C-Corporation (Delaware)
+United Kingdom   Private Limited (Ltd)  Limited Liability Partnership (LLP)
+```
+
+All four ship as **`operator_assisted`**: a ZeroCorp operator files them. Not one provider
+integration is contracted, so not one entity is automated, and the UI says so.
+
+Research on 2026-09-01 established that **Companies House exposes no incorporation
+endpoint on its REST API Filing service** — it covers Transactions, Registered Office
+Address, Insolvency and Registered Email Address. Incorporation runs through the legacy
+XML Gateway (IN01) or a partner, and ECCTA identity verification has been mandatory for
+newly appointed directors and PSCs since 18 November 2025. UK filings route through a
+partner who is already an Authorised Corporate Service Provider (D17).
+
+A jurisdiction is added by adding catalog rows, never by changing the schema —
+`CLAUDE_CODE_RULES.md` §44.
 
 ```text
 formation_orders   draft → collecting_documents → verifying_identity → operator_review

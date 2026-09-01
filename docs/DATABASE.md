@@ -226,44 +226,142 @@ filing job is done.
 `not_started` is a real state, not a null: "we have not asked yet" and "we asked and are
 waiting" are different things to show a founder.
 
-### `companies`
+### The Business Formation Engine — REVISED 2026-09-01 (D14)
+
+> **`packages/db/migrations/0003_formation_engine.sql` and `0004_v1_catalog.sql` are the
+> source of truth for these tables.** This section documents the model.
+
+The previous model had one country in it. `companies.state` could only hold a US state,
+and `ein`, `ein_status`, `ein_requested_at` and `ein_issued_at` made a US federal filing
+part of the shape of every company in the world. Adding the United Kingdom would have
+been four migrations and a rename.
+
+Two structural changes fix that.
+
+**Four columns become rows.** `company_registrations` holds one row per post-incorporation
+registration: an EIN is `kind = 'tax_id', authority = 'IRS'`, a UK company gets a UTR row
+and, when relevant, a VAT row. **Adding a country stops being a migration.**
+
+**The request/order split.** A `formation_request` is what the customer asked for and is
+provider-independent. A `formation_order` is one attempt to execute it against one
+provider. The old model had only the order, so a provider rejection had two bad options:
+retry the same provider, or invent a second order pretending to be a second customer
+request. The audit trail carried the lie.
+
+#### Catalog — global reference data
+
+Every tenant sees the same catalog, so scoping it per tenant would mean a thousand copies
+that drift. These tables have **no `tenant_id` and no RLS**, and are documented exceptions
+under `ARCHITECTURE.md` §7 rule 6.
+
+```text
+jurisdictions                 code, country_code, subdivision_code, name, status
+entity_types                  jurisdiction_code, code, name, customer_label,
+                              liability_model, tax_treatment, automation_level,
+                              government_fee_minor, government_fee_currency,
+                              typical_days_min/max, required_registrations,
+                              notes, verified_at, verification_note
+eligibility_rules             entity_type_id, code, predicate, effect, message_key, requires
+formation_providers           code, name, status, features, reliability_score
+formation_provider_coverage   provider_code, entity_type_id, automation_level,
+                              supports_non_resident, wholesale_fee_*, typical_days_*,
+                              verified, verified_at, verification_note
+formation_provider_accounts   provider_code, environment, credentials_ref, status
+```
+
+Three columns carry the honesty rules and none of them has a permissive default:
+
+| Column | Rule |
+|---|---|
+| `entity_types.automation_level` | **No default.** `automated`, `operator_assisted` or `unavailable`. The UI renders it. A customer is never told a filing is automatic when a human does it |
+| `entity_types.verified_at` | Null means the fee and timeline have never been checked against the authority. Production quoting requires a value |
+| `formation_provider_coverage.verified` | Defaults to **false**. The router excludes an unverified coverage rather than scoring it low |
+
+`government_fee_*` is in the **authority's** currency, never the customer's — D15. A check
+constraint forbids a fee without a currency, because that pair is how a wrong invoice
+starts.
+
+#### Tenant-owned
+
+All of these carry `tenant_id`, have RLS enabled **and forced**, and appear in the
+cross-tenant isolation matrix.
+
+##### `companies`
 
 ```text
 id
 tenant_id
 legal_name
-entity_type
-state
-status                    CompanyStatus — see above
-ein
-ein_status                EinStatus — see above
-ein_requested_at
-ein_issued_at
+jurisdiction_code         replaces `state`
+entity_type_id            replaces the free-text `entity_type`
+status                    CompanyStatus — pending → active → delinquent → dissolved
 formation_date
 registered_agent_until
-provider
+origin                    formed_by_zerocorp | imported
 external_ref
 created_at
 updated_at
 ```
 
-### `formation_orders`
+`origin = 'imported'` is what `PRODUCT_SPEC.md` §29.3 block 4 requires: an existing
+company enters at `status = 'active'` with **no formation order at all**, because a
+formation order is the record of work ZeroCorp did.
+
+##### `company_registrations`
 
 ```text
-id
-company_id
-provider
-provider_ref
-status                    FormationOrderStatus — see above
-rejection_reason          set when status is `rejected`, cleared on the next attempt
-cost_cents
-price_cents
-currency
-submitted_at
-completed_at
-created_at
-updated_at
+id · tenant_id · company_id
+kind          tax_id | vat | payroll | state_registration
+authority     "IRS", "HMRC", "Companies House"
+identifier    the EIN, the UTR, the VAT number — sensitive, never logged
+status        RegistrationStatus — not_started → requested → issued, rejected reparable
+requested_at · issued_at
 ```
+
+##### `formation_requests`
+
+```text
+id · tenant_id
+entity_type_id · jurisdiction_code
+proposed_names · founder_profile
+status            draft → eligibility_checked → routed → executing → fulfilled
+                  → unfulfillable (NOT terminal) · cancelled
+eligibility       the findings, with their rule codes
+routing_decision  every candidate, its score, its reasons, and why the losers lost
+price_minor · price_currency
+```
+
+##### `formation_orders`
+
+```text
+id · tenant_id          ← tenant_id is NEW. The old model had only company_id,
+                          so RLS had nothing to filter on
+request_id · company_id
+provider_code · provider_ref
+status                  FormationOrderStatus — see packages/contracts/src/formation.ts
+rejection_reason
+cost_minor · cost_currency   what it costs US, in the provider's currency
+submitted_at · completed_at
+```
+
+##### `formation_events` · `formation_documents` · `formation_rfis`
+
+```text
+formation_events     order_id, source, provider_code, external_event_id, kind,
+                     payload, occurred_at              APPEND-ONLY
+formation_documents  order_id, company_id, type, storage_key, issued_at, retention_until
+formation_rfis       order_id, question, required_documents, status, due_at,
+                     answered_at, answer
+```
+
+`formation_events` is uniquely indexed on `(provider_code, external_event_id)` where the
+id is not null. That is what lets a webhook replay and a polling loop that see the same
+transition write one row instead of two, and it is why a provider **without** webhooks can
+be driven by polling with nothing upstream changing.
+
+`formation_rfis.question` is **our** wording. A provider's own phrasing names them, uses
+their internal vocabulary, and is written for a filing agent rather than a founder; it
+lives in the event log.
 
 ### `company_documents`
 
