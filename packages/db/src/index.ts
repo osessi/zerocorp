@@ -17,6 +17,8 @@ export type { AppliedMigration } from "./migrate";
 export * from "./schema";
 export { createFormationCatalog } from "./formation/catalog";
 export { createAssessmentRepository } from "./assessment/repository";
+export { createIdentityRepository, createConversionRepository } from "./identity/repository";
+export { createDashboardRepository } from "./dashboard/repository";
 export type { Tx } from "./types";
 
 /** Integration suites only. See lifecycle.ts for why it is not re-exported directly. */

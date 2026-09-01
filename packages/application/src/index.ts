@@ -17,3 +17,5 @@ export * from "./use-case";
 export * from "./formation";
 export * from "./ai";
 export * from "./assessment";
+export * from "./identity";
+export * from "./dashboard";

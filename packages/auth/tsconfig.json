@@ -15,13 +15,7 @@
   ],
   "references": [
     {
-      "path": "../application"
-    },
-    {
       "path": "../contracts"
-    },
-    {
-      "path": "../config"
     }
   ],
   "exclude": [

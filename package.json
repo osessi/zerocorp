@@ -43,6 +43,7 @@
     "@zerocorp/application": "workspace:*",
     "@zerocorp/ai": "workspace:*",
     "@zerocorp/domain": "workspace:*",
-    "@zerocorp/security": "workspace:*"
+    "@zerocorp/security": "workspace:*",
+    "@zerocorp/auth": "workspace:*"
   }
 }

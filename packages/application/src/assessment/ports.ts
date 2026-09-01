@@ -90,6 +90,9 @@ export interface AssessmentRepository<TTx = unknown> {
   setEnrichment(tx: TTx, id: string, enrichment: Enrichment): Promise<void>;
   setTurnsUsed(tx: TTx, id: string, turnsUsed: number): Promise<void>;
   setPendingQuestion(tx: TTx, id: string, question: QuestionCard | null): Promise<void>;
+
+  /** Set exactly once, when payment converts this assessment into a tenant. */
+  setConvertedTenant(tx: TTx, id: string, tenantId: string): Promise<void>;
 }
 
 /** Records what a run cost, so free-tier spend is measurable rather than surprising. */

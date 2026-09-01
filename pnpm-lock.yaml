@@ -32,6 +32,9 @@ importers:
       '@zerocorp/application':
         specifier: workspace:*
         version: link:packages/application
+      '@zerocorp/auth':
+        specifier: workspace:*
+        version: link:packages/auth
       '@zerocorp/contracts':
         specifier: workspace:*
         version: link:packages/contracts

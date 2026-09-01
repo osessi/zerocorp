@@ -226,6 +226,15 @@ export function createAssessmentRepository(): AssessmentRepository<Tx> {
       await tx.update(assessments).set({ turnsUsed, updatedAt: new Date() }).where(eq(assessments.id, id));
     },
 
+    async setConvertedTenant(tx, id, tenantId) {
+      // Set once, and the conversion checks it before doing anything. That check is what
+      // makes a webhook delivered twice harmless.
+      await tx
+        .update(assessments)
+        .set({ convertedTenantId: tenantId, updatedAt: new Date() })
+        .where(eq(assessments.id, id));
+    },
+
     async setPendingQuestion(tx, id, question) {
       await tx
         .update(assessments)

@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { CheckIcon } from "@phosphor-icons/react/dist/ssr";
-import { Alert, Button, FocusedFlowLayout, StatusBadge } from "@zerocorp/ui";
+import Link from "next/link";
+import { Alert, ButtonLink, FocusedFlowLayout, StatusBadge } from "@zerocorp/ui";
 import { DEFAULT_PRICING, setupPrice, subscriptionPrice } from "@zerocorp/config";
 import { formatMoney } from "@zerocorp/contracts";
 import { getAssessmentService } from "../../../../server/container";
@@ -41,9 +42,9 @@ export default async function Page({ params }: { params: Promise<{ token: string
     <FocusedFlowLayout
       width="reading"
       forward={
-        <Button variant="primary" icon={CheckIcon} disabled>
-          Continue to checkout
-        </Button>
+        <ButtonLink as={Link} href={`/welcome/${token}`} variant="primary" icon={CheckIcon}>
+          Create my account
+        </ButtonLink>
       }
     >
       <div className="flex flex-col gap-3 pb-8">
@@ -90,10 +91,11 @@ export default async function Page({ params }: { params: Promise<{ token: string
       </section>
 
       <div className="pt-8">
-        <Alert tone="warning" title="Checkout is not connected yet">
-          Payment needs Stripe keys, which are not configured. Everything up to this point
-          is real: the assessment, the analysis, the plan and the approval are stored, and
-          {assessment.contactEmail ? " your email is on file." : " we have not asked for your email yet."}
+        <Alert tone="warning" title="No payment is taken yet">
+          Card payment is not connected in this build. Everything else is real: the
+          assessment, the analysis, the plan and the approval are stored, and creating your
+          account gives you the product with the plan you just approved.
+          {assessment.contactEmail ? " Your email is already on file." : ""}
         </Alert>
       </div>
     </FocusedFlowLayout>

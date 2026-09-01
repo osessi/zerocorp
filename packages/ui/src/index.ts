@@ -21,3 +21,4 @@ export * from "./field/index";
 export * from "./status-badge/index";
 export * from "./layout/index";
 export * from "./conversation/index";
+export * from "./shell/index";

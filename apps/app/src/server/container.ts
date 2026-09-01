@@ -1,11 +1,24 @@
 import "server-only";
-import { createAssessmentRepository, createFormationCatalog, createSystemUnitOfWork, createUnitOfWork } from "@zerocorp/db";
+import {
+  createAssessmentRepository,
+  createConversionRepository,
+  createDashboardRepository,
+  createFormationCatalog,
+  createIdentityRepository,
+  createSystemUnitOfWork,
+  createUnitOfWork,
+} from "@zerocorp/db";
 import {
   createAssessmentService,
+  createConversionService,
   createInterviewService,
   type AssessmentService as Service,
+  type ConversionService as Conversion,
+  type DashboardRepository,
   type FormationCatalog,
+  type IdentityRepository,
   type InterviewService as Interview,
+  type SystemUnitOfWork,
   type UnitOfWork as Uow,
 } from "@zerocorp/application";
 import {
@@ -31,6 +44,7 @@ import type { ArchitectInput, AssessmentAnswers } from "@zerocorp/contracts";
 export type UnitOfWork = Uow;
 export type AssessmentService = Service;
 export type InterviewService = Interview;
+export type ConversionService = Conversion;
 
 function databaseUrl(): string {
   const url = process.env["DATABASE_URL"];
@@ -177,4 +191,43 @@ export function getAssessmentService(): AssessmentService {
     tokens: tokenService,
   });
   return assessments;
+}
+
+/* ── Identity ───────────────────────────────────────────────────────────────
+ *
+ * Exposed as repositories rather than as a service, because the session helper needs to
+ * read a session and its memberships on every request and has no business logic to run
+ * around them. Everything that DOES have business logic goes through a use case.
+ */
+
+let systemUow: SystemUnitOfWork | undefined;
+export function getSystemUnitOfWork(): SystemUnitOfWork {
+  systemUow ??= createSystemUnitOfWork(databaseUrl());
+  return systemUow;
+}
+
+let identity: IdentityRepository | undefined;
+export function getIdentityRepository(): IdentityRepository {
+  identity ??= createIdentityRepository();
+  return identity;
+}
+
+let conversion: ConversionService | undefined;
+export function getConversionService(): ConversionService {
+  conversion ??= createConversionService({
+    suow: createSystemUnitOfWork(databaseUrl()),
+    uow: getUnitOfWork(),
+    identity: createIdentityRepository(),
+    assessments: createAssessmentRepository(),
+    conversion: createConversionRepository(),
+    clock: { now: () => new Date() },
+    tokens: tokenService,
+  });
+  return conversion;
+}
+
+let dashboard: DashboardRepository | undefined;
+export function getDashboardRepository(): DashboardRepository {
+  dashboard ??= createDashboardRepository();
+  return dashboard;
 }
