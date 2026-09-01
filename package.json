@@ -9,7 +9,7 @@
   "scripts": {
     "build": "node tooling/scripts/no-sync.mjs && turbo run build",
     "dev": "node tooling/scripts/no-sync.mjs && turbo run dev",
-    "typecheck": "node tooling/scripts/no-sync.mjs && turbo run typecheck",
+    "typecheck": "node tooling/scripts/no-sync.mjs && turbo run typecheck && tsc -p tests/tsconfig.json",
     "lint": "eslint .",
     "test": "vitest run",
     "test:tenant-isolation": "vitest run --project tenant-isolation",

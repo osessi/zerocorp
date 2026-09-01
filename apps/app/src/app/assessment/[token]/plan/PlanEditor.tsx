@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { ArrowClockwiseIcon, CheckIcon, PaperPlaneRightIcon } from "@phosphor-icons/react/dist/ssr";
 import { Alert, Button, Checkbox, Field, Textarea, cx } from "@zerocorp/ui";
 import type { PlanProposal, PlanStep } from "@zerocorp/contracts";
-import { applyPlanEdits, approvePlan, discussPlan, regeneratePlan } from "../../actions";
+import { applyPlanEdits, approvePlan, discussPlan } from "../../actions";
 
 /**
  * The plan editor — PRODUCT_SPEC.md §29.3 block 3, "the heart of V1".
@@ -72,17 +72,14 @@ export function PlanEditor({ token, proposal, deterministic }: {
     if (!text) return;
     setError(null);
     startTransition(async () => {
+      // discussPlan stores the message AND regenerates: a message the customer sends
+      // that produces no new proposal is a message that went nowhere.
       const said = await discussPlan(token, text);
       if (!said.ok) {
-        setError(said.error ?? "We could not send that.");
+        setError(said.error ?? "We could not build a new proposal.");
         return;
       }
       setMessage("");
-      const again = await regeneratePlan(token);
-      if (!again.ok) {
-        setError(again.error ?? "We could not build a new proposal.");
-        return;
-      }
       setNotice("A new proposal is ready.");
       router.refresh();
     });

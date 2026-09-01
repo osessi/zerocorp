@@ -118,8 +118,7 @@ export class FallbackInterviewer {
     } catch (cause) {
       const reason = cause instanceof ArchitectFailedError ? cause.reason : "unknown";
       this.onFallback?.(reason);
-      const output = await this.fallback.next(input);
-      return { ...output, costMicros: 0, model: "deterministic" };
+      return this.fallback.next(input);
     }
   }
 }

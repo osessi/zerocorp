@@ -1,4 +1,4 @@
-import type { ArchitectInput, ArchitectRun } from "@zerocorp/contracts";
+import type { ArchitectInput, ArchitectRun, InterviewInput, InterviewOutput } from "@zerocorp/contracts";
 
 /**
  * AI ports. Defined here, implemented in @zerocorp/ai.
@@ -61,6 +61,18 @@ export interface AITranscriptionProvider {
 export interface BusinessArchitect {
   readonly kind: "model" | "deterministic";
   analyze(input: ArchitectInput): Promise<ArchitectRun>;
+}
+
+/**
+ * The interviewer — D18.
+ *
+ * Chooses the next question from the slot state and the conversation so far. It is not
+ * a replacement for the Business Architect: it fills the same five slots the architect
+ * already requires, which is what keeps ADR 0002 untouched.
+ */
+export interface Interviewer {
+  readonly kind: "model" | "deterministic";
+  next(input: InterviewInput): Promise<InterviewOutput & { costMicros: number; model: string }>;
 }
 
 export class ArchitectFailedError extends Error {

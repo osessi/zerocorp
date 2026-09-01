@@ -1,0 +1,14 @@
+{
+  "//": "The integration suites are typechecked like everything else. MAX_INTERVIEW_TURNS was imported from the wrong package here and resolved to undefined, which made a while-loop condition NaN and skipped an entire interview silently. tsc would have caught it in a second; nothing was looking.",
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "lib": ["ES2022"],
+    "types": ["node", "vitest/globals"],
+    "noEmit": true,
+    "emitDeclarationOnly": false,
+    "composite": false,
+    "declaration": false,
+    "declarationMap": false
+  },
+  "include": ["**/*.ts"]
+}

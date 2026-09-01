@@ -130,7 +130,7 @@ export function extractDeterministically(answer: string): ExtractedSlots {
 export class DeterministicInterviewer {
   readonly kind = "deterministic" as const;
 
-  async next(input: InterviewInput): Promise<InterviewOutput> {
+  async next(input: InterviewInput): Promise<InterviewOutput & { costMicros: number; model: string }> {
     const lastAnswer = input.transcript.at(-1)?.answer ?? "";
     const extracted = extractDeterministically(lastAnswer);
 
@@ -141,26 +141,34 @@ export class DeterministicInterviewer {
     // difference between an interview and an interrogation.
     const inferred = ORDER.find((id) => input.slots[id]?.source === "inferred");
     if (inferred && !outOfTurns) {
-      return interviewOutputSchema.parse({
-        extracted,
-        enrichment: {},
-        next: {
-          kind: "confirm",
-          slot: inferred,
-          question: "Have I got this right?",
-          statement: confirmationFor(inferred, input),
-        },
-        acknowledgement: "Got it.",
-      });
+      return {
+        ...interviewOutputSchema.parse({
+          extracted,
+          enrichment: {},
+          next: {
+            kind: "confirm",
+            slot: inferred,
+            question: "Have I got this right?",
+            statement: confirmationFor(inferred, input),
+          },
+          acknowledgement: "Got it.",
+        }),
+        costMicros: 0,
+        model: "deterministic",
+      };
     }
 
     const nextSlot = missing[0];
-    return interviewOutputSchema.parse({
-      extracted,
-      enrichment: {},
-      next: nextSlot === undefined || outOfTurns ? null : CARDS[nextSlot],
-      ...(input.transcript.length > 0 ? { acknowledgement: "Understood." } : {}),
-    });
+    return {
+      ...interviewOutputSchema.parse({
+        extracted,
+        enrichment: {},
+        next: nextSlot === undefined || outOfTurns ? null : CARDS[nextSlot],
+        ...(input.transcript.length > 0 ? { acknowledgement: "Understood." } : {}),
+      }),
+      costMicros: 0,
+      model: "deterministic",
+    };
   }
 }
 

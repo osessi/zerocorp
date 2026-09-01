@@ -2,11 +2,22 @@ import "server-only";
 import { createAssessmentRepository, createFormationCatalog, createSystemUnitOfWork, createUnitOfWork } from "@zerocorp/db";
 import {
   createAssessmentService,
+  createInterviewService,
   type AssessmentService as Service,
   type FormationCatalog,
+  type InterviewService as Interview,
   type UnitOfWork as Uow,
 } from "@zerocorp/application";
-import { DeterministicArchitect, FallbackArchitect, ModelBusinessArchitect, AnthropicTextProvider, TASK_MODELS } from "@zerocorp/ai";
+import {
+  DeterministicArchitect,
+  DeterministicInterviewer,
+  FallbackArchitect,
+  FallbackInterviewer,
+  ModelBusinessArchitect,
+  ModelInterviewer,
+  OpenRouterTextProvider,
+  assertModelSupportsStructuredOutput,
+} from "@zerocorp/ai";
 import { evaluateEligibility } from "@zerocorp/domain";
 import { tokenService } from "@zerocorp/security";
 import type { ArchitectInput, AssessmentAnswers } from "@zerocorp/contracts";
@@ -19,6 +30,7 @@ import type { ArchitectInput, AssessmentAnswers } from "@zerocorp/contracts";
  */
 export type UnitOfWork = Uow;
 export type AssessmentService = Service;
+export type InterviewService = Interview;
 
 function databaseUrl(): string {
   const url = process.env["DATABASE_URL"];
@@ -39,27 +51,71 @@ export function getFormationCatalog(): FormationCatalog {
 }
 
 /**
+ * OpenRouter, with the model chosen in configuration — D19.
+ *
+ * Two agents, two models, because they have different demands: the interviewer runs on
+ * every turn and decides little, the architect runs once and decides everything.
+ *
+ * `require_parameters` is sent on every request by the adapter, so OpenRouter routes
+ * only to an endpoint that actually supports structured outputs. Support is per
+ * ENDPOINT, not per model, and without that flag a provider that ignores the schema
+ * returns prose — which parses as invalid and quietly burns a retry.
+ */
+function openRouter(model: string) {
+  const apiKey = process.env["OPENROUTER_API_KEY"];
+  if (!apiKey) return null;
+  return new OpenRouterTextProvider({
+    apiKey,
+    model,
+    ...(process.env["APP_URL"] ? { appUrl: process.env["APP_URL"] } : {}),
+    appName: "ZeroCorp",
+  });
+}
+
+/**
+ * Verifies the configured models at boot.
+ *
+ * A model that cannot do structured outputs makes ADR 0002's "reject, never repair"
+ * rule collapse silently. Checked once, loudly, rather than discovered by the first
+ * real visitor. Called from instrumentation, not from a request path.
+ */
+export async function verifyModels(): Promise<void> {
+  const apiKey = process.env["OPENROUTER_API_KEY"];
+  if (!apiKey) return;
+  for (const model of [MODEL_INTERVIEW, MODEL_ARCHITECT]) {
+    await assertModelSupportsStructuredOutput({ apiKey, model });
+  }
+}
+
+const MODEL_INTERVIEW = process.env["OPENROUTER_MODEL_INTERVIEW"] ?? "anthropic/claude-haiku-4.5";
+const MODEL_ARCHITECT = process.env["OPENROUTER_MODEL_ARCHITECT"] ?? "anthropic/claude-sonnet-4.6";
+
+/**
  * The Business Architect.
  *
- * With a key: the model, with the deterministic architect behind it as a fallback, so
- * a provider outage degrades the answer instead of losing the visitor.
+ * With a key: the model, with the deterministic architect behind it, so a provider
+ * outage degrades the answer instead of losing the visitor.
  *
- * Without one: the deterministic architect alone. It is a real path with real tests,
- * and every run it produces is labelled so the UI can say what it is. ADR 0002.
+ * Without one: the deterministic architect alone. A real path with real tests, and every
+ * run it produces is labelled so the UI can say what it is. ADR 0002.
  */
 function buildArchitect() {
-  const apiKey = process.env["ANTHROPIC_API_KEY"];
   const deterministic = new DeterministicArchitect();
-  if (!apiKey) return deterministic;
+  const provider = openRouter(MODEL_ARCHITECT);
+  if (!provider) return deterministic;
 
-  const model = new ModelBusinessArchitect({
-    provider: new AnthropicTextProvider({
-      apiKey,
-      model: process.env["ANTHROPIC_MODEL"] ?? TASK_MODELS["assessment.analyze"] ?? "claude-haiku-4-5-20251001",
-    }),
+  return new FallbackArchitect(new ModelBusinessArchitect({ provider }), deterministic, (reason) => {
+    console.warn(`[architect] fell back to the rules path: ${reason}`);
   });
-  return new FallbackArchitect(model, deterministic, (reason) => {
-    console.warn(`[architect] fell back to deterministic: ${reason}`);
+}
+
+function buildInterviewer() {
+  const deterministic = new DeterministicInterviewer();
+  const provider = openRouter(MODEL_INTERVIEW);
+  if (!provider) return deterministic;
+
+  return new FallbackInterviewer(new ModelInterviewer({ provider }), deterministic, (reason) => {
+    console.warn(`[interviewer] fell back to the rules path: ${reason}`);
   });
 }
 
@@ -96,6 +152,18 @@ export async function evaluateEligibilityForCatalog(
     });
   }
   return out;
+}
+
+let interview: InterviewService | undefined;
+export function getInterviewService(): InterviewService {
+  interview ??= createInterviewService({
+    suow: createSystemUnitOfWork(databaseUrl()),
+    repository: createAssessmentRepository(),
+    interviewer: buildInterviewer(),
+    clock: { now: () => new Date() },
+    tokens: tokenService,
+  });
+  return interview;
 }
 
 let assessments: AssessmentService | undefined;

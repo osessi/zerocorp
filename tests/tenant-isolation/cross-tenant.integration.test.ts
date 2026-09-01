@@ -43,7 +43,9 @@ let seq = 0;
 async function insertRow(url: string, tenantId: string, name: string, f: Fixture): Promise<string> {
   const values = f.columns((seq += 1));
   const cols = ["tenant_id", ...Object.keys(values)];
-  const vals = [tenantId, ...Object.values(values)];
+  // postgres.js parameters are typed narrowly; a fixture value is deliberately `unknown`
+  // because the point of the matrix is that it does not care what a column holds.
+  const vals = [tenantId, ...Object.values(values)] as postgres.ParameterOrJSON<never>[];
   const placeholders = cols.map((_, i) => `$${i + 1}`).join(", ");
   return asTenant(url, tenantId, "read-write", async (tx) => {
     const rows = await tx.unsafe<Array<{ id: string }>>(
@@ -169,7 +171,7 @@ describe.each(TABLE_NAMES)("%s — cross-tenant access", (name) => {
     // WITH CHECK, not just USING. Reading is protected; so is writing.
     const values = table[name]!.columns((seq += 1));
     const cols = ["tenant_id", ...Object.keys(values)];
-    const vals = [tenants.b, ...Object.values(values)];
+    const vals = [tenants.b, ...Object.values(values)] as postgres.ParameterOrJSON<never>[];
     const placeholders = cols.map((_, i) => `$${i + 1}`).join(", ");
     await expect(
       asTenant(urls.app, tenants.a, "read-write", (tx) =>

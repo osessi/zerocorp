@@ -1,16 +1,18 @@
 import { and, asc, desc, eq, sql } from "drizzle-orm";
 import {
   businessAnalysisSchema,
+  enrichmentSchema,
   planProposalSchema,
   partialAssessmentAnswersSchema,
+  questionCardSchema,
   type AssessmentStatus,
   type BusinessAnalysis,
   type PartialAssessmentAnswers,
   type PlanMessage,
   type PlanProposal,
 } from "@zerocorp/contracts";
-import type { AssessmentRepository, StoredAssessment, StoredPlan } from "@zerocorp/application";
-import { assessments, planMessages, plans } from "../schema/global";
+import type { AssessmentRepository, StoredAssessment, StoredPlan, StoredTurn } from "@zerocorp/application";
+import { assessmentTurns, assessments, planMessages, plans } from "../schema/global";
 import type { Tx } from "../types";
 
 /**
@@ -37,6 +39,9 @@ export function createAssessmentRepository(): AssessmentRepository<Tx> {
       failureReason: row.failureReason,
       expiresAt: row.expiresAt,
       convertedTenantId: row.convertedTenantId,
+      enrichment: enrichmentSchema.parse(row.enrichment),
+      turnsUsed: row.turnsUsed,
+      pendingQuestion: row.pendingQuestion === null ? null : questionCardSchema.parse(row.pendingQuestion),
     };
   }
 
@@ -169,6 +174,63 @@ export function createAssessmentRepository(): AssessmentRepository<Tx> {
         .from(plans)
         .where(eq(plans.assessmentId, id));
       return row?.n ?? 0;
+    },
+
+    /* ── The interview ────────────────────────────────────────────────────── */
+
+    async appendTurn(tx, id, turn) {
+      await tx.insert(assessmentTurns).values({
+        assessmentId: id,
+        position: turn.position,
+        question: turn.question,
+        answer: turn.answer,
+        patch: turn.patch,
+        statedSlot: turn.statedSlot,
+        inferredSlots: turn.inferredSlots,
+        ...(turn.costMicros !== undefined ? { costMicros: turn.costMicros } : {}),
+        ...(turn.model !== undefined ? { model: turn.model } : {}),
+      });
+    },
+
+    async replaceTurn(tx, id, position, turn) {
+      // In place, by position. Everything after it is untouched — D18.
+      await tx
+        .update(assessmentTurns)
+        .set({ answer: turn.answer, patch: turn.patch, updatedAt: new Date() })
+        .where(and(eq(assessmentTurns.assessmentId, id), eq(assessmentTurns.position, position)));
+    },
+
+    async listTurns(tx, id) {
+      const rows = await tx
+        .select()
+        .from(assessmentTurns)
+        .where(eq(assessmentTurns.assessmentId, id))
+        .orderBy(asc(assessmentTurns.position));
+      return rows.map((row) => ({
+        position: row.position,
+        // Parsed back through the contract. A jsonb column holds whatever was written
+        // into it, including whatever an older version of the code wrote.
+        question: questionCardSchema.parse(row.question),
+        answer: row.answer,
+        patch: partialAssessmentAnswersSchema.parse(row.patch),
+        statedSlot: row.statedSlot as StoredTurn["statedSlot"],
+        inferredSlots: row.inferredSlots as StoredTurn["inferredSlots"],
+      }));
+    },
+
+    async setEnrichment(tx, id, enrichment) {
+      await tx.update(assessments).set({ enrichment, updatedAt: new Date() }).where(eq(assessments.id, id));
+    },
+
+    async setTurnsUsed(tx, id, turnsUsed) {
+      await tx.update(assessments).set({ turnsUsed, updatedAt: new Date() }).where(eq(assessments.id, id));
+    },
+
+    async setPendingQuestion(tx, id, question) {
+      await tx
+        .update(assessments)
+        .set({ pendingQuestion: question, updatedAt: new Date() })
+        .where(eq(assessments.id, id));
     },
   };
 }

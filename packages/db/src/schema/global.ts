@@ -1,4 +1,4 @@
-import { pgTable, uuid, text, timestamp, jsonb, integer, uniqueIndex, index } from "drizzle-orm/pg-core";
+import { pgTable, uuid, text, timestamp, jsonb, integer, bigint, uniqueIndex, index } from "drizzle-orm/pg-core";
 
 /**
  * Global tables — the documented exceptions to tenancy.
@@ -119,6 +119,17 @@ export const assessments = pgTable(
     /** Set exactly once, when payment converts this assessment into a tenant. */
     convertedTenantId: uuid("converted_tenant_id"),
     failureReason: text("failure_reason"),
+    /** What the interview picked up beyond the five required slots. Optional to the architect. */
+    enrichment: jsonb("enrichment").notNull().default({}),
+    /** How far the interview has got. What the turn cap is checked against. */
+    turnsUsed: integer("turns_used").notNull().default(0),
+    /**
+     * The question the server last asked.
+     *
+     * The answer endpoint checks the card it is given against this one. Taking the card
+     * from the client means the client decides which slot its answer lands in.
+     */
+    pendingQuestion: jsonb("pending_question"),
     expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
@@ -155,6 +166,34 @@ export const plans = pgTable(
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [uniqueIndex("plans_assessment_version_key").on(t.assessmentId, t.version)],
+);
+
+/**
+ * One question asked and the answer given — D18.
+ *
+ * The question is stored WHOLE rather than as its text: replaying an interview needs to
+ * know it was a three-option single choice, and a string cannot say that.
+ */
+export const assessmentTurns = pgTable(
+  "assessment_turns",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    assessmentId: uuid("assessment_id").notNull(),
+    position: integer("position").notNull(),
+    /** A validated QuestionCard, parsed back through questionCardSchema on read. */
+    question: jsonb("question").notNull(),
+    answer: text("answer").notNull(),
+    /** What this answer wrote into the slots. Keeping it here is what makes rewind exact. */
+    patch: jsonb("patch").notNull().default({}),
+    statedSlot: text("stated_slot"),
+    inferredSlots: jsonb("inferred_slots").notNull().default([]),
+    /** Null for the fixed opening question, which costs nothing, and for the fallback. */
+    costMicros: bigint("cost_micros", { mode: "number" }),
+    model: text("model"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [uniqueIndex("assessment_turns_position_key").on(t.assessmentId, t.position)],
 );
 
 /** The conversation about the plan. Grounds the next regeneration and audits the approval. */
@@ -236,6 +275,7 @@ export const GLOBAL_TABLES = [
   "assessments",
   "plans",
   "plan_messages",
+  "assessment_turns",
   "checkout_sessions",
   "webhook_events",
 ] as const;

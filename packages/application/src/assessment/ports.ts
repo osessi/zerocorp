@@ -2,10 +2,13 @@ import type {
   AssessmentAnswers,
   AssessmentStatus,
   BusinessAnalysis,
+  Enrichment,
   PartialAssessmentAnswers,
   PlanConstraint,
   PlanMessage,
   PlanProposal,
+  QuestionCard,
+  SlotId,
 } from "@zerocorp/contracts";
 
 /**
@@ -26,6 +29,26 @@ export interface StoredAssessment {
   readonly failureReason: string | null;
   readonly expiresAt: Date;
   readonly convertedTenantId: string | null;
+  readonly enrichment: Enrichment;
+  readonly turnsUsed: number;
+  /** The question the server last asked. What an incoming answer is checked against. */
+  readonly pendingQuestion: QuestionCard | null;
+}
+
+/**
+ * One question asked and the answer given — D18.
+ *
+ * `patch` is what the answer wrote into the slots, kept beside the turn rather than
+ * derived later. That is what makes going back exact: replace an entry and recompute,
+ * instead of guessing which later turn touched which slot.
+ */
+export interface StoredTurn {
+  readonly position: number;
+  readonly question: QuestionCard;
+  readonly answer: string;
+  readonly patch: PartialAssessmentAnswers;
+  readonly statedSlot: SlotId | null;
+  readonly inferredSlots: readonly SlotId[];
 }
 
 export interface StoredPlan {
@@ -57,6 +80,16 @@ export interface AssessmentRepository<TTx = unknown> {
 
   /** How many analyses have run. The regeneration cap is enforced on this. */
   countAnalyses(tx: TTx, id: string): Promise<number>;
+
+  /* ── The interview ──────────────────────────────────────────────────────── */
+
+  appendTurn(tx: TTx, id: string, turn: StoredTurn & { costMicros?: number; model?: string }): Promise<void>;
+  /** Replaces an answered turn in place. Everything after it is left alone — D18. */
+  replaceTurn(tx: TTx, id: string, position: number, turn: StoredTurn): Promise<void>;
+  listTurns(tx: TTx, id: string): Promise<readonly StoredTurn[]>;
+  setEnrichment(tx: TTx, id: string, enrichment: Enrichment): Promise<void>;
+  setTurnsUsed(tx: TTx, id: string, turnsUsed: number): Promise<void>;
+  setPendingQuestion(tx: TTx, id: string, question: QuestionCard | null): Promise<void>;
 }
 
 /** Records what a run cost, so free-tier spend is measurable rather than surprising. */
