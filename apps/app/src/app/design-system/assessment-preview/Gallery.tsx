@@ -2,6 +2,13 @@
 
 import { useState } from "react";
 import {
+  BriefcaseIcon,
+  BuildingsIcon,
+  GlobeHemisphereWestIcon,
+  MapPinIcon,
+  TargetIcon,
+} from "@phosphor-icons/react/dist/ssr";
+import {
   PromptDock,
   PromptHero,
   QuestionCard,
@@ -117,11 +124,11 @@ export function Gallery() {
       >
         <WizardRail
           steps={[
-            { id: "a", label: "Business", done: true },
-            { id: "b", label: "Situation", done: true },
-            { id: "c", label: "Company", done: true, tentative: true },
-            { id: "d", label: "Goals", done: false },
-            { id: "e", label: "Markets", done: false },
+            { id: "a", label: "Business", done: true, icon: BriefcaseIcon },
+            { id: "b", label: "Situation", done: true, icon: MapPinIcon },
+            { id: "c", label: "Company", done: true, tentative: true, icon: BuildingsIcon },
+            { id: "d", label: "Goals", done: false, icon: TargetIcon },
+            { id: "e", label: "Markets", done: false, icon: GlobeHemisphereWestIcon },
           ]}
           activeId="d"
         />

@@ -490,6 +490,24 @@
     to   { opacity: 1; transform: translateX(0); }
   }
 
+  /*
+    A rule drawing itself under a heading as it arrives.
+
+    It is the "this is new" signal. A question that simply replaces the last one in the
+    same position is easy to miss, especially for someone who looked away while the
+    system was thinking. The line draws once and stops; it is punctuation, not decoration.
+  */
+  @keyframes zc-underline {
+    from { transform: scaleX(0); }
+    to   { transform: scaleX(1); }
+  }
+
+  /* The active step. A soft halo, opacity only, so nothing on the rail moves. */
+  @keyframes zc-halo {
+    0%, 100% { opacity: 0.15; }
+    50%      { opacity: 0.5; }
+  }
+
   /* The thinking indicator. Opacity only: nothing moves while the system is quiet. */
   @keyframes zc-pulse {
     0%, 100% { opacity: 0.25; }
@@ -514,6 +532,15 @@
 
   .zc-slide-in {
     animation: zc-slide-in var(--duration-modal) var(--ease-out) both;
+  }
+
+  .zc-underline {
+    transform-origin: left;
+    animation: zc-underline 500ms var(--ease-out) both;
+  }
+
+  .zc-halo {
+    animation: zc-halo 2s var(--ease-in-out) infinite;
   }
 
   /* §10 — motion is honoured, never imposed. */

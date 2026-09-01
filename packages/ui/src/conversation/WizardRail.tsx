@@ -1,4 +1,5 @@
 import { CheckIcon } from "@phosphor-icons/react/dist/ssr";
+import type { ComponentType } from "react";
 import { cx } from "../cx";
 import { ACCENT_EDGE, ACCENT_FILL, ACCENT_RULE, ACCENT_TEXT, accentFor } from "./accent";
 
@@ -6,20 +7,22 @@ import { ACCENT_EDGE, ACCENT_FILL, ACCENT_RULE, ACCENT_TEXT, accentFor } from ".
  * The steps, across the top, validating one at a time.
  *
  * A rail rather than a progress bar. A bar says "you are 60% through"; a rail says
- * "these are the five things we need, and three of them are settled", which is the true
+ * "these are the five things we need, and three are settled", which is the true
  * statement and the more reassuring one.
  *
- * The segment between two nodes fills as the earlier one is answered. That filling is
- * the whole feedback moment: the marker turns, the check lands, the line runs to the
- * next node, and the next node lights up. Under prefers-reduced-motion each of those
- * simply arrives at its end state.
+ * The connector runs BEHIND the markers, from one centre to the next, so the labels can
+ * sit centred under their own marker. Drawing it between markers instead forces the
+ * labels left-aligned, and a left-aligned label under a centred dot reads as belonging
+ * to the gap rather than to the step.
  */
 export interface WizardStep {
   readonly id: string;
   readonly label: string;
   readonly done: boolean;
-  /** Filled but not confirmed. Shown as an outline in the accent rather than a fill. */
+  /** Filled but not confirmed. An outline in the accent rather than a fill. */
   readonly tentative?: boolean;
+  /** The step's glyph. Falls back to its number, which is a weaker signal. */
+  readonly icon?: ComponentType<{ size?: number; weight?: "regular" | "bold" | "fill" }>;
 }
 
 export function WizardRail({
@@ -32,63 +35,82 @@ export function WizardRail({
   className?: string;
 }) {
   return (
-    <div className={cx("flex w-full items-start", className)} aria-hidden="true">
+    <ol className={cx("flex w-full items-start", className)}>
       {steps.map((step, i) => {
         const accent = accentFor(i);
         const active = step.id === activeId;
         const settled = step.done && !step.tentative;
+        const Icon = step.icon;
+        const last = i === steps.length - 1;
 
         return (
-          <div key={step.id} className="flex min-w-0 flex-1 flex-col gap-2">
-            <div className="flex items-center">
+          <li key={step.id} className="relative flex min-w-0 flex-1 flex-col items-center gap-2.5">
+            {/* Behind the markers, centre to centre. Two layers: the dashed track that
+                is always there, and the solid run that grows as the step settles. */}
+            {!last ? (
+              <>
+                <span className="border-border absolute top-3 left-1/2 w-full border-t border-dashed" aria-hidden="true" />
+                <span
+                  className={cx(
+                    "absolute top-3 left-1/2 h-px transition-[width] duration-modal ease-out",
+                    ACCENT_RULE[accent],
+                  )}
+                  style={{ width: settled ? "100%" : "0%" }}
+                  aria-hidden="true"
+                />
+              </>
+            ) : null}
+
+            <span className="bg-background relative z-10 px-1">
+              {/* The halo marks the live step. Opacity only, so nothing on the rail
+                  moves while the visitor is reading the question below it. */}
+              {active && !settled ? (
+                <span
+                  aria-hidden="true"
+                  className={cx("zc-halo absolute -inset-1 border", ACCENT_EDGE[accent])}
+                />
+              ) : null}
+
               <span
                 className={cx(
-                  "flex size-6 shrink-0 items-center justify-center border",
+                  "relative flex size-6 items-center justify-center border",
                   "transition-[color,background-color,border-color] duration-emphasis ease-out",
                   settled
                     ? cx(ACCENT_FILL[accent], ACCENT_EDGE[accent], "zc-pop")
                     : step.tentative
-                      ? cx(ACCENT_EDGE[accent], ACCENT_TEXT[accent])
+                      ? cx(ACCENT_EDGE[accent], ACCENT_TEXT[accent], "bg-background")
                       : active
-                        ? "border-foreground text-foreground"
-                        : "border-border text-muted-foreground",
+                        ? cx(ACCENT_EDGE[accent], ACCENT_TEXT[accent], "bg-background")
+                        : "border-border text-muted-foreground bg-background",
                 )}
               >
                 {settled ? (
-                  <CheckIcon size={12} weight="bold" />
+                  <CheckIcon size={14} weight="bold" aria-hidden="true" />
+                ) : Icon ? (
+                  <Icon size={14} weight="regular" aria-hidden="true" />
                 ) : (
-                  <span className="text-caption font-mono tabular-nums">{i + 1}</span>
+                  <span className="text-caption font-mono tabular-nums" aria-hidden="true">
+                    {i + 1}
+                  </span>
                 )}
               </span>
-
-              {i < steps.length - 1 ? (
-                <span className="relative mx-2 h-px flex-1">
-                  {/* The unfilled track. Dashed, so an unreached step reads as planned
-                      rather than as broken. */}
-                  <span className="border-border absolute inset-0 border-t border-dashed" />
-                  {/* The filled run. Width, not opacity: the line has to travel. */}
-                  <span
-                    className={cx(
-                      "absolute inset-y-0 left-0 transition-[width] duration-modal ease-out",
-                      ACCENT_RULE[accent],
-                    )}
-                    style={{ width: settled ? "100%" : "0%" }}
-                  />
-                </span>
-              ) : null}
-            </div>
+            </span>
 
             <span
               className={cx(
-                "text-caption truncate pr-2 transition-[color] duration-emphasis ease-out",
-                settled ? ACCENT_TEXT[accent] : active ? "text-foreground" : "text-muted-foreground",
+                "text-caption w-full truncate px-1 text-center transition-[color] duration-emphasis ease-out",
+                settled ? ACCENT_TEXT[accent] : active ? cx(ACCENT_TEXT[accent], "font-medium") : "text-muted-foreground",
               )}
             >
               {step.label}
             </span>
-          </div>
+
+            <span className="sr-only">
+              {settled ? "done" : active ? "current step" : step.tentative ? "assumed, not confirmed" : "not yet"}
+            </span>
+          </li>
         );
       })}
-    </div>
+    </ol>
   );
 }

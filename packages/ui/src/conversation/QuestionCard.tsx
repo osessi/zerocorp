@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ArrowRightIcon, CheckIcon, PencilSimpleIcon } from "@phosphor-icons/react/dist/ssr";
 import type { QuestionCard as Card, QuestionOption } from "@zerocorp/contracts";
 import { Button } from "../button/index";
 import { cx } from "../cx";
-import { ACCENT_EDGE, ACCENT_EDGE_HOVER, ACCENT_FILL, ACCENT_TEXT, type AccentIndex } from "./accent";
+import { ACCENT_EDGE, ACCENT_EDGE_HOVER, ACCENT_FILL, ACCENT_RULE, ACCENT_TEXT, type AccentIndex } from "./accent";
 import { ENTER, staggerStyle } from "./motion";
 
 /**
@@ -101,7 +101,16 @@ function Heading({ card, accent, eyebrow }: { card: Card; accent: AccentIndex; e
   return (
     <div className={cx(ENTER, "flex flex-col gap-2")}>
       {eyebrow ? <p className={cx("text-overline", ACCENT_TEXT[accent])}>{eyebrow}</p> : null}
-      <h2 className="text-h2 text-balance">{card.question}</h2>
+      <div className="flex flex-col gap-3">
+        <h2 className="text-h2 text-balance">{card.question}</h2>
+        {/* Drawn once, left to right, as the question arrives. A question that replaces
+            the last one in the same position is easy to miss, especially for someone who
+            looked away while the system was thinking. Punctuation, not decoration. */}
+        <span
+          aria-hidden="true"
+          className={cx("zc-underline h-0.5 w-12 origin-left", ACCENT_RULE[accent])}
+        />
+      </div>
       {card.kind !== "confirm" && card.help ? (
         <p className="text-body-sm text-muted-foreground max-w-prose">{card.help}</p>
       ) : null}
@@ -109,8 +118,32 @@ function Heading({ card, accent, eyebrow }: { card: Card; accent: AccentIndex; e
   );
 }
 
+/**
+ * How long a single choice stays lit before it submits.
+ *
+ * A single choice IS the answer, so a Continue button after it adds a click carrying no
+ * information. But submitting on the same frame as the click means the visitor never
+ * sees their own choice register, and an interface that moves before acknowledging you
+ * feels like it stopped listening. The pause is long enough to see the mark land and
+ * short enough that nobody waits for it.
+ */
+const CONFIRM_MS = 260;
+
 export function QuestionCard({ card, onAnswer, disabled, accent = 1, eyebrow }: QuestionCardProps) {
   const [selected, setSelected] = useState<string[]>([]);
+  const [committing, setCommitting] = useState(false);
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // A card that is replaced mid-confirmation must not fire its old answer into the new
+  // question.
+  useEffect(() => () => { if (timer.current) clearTimeout(timer.current); }, []);
+
+  function chooseOne(value: string, label: string) {
+    if (committing || disabled) return;
+    setSelected([value]);
+    setCommitting(true);
+    timer.current = setTimeout(() => onAnswer(label, [value]), CONFIRM_MS);
+  }
 
   if (card.kind === "single_choice") {
     return (
@@ -124,11 +157,9 @@ export function QuestionCard({ card, onAnswer, disabled, accent = 1, eyebrow }: 
               index={i}
               multiple={false}
               accent={accent}
-              selected={false}
-              disabled={disabled}
-              // A single choice IS the answer. Asking someone to pick and then press
-              // Continue adds a click that carries no information.
-              onClick={() => onAnswer(option.label, [option.value])}
+              selected={selected.includes(option.value)}
+              disabled={disabled || (committing && !selected.includes(option.value))}
+              onClick={() => chooseOne(option.value, option.label)}
             />
           ))}
         </div>
@@ -194,10 +225,20 @@ export function QuestionCard({ card, onAnswer, disabled, accent = 1, eyebrow }: 
           <p className="text-body">{card.statement}</p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Button variant="primary" icon={CheckIcon} disabled={disabled} onClick={() => onAnswer("Yes, that is right.", ["confirmed"])}>
+          <Button
+            variant="primary"
+            icon={CheckIcon}
+            disabled={disabled || committing}
+            onClick={() => chooseOne("confirmed", "Yes, that is right.")}
+          >
             That is right
           </Button>
-          <Button variant="secondary" icon={PencilSimpleIcon} disabled={disabled} onClick={() => onAnswer("Not quite.", ["rejected"])}>
+          <Button
+            variant="secondary"
+            icon={PencilSimpleIcon}
+            disabled={disabled || committing}
+            onClick={() => chooseOne("rejected", "Not quite.")}
+          >
             Not quite
           </Button>
         </div>

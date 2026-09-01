@@ -1,7 +1,14 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { ArrowCounterClockwiseIcon } from "@phosphor-icons/react/dist/ssr";
+import {
+  ArrowCounterClockwiseIcon,
+  BriefcaseIcon,
+  BuildingsIcon,
+  GlobeHemisphereWestIcon,
+  MapPinIcon,
+  TargetIcon,
+} from "@phosphor-icons/react/dist/ssr";
 import {
   Button,
   ConversationLayout,
@@ -42,12 +49,19 @@ import { PlanResult } from "./PlanResult";
 
 const THINKING_MS = 700;
 
-const SLOT_LABELS: Record<SlotId, string> = {
-  business_description: "Business",
-  current_situation: "Situation",
-  company_situation: "Company",
-  twelve_month_goal: "Goals",
-  target_markets: "Markets",
+/**
+ * A label and a glyph per step.
+ *
+ * The glyph is what the step IS, not a decoration: a pin for where you are, a globe for
+ * where you sell. A numbered circle tells a visitor how many are left; an icon tells
+ * them what each one is about before they have read the word underneath it.
+ */
+const SLOT_STEPS: Record<SlotId, { label: string; icon: typeof BriefcaseIcon }> = {
+  business_description: { label: "Business", icon: BriefcaseIcon },
+  current_situation: { label: "Situation", icon: MapPinIcon },
+  company_situation: { label: "Company", icon: BuildingsIcon },
+  twelve_month_goal: { label: "Goals", icon: TargetIcon },
+  target_markets: { label: "Markets", icon: GlobeHemisphereWestIcon },
 };
 
 const interviewer = new DeterministicInterviewer();
@@ -81,7 +95,8 @@ export function Walkthrough() {
 
   const steps: WizardStep[] = SLOT_IDS.map((id) => ({
     id,
-    label: SLOT_LABELS[id],
+    label: SLOT_STEPS[id].label,
+    icon: SLOT_STEPS[id].icon,
     done: slots[id].filled,
     ...(slots[id].source === "inferred" ? { tentative: true } : {}),
   }));
@@ -243,7 +258,7 @@ export function Walkthrough() {
         <QuestionCard
           card={card}
           accent={accent}
-          {...(card.slot ? { eyebrow: SLOT_LABELS[card.slot] } : {})}
+          {...(card.slot ? { eyebrow: SLOT_STEPS[card.slot].label } : {})}
           onAnswer={(text, values) => void answer(text, values)}
         />
       ) : (
