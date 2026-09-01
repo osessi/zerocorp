@@ -15,7 +15,7 @@ import {
   type CompanyStatus,
   type EinStatus,
   type FormationOrderStatus,
-} from "./formation.js";
+} from "./formation";
 
 /**
  * D2, decided 2026-08-31. These tests exist because the repository carried three

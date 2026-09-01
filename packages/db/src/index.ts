@@ -7,6 +7,6 @@
  *
  * Everything tenant-owned goes through withTenant(). There is no second door.
  */
-export { withTenant, createUnitOfWork } from "./tenant.js";
-export { tenantTable, TENANT_OWNED_TABLES } from "./schema/tenant-table.js";
-export type { Tx } from "./types.js";
+export { withTenant, createUnitOfWork } from "./tenant";
+export { tenantTable, TENANT_OWNED_TABLES } from "./schema/tenant-table";
+export type { Tx } from "./types";

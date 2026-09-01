@@ -8,6 +8,6 @@
  * It is the vocabulary that lets `apps/api` be generated later without
  * reinventing a single contract.
  */
-export * from "./tenant-context.js";
-export * from "./ids.js";
-export * from "./formation.js";
+export * from "./tenant-context";
+export * from "./ids";
+export * from "./formation";

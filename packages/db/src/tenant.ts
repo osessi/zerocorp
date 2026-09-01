@@ -1,8 +1,8 @@
 import { sql } from "drizzle-orm";
 import type { TenantContext } from "@zerocorp/contracts";
 import type { UnitOfWork } from "@zerocorp/application";
-import { getClient } from "./internal/client.js";
-import type { Tx } from "./types.js";
+import { getClient } from "./internal/client";
+import type { Tx } from "./types";
 
 /**
  * The only sanctioned path to tenant-owned data.

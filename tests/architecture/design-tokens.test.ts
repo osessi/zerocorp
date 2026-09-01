@@ -24,7 +24,7 @@ function sourceFiles(dir: string, out: string[] = []): string[] {
   }
   for (const entry of entries) {
     const rel = join(dir, entry);
-    if (entry === "node_modules" || entry === "dist") continue;
+    if (entry === "node_modules" || entry === "dist" || entry === ".next") continue;
     if (statSync(join(ROOT, rel)).isDirectory()) sourceFiles(rel, out);
     else if (/\.(ts|tsx|css)$/.test(entry)) out.push(rel);
   }
@@ -126,6 +126,33 @@ describe("design tokens — no arbitrary visual values", () => {
     for (const value of ["#00786f", "#949494", "#15803d", "#b45309", "#2563eb", "#dc2626"]) {
       expect(tokens.toLowerCase()).toContain(value);
     }
+  });
+});
+
+describe("module resolution — the bundler has to agree with the compiler", () => {
+  /**
+   * `tsconfig.base.json` sets `moduleResolution: "Bundler"`, under which a relative
+   * import must NOT carry a file extension.
+   *
+   * Four packages wrote `./ids.js` anyway. TypeScript tolerates it — it maps `.js` back
+   * to `.ts` — so `pnpm typecheck` was green. Webpack cannot: the file on disk is
+   * `ids.ts`, so it resolves nothing.
+   *
+   * It stayed latent because no app imported those packages. The moment `apps/app`
+   * imported `@zerocorp/contracts` for the D2 state machines, EVERY design-system route
+   * returned 500 while `pnpm verify` still passed. Found by restarting the dev server,
+   * 2026-08-31.
+   *
+   * > A green typecheck is not a running app. The compiler and the bundler resolve
+   * > modules differently, and only one of them serves the page.
+   */
+  it("uses no file extension on a relative import", () => {
+    const offenders: string[] = [];
+    for (const file of [...sourceFiles("packages"), ...sourceFiles("apps")]) {
+      const hits = code(file).match(/from\s+"\.\.?\/[^"]*\.(js|ts|tsx|mjs|cjs)"/g);
+      if (hits) offenders.push(`${relative(ROOT, file)} → ${hits.join(", ")}`);
+    }
+    expect(offenders).toEqual([]);
   });
 });
 

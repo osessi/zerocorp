@@ -1,5 +1,5 @@
-import { inngest } from "./client.js";
-import { functions } from "./functions/index.js";
+import { inngest } from "./client";
+import { functions } from "./functions/index";
 
 /**
  * apps/worker — durable jobs, scheduled workflows and agent runs.

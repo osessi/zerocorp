@@ -11,5 +11,5 @@
  *
  * Anything non-deterministic is injected as a port by @zerocorp/application.
  */
-export * from "./errors.js";
-export * from "./state-machine.js";
+export * from "./errors";
+export * from "./state-machine";

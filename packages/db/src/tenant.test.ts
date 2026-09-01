@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import type { TenantContext } from "@zerocorp/contracts";
-import { withTenant } from "./tenant.js";
-import { __setClientForTesting } from "./internal/client.js";
+import { withTenant } from "./tenant";
+import { __setClientForTesting } from "./internal/client";
 
 /** Walks any object graph and collects every string, without depending on Drizzle internals. */
 function collectStrings(value: unknown, out: string[] = [], depth = 0): string[] {

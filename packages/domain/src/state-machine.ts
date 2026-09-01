@@ -1,4 +1,4 @@
-import { InvalidTransitionError } from "./errors.js";
+import { InvalidTransitionError } from "./errors";
 
 /**
  * Pure, declarative state machine.

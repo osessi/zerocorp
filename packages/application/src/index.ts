@@ -12,5 +12,5 @@
  *   - no framework, no Node built-ins, no DOM (same tsconfig lockdown as domain)
  *   - never imports an infrastructure package; it DEFINES ports, adapters implement them
  */
-export * from "./ports.js";
-export * from "./use-case.js";
+export * from "./ports";
+export * from "./use-case";

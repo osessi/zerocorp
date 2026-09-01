@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { tenantTable, TENANT_OWNED_TABLES } from "./tenant-table.js";
+import { tenantTable, TENANT_OWNED_TABLES } from "./tenant-table";
 import { text } from "drizzle-orm/pg-core";
 
 describe("tenantTable — tenant_id is not optional", () => {
