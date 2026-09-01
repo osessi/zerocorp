@@ -188,6 +188,7 @@ export const APPEND_ONLY_TABLES = [
   "audit_logs",
   "activity_events",
   "formation_events",
+  "page_versions",
 ] as const;
 
 export const TENANT_TABLES = {

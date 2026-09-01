@@ -1,8 +1,10 @@
 import "server-only";
 import {
   createAssessmentRepository,
+  createBlocksRepository,
   createConversionRepository,
   createDashboardRepository,
+  createSettingsRepository,
   createFormationCatalog,
   createIdentityRepository,
   createSystemUnitOfWork,
@@ -14,8 +16,10 @@ import {
   createInterviewService,
   type AssessmentService as Service,
   type ConversionService as Conversion,
+  type BlocksRepository,
   type DashboardRepository,
   type FormationCatalog,
+  type SettingsRepository,
   type IdentityRepository,
   type InterviewService as Interview,
   type SystemUnitOfWork,
@@ -230,4 +234,16 @@ let dashboard: DashboardRepository | undefined;
 export function getDashboardRepository(): DashboardRepository {
   dashboard ??= createDashboardRepository();
   return dashboard;
+}
+
+let blocks: BlocksRepository | undefined;
+export function getBlocksRepository(): BlocksRepository {
+  blocks ??= createBlocksRepository();
+  return blocks;
+}
+
+let settings: SettingsRepository | undefined;
+export function getSettingsRepository(): SettingsRepository {
+  settings ??= createSettingsRepository();
+  return settings;
 }

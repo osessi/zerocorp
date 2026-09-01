@@ -50,5 +50,18 @@ export function fixtures(catalog: { entityTypeId: string }): Record<string, Fixt
     formation_events: col((seq) => ({ order_id: uuidFor(seq), source: "system", kind: "order.created" })),
     formation_documents: col(() => ({ type: "certificate_of_formation", storage_key: "identity/a/cert.pdf" })),
     formation_rfis: col((seq) => ({ order_id: uuidFor(seq), question: "Please confirm your address." })),
+
+    brand_identities: col(() => ({ name: "Acme Studio", status: "draft" })),
+    domains: col((seq) => ({ hostname: `acme-${seq}.example` })),
+    sites: col(() => ({ status: "draft" })),
+    pages: col((seq) => ({ site_id: uuidFor(seq), slug: `about-${seq}`, title: "About" })),
+    page_versions: col((seq) => ({ page_id: uuidFor(seq), version: seq })),
+    email_domains: col((seq) => ({ hostname: `mail-${seq}.example` })),
+    mailboxes: col((seq) => ({ address: `hello-${seq}@acme.example` })),
+    content_keywords: col((seq) => ({ keyword: `brand identity ${seq}` })),
+    posts: col((seq) => ({ slug: `post-${seq}`, title: "A post" })),
+    lead_lists: col(() => ({ name: "Early-stage SaaS" })),
+    leads: col(() => ({ company_name: "Prospect Ltd", consent_basis: "legitimate_interest" })),
+    notifications: col(() => ({ type: "formation.filed", title: "Your filing is with the state" })),
   };
 }

@@ -19,3 +19,4 @@ export * from "./ai";
 export * from "./assessment";
 export * from "./identity";
 export * from "./dashboard";
+export * from "./blocks";
