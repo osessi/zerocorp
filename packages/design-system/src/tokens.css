@@ -147,6 +147,32 @@
   --info-wash: #eff6ff;
   --processing-wash: #f0fdfa;
   --ai-wash: #f5f3ff;
+
+  /* -------------------------------------------------------------------------
+     Chart series. §4.7, and §24.14 is closed by it.
+
+     A SERIES palette is a different problem from a STATUS palette. Status colours must
+     mean something and must not be confused; series colours must only be told apart, and
+     must NOT be read as good or bad. So these are not the status hues: a green line
+     reading as "good" is a misreading a chart cannot afford.
+
+     Measured, and the measurement settled the design. Anchored on the brand teal, five
+     hue-distinct series, every one clearing 3:1 against the page as a graphical object.
+
+     They do NOT all separate in greyscale. That is not a failure of the choice: the usable
+     band is roughly 40 to 149 in grey, because anything lighter falls under 3:1 on white,
+     and five hues cannot ladder across it AND stay hue-distinct AND stay on brand. The
+     honest consequence is that a chart may never rely on colour alone, which §14 already
+     required. The chart component carries a second channel: direct labels, or a dashed
+     stroke, or a legend whose order matches the stack order.
+     ------------------------------------------------------------------------- */
+  --chart-1: #00786f;
+  --chart-2: #6d28d9;
+  --chart-3: #2563eb;
+  --chart-4: #b45309;
+  --chart-5: #be185d;
+  --chart-grid: #e5e5e5;
+  --chart-axis: #707070;
 }
 
 /* ---------------------------------------------------------------------------
@@ -224,6 +250,15 @@
   --info-wash: #080f1c;
   --processing-wash: #04120f;
   --ai-wash: #12092b;
+
+  /* Brighter in dark, same hues, same order. 7.27:1 to 11.86:1 against #0A0A0A. */
+  --chart-1: #2dd4bf;
+  --chart-2: #a78bfa;
+  --chart-3: #60a5fa;
+  --chart-4: #fbbf24;
+  --chart-5: #f472b6;
+  --chart-grid: #262626;
+  --chart-axis: #a3a3a3;
 }
 
 /* ---------------------------------------------------------------------------
@@ -286,6 +321,13 @@
   --color-info-wash: var(--info-wash);
   --color-processing-wash: var(--processing-wash);
   --color-ai-wash: var(--ai-wash);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-chart-grid: var(--chart-grid);
+  --color-chart-axis: var(--chart-axis);
 }
 
 @theme {

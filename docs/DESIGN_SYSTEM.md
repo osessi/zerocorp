@@ -248,6 +248,133 @@ would have hidden them.
 
 ---
 
+### 4.6 Four steps per hue, and the rules that use them — VALIDATED 2026-09-01
+
+§4.5 gave each hue a tint and an ink. Two more grounds turned up while building the
+dashboard, each found by measurement rather than by eye, and each the same shape: **a value
+tuned against one ground is not tuned against another.**
+
+| Step | Token | Ground it is tuned for | Measured |
+|---|---|---|---|
+| colour | `--{tone}` | the page | §4.3, unchanged |
+| tint | `--{tone}-subtle` | a chip, a badge, a short panel | 1.10–1.22 on the page |
+| ink | `--{tone}-ink` | text **on that tint** | 4.71–8.95:1 |
+| wash | `--{tone}-wash` | **a whole card** | body text 4.52–4.78:1 light, 7.36–7.62:1 dark |
+
+A wash exists because a chip and a card are not the same problem. A chip holds one short
+label in `-ink` over a small area; a card holds paragraphs of `--muted-foreground` over a
+large one. At the chip tint, body text measured **4.05:1** on the red and 4.51:1 on the
+green.
+
+`--info-on-muted` and `--destructive-on-muted` exist for the same reason at a third ground.
+On `--muted`, the dark `-ink` values measured **4.11** and **4.02**, because §4.2 is tuned
+against the page and not against a raised neutral. In light the same values passed
+comfortably, which is exactly how it hid.
+
+> Every ink must declare the ground it was measured against. Using it on another ground is
+> a new measurement, not a reuse.
+
+#### The formation colours say WHO HOLDS IT
+
+The nine states are a journey, so the colours progress rather than being handed out. The
+first version used teal for four of the nine, so "verifying identity", "ready to file" and
+"filed" looked identical and the badge told the reader almost nothing.
+
+```text
+grey     draft · cancelled          nothing has started
+violet   collecting documents       YOU hold it
+teal     verifying · ready to file  WE hold it
+yellow   operator review            a person must act
+blue     filed                      the STATE holds it, out of our hands
+green    formed                     done
+red      rejected                   it came back
+```
+
+A founder learns three colours and can then read any stage. Yellow always means a person
+must act, blue always means an authority has it, teal always means the machine is working.
+
+#### Progress reads its own value
+
+```text
+under 50   destructive   this is behind
+under 75   warning       this is moving
+75 and up  success       this will land
+```
+
+The percentage beside the bar takes the matching ink, so the number and the bar agree and
+the figure stays legible without the hue. One rule, in one place: a rule copied into two
+files is a rule that will disagree with itself.
+
+#### The record vocabulary is shared, or it is worthless
+
+`STATE_TONE`, `PLAN_TONE` and `FIELD_INK` live in one module and every surface reads them.
+A founder who learns "Wyoming is violet" in the table and finds it grey in the drawer has
+learned nothing. **The mapping is only worth having if it holds everywhere.**
+
+---
+
+### 4.7 Chart series — VALIDATED 2026-09-01, closes §24.14
+
+Recharts is the engine (D11). Every visual is ours.
+
+```text
+--chart-1  #00786F / #2DD4BF   teal, the brand
+--chart-2  #6D28D9 / #A78BFA   violet
+--chart-3  #2563EB / #60A5FA   blue
+--chart-4  #B45309 / #FBBF24   amber
+--chart-5  #BE185D / #F472B6   rose
+--chart-grid  --border         decorative, no floor
+--chart-axis  4.95:1 / 7.85:1  tick labels are text
+```
+
+**A series palette is a different problem from a status palette.** Status colours must
+mean something; series colours must only be told apart, and must **not** be read as good
+or bad. A green line reading as "good" is a misreading a chart cannot afford, so these are
+not the status hues.
+
+All five clear 3:1 against the page as graphical objects: 5.02–7.10 light, 7.27–11.86 dark.
+
+#### They do not all separate in greyscale, and they cannot
+
+Measured: with the five hues laid on a greyscale ladder, four of five adjacent pairs
+collapse. Several attempts to fix it by choosing different hues failed the same way, and
+the reason is arithmetic rather than taste. The usable band is roughly **40 to 149** in
+grey, because anything lighter falls under 3:1 on white. Five hue-distinct, on-brand series
+will not ladder across 110 points of grey.
+
+> The honest consequence is not a sixth hex value. It is that **a chart may never rely on
+> colour alone**, which §14 already required.
+
+So the chart component carries a second channel and enforces it:
+
+```text
+stroke pattern   solid · dashed · dotted, per series
+legend           shows the SWATCH AND THE STROKE, never a colour square alone
+tooltip          repeats both
+```
+
+`Series.pattern` is a **required** field. A legend rendered from a colour alone would
+defeat the whole arrangement, so the type does not allow one.
+
+#### What was not taken from the reference
+
+The shadcn chart set was the structural reference. Dropped on contact with the system:
+
+| Reference | Why not |
+|---|---|
+| `radius={8}` on bars and tooltips | §7 is radius 0. This was the first thing to go |
+| the `Card` shell | we have no Card, deliberately: a bordered div is not worth five files |
+| a raw `--chart-n` hex ladder | ours are tokens with a measured rationale |
+| `lucide-react` icons | §11 is Phosphor, and a second icon library is a second vocabulary |
+
+Charts compose `ChartFrame`, which is the same `--muted` panel header the dashboard already
+uses, so a chart is not a foreign object on the page. The tooltip composes the overlay
+surface contract rather than inventing a third one.
+
+Numbers are Geist Mono. A tooltip exists to be compared against another tooltip (§5).
+
+---
+
 ### 4.2 Dark mode — PARTIALLY VALIDATED
 
 | Token | Value | Status |
@@ -2493,7 +2620,7 @@ Also resolved 2026-08-31: the animated focus ring — `COLOR_TRANSITION` replace
 | 11 | **Responsive behaviour of the dashboard patterns** (§21.16) — no narrow reference exists | Sidebar, split detail, tables and drawer below `lg` |
 | 12 | **Table row height, column widths, hover and click target** (§21.8) — engine now decided (TanStack), these are still open. The exploration pass measured sort buttons at 11px high, under the 24×24 of WCAG 2.5.8 | `DataTableLayout` |
 | 13 | ~~Drawer width~~ **RESOLVED 2026-08-31** — `min(40vw, 640px)` desktop, `100vw` mobile. Motion still open | `RightDrawer` |
-| 14 | **Chart tokens** (§21.14) — series colours, axes, grid, empty and loading states. Recharts is approved as the ENGINE; this blocks the wrapper | The Overview screen. No chart ships before this |
+| 14 | ~~Chart tokens~~ **RESOLVED 2026-09-01** — §4.7: five series, grid and axis, measured; the wrapper is built and the empty state with it | — |
 | 17 | **`Choice` has no visually-hidden-label mode**, so a table selection column cannot use it — the exploration pass worked around it with a bare `Checkbox` and `aria-label` | Any table or toolbar with an unlabelled control |
 | 18 | **A scrollable container needs `contain-paint`** — without it a wide `<table>` propagated its overflow past the scroll container to the root and scrolled the whole page 345px at 375px. Should this be a CI rule, like `outline-none`? | Every `overflow-x-auto` in the product |
 | 15 | **`--primary` has no dark value** — teal TEXT measures 3.69:1 on `#0A0A0A`, below the 4.5:1 floor. Fine as a fill or a border. `--processing` already carries a lighter dark teal, but it is a status token | Any teal text or teal link in dark. `Button` tertiary works around it today |
