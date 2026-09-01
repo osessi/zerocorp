@@ -478,6 +478,18 @@
     to   { opacity: 1; }
   }
 
+  /* A step validating. Scale is small: 0.7 reads as a pop, 0.92 reads as a click. */
+  @keyframes zc-pop {
+    from { opacity: 0; transform: scale(0.92); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+
+  /* A node drawing itself in. Used on the timeline as an answer lands. */
+  @keyframes zc-slide-in {
+    from { opacity: 0; transform: translateX(-6px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+
   /* The thinking indicator. Opacity only: nothing moves while the system is quiet. */
   @keyframes zc-pulse {
     0%, 100% { opacity: 0.25; }
@@ -494,6 +506,14 @@
 
   .zc-pulse {
     animation: zc-pulse 1.2s var(--ease-in-out) infinite;
+  }
+
+  .zc-pop {
+    animation: zc-pop var(--duration-emphasis) var(--ease-out) both;
+  }
+
+  .zc-slide-in {
+    animation: zc-slide-in var(--duration-modal) var(--ease-out) both;
   }
 
   /* §10 — motion is honoured, never imposed. */

@@ -5,6 +5,7 @@ import { ArrowRightIcon, CheckIcon, PencilSimpleIcon } from "@phosphor-icons/rea
 import type { QuestionCard as Card, QuestionOption } from "@zerocorp/contracts";
 import { Button } from "../button/index";
 import { cx } from "../cx";
+import { ACCENT_EDGE, ACCENT_EDGE_HOVER, ACCENT_FILL, ACCENT_TEXT, type AccentIndex } from "./accent";
 import { ENTER, staggerStyle } from "./motion";
 
 /**
@@ -23,14 +24,22 @@ export interface QuestionCardProps {
   /** Called with the answer as the visitor would have written it. */
   onAnswer: (answer: string, values?: string[]) => void;
   disabled?: boolean | undefined;
+  /**
+   * Which of the five step colours this question belongs to. The same hue is on its
+   * node in the rail and on its node in the timeline, so the three agree without any
+   * of them having to say so.
+   */
+  accent?: AccentIndex;
+  /** The step label, shown above the question. */
+  eyebrow?: string;
 }
 
 /**
  * An option button.
  *
- * `--input` at rest, `--primary` when chosen. The border does the work, not a fill:
- * a filled chip in a list of unfilled ones reads as a status, and none of these is a
- * status.
+ * `--input` at rest, the step's accent on hover and on selection. The border does the
+ * work rather than a fill: five coloured options competing for attention is a menu, not
+ * a question, and a filled chip among unfilled ones reads as a status.
  */
 function OptionButton({
   option,
@@ -39,6 +48,7 @@ function OptionButton({
   disabled,
   index,
   multiple,
+  accent,
 }: {
   option: QuestionOption;
   selected: boolean;
@@ -46,6 +56,7 @@ function OptionButton({
   disabled?: boolean | undefined;
   index: number;
   multiple: boolean;
+  accent: AccentIndex;
 }) {
   return (
     <button
@@ -61,9 +72,11 @@ function OptionButton({
         "transition-[color,background-color,border-color] duration-normal ease-out",
         "focus-visible:outline-ring focus-visible:outline-2 focus-visible:outline-offset-2",
         "disabled:cursor-not-allowed disabled:opacity-60",
+        // The accent lands on selection and on hover. At rest every option is neutral,
+        // because five coloured options competing for attention is a menu, not a question.
         selected
-          ? "border-primary text-foreground"
-          : "border-input text-foreground hover:border-input-hover",
+          ? cx(ACCENT_EDGE[accent], "bg-accent text-foreground")
+          : cx("border-input text-foreground", ACCENT_EDGE_HOVER[accent]),
       )}
     >
       <span
@@ -71,7 +84,7 @@ function OptionButton({
         className={cx(
           "flex size-4 shrink-0 items-center justify-center border transition-[color,background-color,border-color] duration-normal ease-out",
           multiple ? "" : "rounded-full",
-          selected ? "border-primary bg-primary text-primary-foreground" : "border-input text-transparent",
+          selected ? cx(ACCENT_FILL[accent], ACCENT_EDGE[accent], "zc-pop") : "border-input text-transparent",
         )}
       >
         <CheckIcon size={12} weight="bold" />
@@ -84,9 +97,10 @@ function OptionButton({
   );
 }
 
-function Heading({ card }: { card: Card }) {
+function Heading({ card, accent, eyebrow }: { card: Card; accent: AccentIndex; eyebrow?: string }) {
   return (
     <div className={cx(ENTER, "flex flex-col gap-2")}>
+      {eyebrow ? <p className={cx("text-overline", ACCENT_TEXT[accent])}>{eyebrow}</p> : null}
       <h2 className="text-h2 text-balance">{card.question}</h2>
       {card.kind !== "confirm" && card.help ? (
         <p className="text-body-sm text-muted-foreground max-w-prose">{card.help}</p>
@@ -95,13 +109,13 @@ function Heading({ card }: { card: Card }) {
   );
 }
 
-export function QuestionCard({ card, onAnswer, disabled }: QuestionCardProps) {
+export function QuestionCard({ card, onAnswer, disabled, accent = 1, eyebrow }: QuestionCardProps) {
   const [selected, setSelected] = useState<string[]>([]);
 
   if (card.kind === "single_choice") {
     return (
       <div className="flex flex-col gap-8">
-        <Heading card={card} />
+        <Heading card={card} accent={accent} {...(eyebrow ? { eyebrow } : {})} />
         <div className="flex flex-col gap-2" role="radiogroup" aria-label={card.question}>
           {card.options.map((option, i) => (
             <OptionButton
@@ -109,6 +123,7 @@ export function QuestionCard({ card, onAnswer, disabled }: QuestionCardProps) {
               option={option}
               index={i}
               multiple={false}
+              accent={accent}
               selected={false}
               disabled={disabled}
               // A single choice IS the answer. Asking someone to pick and then press
@@ -125,7 +140,7 @@ export function QuestionCard({ card, onAnswer, disabled }: QuestionCardProps) {
     const enough = selected.length >= card.min;
     return (
       <div className="flex flex-col gap-8">
-        <Heading card={card} />
+        <Heading card={card} accent={accent} {...(eyebrow ? { eyebrow } : {})} />
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-2" role="group" aria-label={card.question}>
           {card.options.map((option, i) => (
             <OptionButton
@@ -133,6 +148,7 @@ export function QuestionCard({ card, onAnswer, disabled }: QuestionCardProps) {
               option={option}
               index={i}
               multiple
+              accent={accent}
               selected={selected.includes(option.value)}
               disabled={disabled || (!selected.includes(option.value) && selected.length >= card.max)}
               onClick={() =>
@@ -173,8 +189,8 @@ export function QuestionCard({ card, onAnswer, disabled }: QuestionCardProps) {
   if (card.kind === "confirm") {
     return (
       <div className="flex flex-col gap-8">
-        <Heading card={card} />
-        <div className={cx(ENTER, "border-primary border-l-2 pl-4")}>
+        <Heading card={card} accent={accent} {...(eyebrow ? { eyebrow } : {})} />
+        <div className={cx(ENTER, ACCENT_EDGE[accent], "border-l-2 pl-4")}>
           <p className="text-body">{card.statement}</p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -194,7 +210,7 @@ export function QuestionCard({ card, onAnswer, disabled }: QuestionCardProps) {
   // no way to know which one counts.
   return (
     <div className="flex flex-col gap-8">
-      <Heading card={card} />
+      <Heading card={card} accent={accent} {...(eyebrow ? { eyebrow } : {})} />
       {card.suggestions.length > 0 ? (
         <div className="flex flex-col gap-3">
           <p className="text-overline text-muted-foreground">Or pick one to start from</p>
@@ -208,7 +224,8 @@ export function QuestionCard({ card, onAnswer, disabled }: QuestionCardProps) {
                 onClick={() => onAnswer(suggestion)}
                 className={cx(
                   ENTER,
-                  "border-input hover:border-input-hover text-body-sm min-h-9 border px-3 py-1.5",
+                  "border-input text-body-sm min-h-9 border px-3 py-1.5",
+                  ACCENT_EDGE_HOVER[accent],
                   "transition-[color,background-color,border-color] duration-normal ease-out",
                   "focus-visible:outline-ring focus-visible:outline-2 focus-visible:outline-offset-2",
                   "disabled:cursor-not-allowed disabled:opacity-60",

@@ -3,14 +3,16 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { ArrowCounterClockwiseIcon } from "@phosphor-icons/react/dist/ssr";
 import {
-  AnsweredTurn,
   Button,
   ConversationLayout,
   PromptDock,
   QuestionCard,
-  SlotProgress,
+  QuestionTimeline,
   Thinking,
-  type SlotProgressItem,
+  WizardRail,
+  accentFor,
+  type TimelineItem,
+  type WizardStep,
 } from "@zerocorp/ui";
 import {
   MAX_INTERVIEW_TURNS,
@@ -77,12 +79,31 @@ export function Walkthrough() {
 
   const slots = useMemo(() => slotsFrom(answers, sources), [answers, sources]);
 
-  const progress: SlotProgressItem[] = SLOT_IDS.map((id) => ({
+  const steps: WizardStep[] = SLOT_IDS.map((id) => ({
     id,
     label: SLOT_LABELS[id],
-    filled: slots[id].filled,
+    done: slots[id].filled,
     ...(slots[id].source === "inferred" ? { tentative: true } : {}),
   }));
+
+  const answeredCount = SLOT_IDS.filter((id) => slots[id].filled && slots[id].source !== "inferred").length;
+
+  /**
+   * The timeline: everything asked, plus the one being asked.
+   *
+   * Built from the transcript rather than from the slots, because a question and a slot
+   * are not the same thing. One answer can fill three slots, and a confirm question
+   * fills none.
+   */
+  const timeline: TimelineItem[] = [
+    ...transcript.map((turn, i) => ({
+      id: `turn-${i}`,
+      question: turn.question.question,
+      answer: turn.answer,
+      state: "answered" as const,
+    })),
+    ...(card ? [{ id: "active", question: card.question, state: "active" as const }] : []),
+  ];
 
   const answer = useCallback(
     async (text: string, values?: string[]) => {
@@ -177,23 +198,35 @@ export function Walkthrough() {
 
   if (plan) {
     return (
-      <ConversationLayout progress={<SlotProgress items={progress} />}>
-        <PlanResult output={plan} />
-        <div className="border-border border-t pt-6">
-          <Button variant="tertiary" icon={ArrowCounterClockwiseIcon} onClick={reset}>
+      <div className="bg-background text-foreground flex h-dvh flex-col overflow-hidden">
+        <header className="border-border flex h-14 shrink-0 items-center justify-between border-b px-5 sm:px-8">
+          <span className="text-label tracking-tight">ZeroCorp</span>
+          <Button variant="tertiary" size="sm" icon={ArrowCounterClockwiseIcon} onClick={reset}>
             Start over
           </Button>
+        </header>
+        <div className="border-border shrink-0 border-b px-5 py-5 sm:px-8">
+          <div className="mx-auto w-full max-w-5xl">
+            <WizardRail steps={steps} />
+          </div>
         </div>
-      </ConversationLayout>
+        <main className="flex-1 overflow-y-auto px-5 py-10 sm:px-8">
+          <div className="mx-auto w-full max-w-2xl">
+            <PlanResult output={plan} />
+          </div>
+        </main>
+      </div>
     );
   }
 
+  const activeIndex = card?.slot ? SLOT_IDS.indexOf(card.slot) : transcript.length;
+  const accent = accentFor(activeIndex);
+
   return (
     <ConversationLayout
-      progress={<SlotProgress items={progress} />}
-      history={transcript.map((t, i) => (
-        <AnsweredTurn key={i} question={t.question.question} answer={t.answer} onEdit={() => undefined} />
-      ))}
+      status={`${answeredCount} of ${SLOT_IDS.length} understood`}
+      rail={<WizardRail steps={steps} activeId={card?.slot ?? null} />}
+      timeline={<QuestionTimeline items={timeline} />}
       dock={
         <PromptDock
           onSubmit={(text) => void answer(text)}
@@ -207,7 +240,12 @@ export function Walkthrough() {
       {thinking ? (
         <Thinking label={transcript.length >= 4 ? "Building your plan" : "Thinking"} />
       ) : card ? (
-        <QuestionCard card={card} onAnswer={(text, values) => void answer(text, values)} />
+        <QuestionCard
+          card={card}
+          accent={accent}
+          {...(card.slot ? { eyebrow: SLOT_LABELS[card.slot] } : {})}
+          onAnswer={(text, values) => void answer(text, values)}
+        />
       ) : (
         <Thinking label="Finishing up" />
       )}

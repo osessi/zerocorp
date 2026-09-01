@@ -68,6 +68,58 @@ describe("design tokens — no arbitrary visual values", () => {
     expect(offenders).toEqual([]);
   });
 
+  it("never builds a Tailwind class name at runtime", () => {
+    /*
+      Tailwind scans source files for LITERAL class names.
+
+      `ACCENT_EDGE[n].replace("border-", "hover:border-")` produces a string that exists
+      nowhere in the source, so the utility is never generated. It typechecks, it
+      renders, the element gets the class, and the colour simply never appears. Found on
+      2026-09-01 in the assessment accent scale, where every hover border was silently
+      inert.
+
+      A template literal has the same problem: `bg-${tone}-subtle` is invisible to the
+      scanner. Write the variants out; a five-line map is cheaper than a bug you can only
+      see by looking.
+    */
+    /*
+      The prefix must be GLUED to the interpolation.
+
+      `text-caption border px-2 ${tone}` is fine and common: every class in it is a
+      literal, and the variable holds another complete class. `bg-${tone}` and
+      `bg-chart-${n}` are not: the utility name only exists once the code runs, which is
+      after Tailwind has finished looking. The space is the whole difference, so the
+      pattern requires none.
+    */
+    /*
+      `fill` and `stroke` are absent on purpose. They are Tailwind prefixes AND SVG
+      attribute names, and a recharts gradient id of `fill-${series.key}` is neither a
+      class nor a bug. An exception list for that one case would be a rule with a hole
+      in it; dropping two rarely-dynamic prefixes is a rule with a smaller mouth.
+    */
+    const PREFIXES = "bg|text|border|ring|outline|from|via|to|shadow";
+    const CONSTRUCTED = [
+      new RegExp(`\\.replace\\(\\s*["'\`](?:${PREFIXES})[-:]`),
+      new RegExp("\\b(?:" + PREFIXES + ")-[a-z0-9-]*\\$\\{"),
+    ];
+
+    // UI_SOURCES, not sourceFiles(): that helper takes a directory and swallows its
+    // own failure, so calling it wrong iterates nothing and the test passes for no
+    // reason. Which is exactly what happened when this was first written.
+    expect(UI_SOURCES.length).toBeGreaterThan(20);
+
+    const offenders: string[] = [];
+    for (const file of UI_SOURCES) {
+      const raw = readFileSync(file, "utf8");
+      const code = raw.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/.*$/gm, "");
+      for (const pattern of CONSTRUCTED) {
+        const hit = pattern.exec(code);
+        if (hit) offenders.push(`${relative(ROOT, file)} → ${hit[0]}`);
+      }
+    }
+    expect(offenders).toEqual([]);
+  });
+
   it("uses no arbitrary colour or pixel value in a Tailwind bracket", () => {
     // Catches className="mt-[17px] bg-[#00786F] text-[13px]" — the defect
     // CLAUDE_CODE_RULES.md §11 names: values the token scales govern.

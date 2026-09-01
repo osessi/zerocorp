@@ -15,9 +15,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
  *   - Where the API does not exist, `supported` is false and the caller renders NO
  *     microphone. A control that appears and then fails is worse than one that never
  *     appeared.
- *   - Where it does exist, some browsers send the audio to the vendor's servers. The
- *     caller is expected to say so. Someone dictating their business plan deserves to
- *     know where it goes.
+ *   - Where it does exist, the browser's own permission prompt is the disclosure, and
+ *     it arrives at the moment it matters rather than as standing small print.
  *
  * The transcript is always editable before it is sent. Recognition mishears, and a
  * founder should never have to fight an interface to correct their own words.

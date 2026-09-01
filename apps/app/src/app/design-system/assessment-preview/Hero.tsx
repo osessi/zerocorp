@@ -21,12 +21,6 @@ export function Hero({ onStart }: { onStart: (answer: string) => void }) {
         <PromptHero
           title={<>Tell us where you are.<br />We build the business system.</>}
           subtitle="Describe what you are building. ZeroCorp works out what is missing, what to build first, and what it costs. No account, no card, about three minutes."
-          footnote={
-            <>
-              <span>US LLC · C-Corp · UK Ltd · LLP</span>
-              <span>Company, brand, site, email, content, prospects</span>
-            </>
-          }
         >
           <PromptDock
             onSubmit={onStart}

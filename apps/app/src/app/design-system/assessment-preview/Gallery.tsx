@@ -2,12 +2,12 @@
 
 import { useState } from "react";
 import {
-  AnsweredTurn,
   PromptDock,
   PromptHero,
   QuestionCard,
-  SlotProgress,
+  QuestionTimeline,
   Thinking,
+  WizardRail,
 } from "@zerocorp/ui";
 import type { QuestionCard as Card } from "@zerocorp/contracts";
 import { PlanResult } from "./PlanResult";
@@ -93,11 +93,7 @@ export function Gallery() {
         title="Prompt hero — page"
         note="The landing IS the first question. Fixed, so it costs no model call, which is why it can be rendered before anyone commits."
       >
-        <PromptHero
-          title="Tell us where you are."
-          subtitle="Describe what you are building."
-          footnote={<span>US LLC · C-Corp · UK Ltd · LLP</span>}
-        >
+        <PromptHero title="Tell us where you are." subtitle="Describe what you are building.">
           <PromptDock onSubmit={record} placeholder="I design brand identities…" />
         </PromptHero>
       </Case>
@@ -115,50 +111,58 @@ export function Gallery() {
         </PromptHero>
       </Case>
 
-      <Case title="Slot progress" note="Not a step counter. It renders the same state that decides when the interview stops.">
-        <div className="flex flex-col gap-4">
-          <SlotProgress
+      <Case
+        title="The rail"
+        note="Not a progress bar. A bar claims to know how far through you are; this interview may end at turn three or turn eight. The rail says something true instead: five things are needed, two are settled. Each step carries one of the five chart hues, because the status tones already mean something and Markets should not inherit the colour of an alert."
+      >
+        <WizardRail
+          steps={[
+            { id: "a", label: "Business", done: true },
+            { id: "b", label: "Situation", done: true },
+            { id: "c", label: "Company", done: true, tentative: true },
+            { id: "d", label: "Goals", done: false },
+            { id: "e", label: "Markets", done: false },
+          ]}
+          activeId="d"
+        />
+      </Case>
+
+      <Case
+        title="The timeline"
+        note="Down the left, every question with its answer. The visitor is building a picture of what has been understood, and a conversation that scrolls itself away gives them nothing to check. Answered nodes are clickable: an answer can always be revisited."
+      >
+        <div className="max-w-xs">
+          <QuestionTimeline
+            onSelect={record}
             items={[
-              { id: "1", label: "Business", filled: true },
-              { id: "2", label: "Situation", filled: true },
-              { id: "3", label: "Company", filled: true, tentative: true },
-              { id: "4", label: "Goals", filled: false },
-              { id: "5", label: "Markets", filled: false },
+              { id: "1", question: "What are you building?", answer: "Brand identities for early-stage software companies.", state: "answered" },
+              { id: "2", question: "Where are you today?", answer: "Three clients, invoiced personally, no company.", state: "answered" },
+              { id: "3", question: "Do you already have a company?", state: "active" },
             ]}
           />
-          <p className="text-caption text-muted-foreground">
-            The third is outlined rather than filled: inferred, not yet confirmed.
-          </p>
         </div>
       </Case>
 
       <Case title="Single choice" note="Picking IS the answer. A Continue button after a single choice adds a click carrying no information.">
-        <QuestionCard card={SINGLE} onAnswer={record} />
+        <QuestionCard card={SINGLE} onAnswer={record} accent={3} eyebrow="Company" />
       </Case>
 
       <Case title="Multiple selection" note="Needs a Continue, because the system cannot know when they are finished choosing.">
-        <QuestionCard card={MULTI} onAnswer={record} />
+        <QuestionCard card={MULTI} onAnswer={record} accent={5} eyebrow="What you want" />
       </Case>
 
       <Case title="Free text with AI suggestions" note="Chips are a starting point, never a closed set. The dock below is always available.">
-        <QuestionCard card={FREE} onAnswer={record} />
+        <QuestionCard card={FREE} onAnswer={record} accent={1} eyebrow="Business" />
       </Case>
 
       <Case title="Confirm" note="When the system inferred something rather than being told. One click instead of a repeated question.">
-        <QuestionCard card={CONFIRM} onAnswer={record} />
+        <QuestionCard card={CONFIRM} onAnswer={record} accent={5} eyebrow="Markets" />
       </Case>
 
       <Case title="Thinking" note="Opacity only. A spinner says the machine is busy; this says someone is considering what you said.">
         <div className="flex flex-col gap-6">
           <Thinking />
           <Thinking label="Building your plan" />
-        </div>
-      </Case>
-
-      <Case title="Answered, collapsed" note="It stays on the page and stays editable. Hover or tab to reach the pencil.">
-        <div className="flex flex-col gap-2">
-          <AnsweredTurn question="What are you building?" answer="Brand identities for early-stage software companies." onEdit={() => record("edit")} />
-          <AnsweredTurn question="Where are you today?" answer="Three clients, invoiced personally, no company." onEdit={() => record("edit")} />
         </div>
       </Case>
 

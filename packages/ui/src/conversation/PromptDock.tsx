@@ -92,13 +92,13 @@ export function PromptDock({ onSubmit, placeholder, disabled, hint, value, onVal
         />
 
         <div className="flex items-center justify-between px-2 pb-2">
-          <span className="text-caption text-muted-foreground px-2">
-            {speech.state === "listening"
-              ? "Speak naturally, then stop. You can edit it after."
-              : speech.state === "transcribed"
-                ? "Check it reads right, then send."
-                : ""}
-          </span>
+          {speech.state === "listening" || speech.state === "transcribed" ? (
+            <span className="text-caption text-processing-ink zc-enter-fade px-2">
+              {speech.state === "listening" ? "Listening" : "Edit it if it misheard you"}
+            </span>
+          ) : (
+            <span />
+          )}
 
           <div className="flex items-center gap-1">
             {speech.supported ? (
@@ -140,11 +140,6 @@ export function PromptDock({ onSubmit, placeholder, disabled, hint, value, onVal
         </div>
       </div>
 
-      {speech.supported ? (
-        <p className="text-caption text-muted-foreground px-1">
-          Voice is transcribed by your browser. Some browsers send the audio to their own servers.
-        </p>
-      ) : null}
     </div>
   );
 }
