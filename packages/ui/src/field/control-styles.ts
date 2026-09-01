@@ -65,9 +65,8 @@ export function controlTone(state: { invalid: boolean; valid: boolean }): string
 }
 
 /** Joins class fragments, dropping empties. */
-export function cx(...parts: Array<string | false | undefined>): string {
-  return parts.filter(Boolean).join(" ");
-}
+/** Re-exported from ../cx so there is one definition. */
+export { cx } from "../cx";
 
 /* ──────────────────────────────────────────────────────────────────────────────
    Choice controls — Checkbox, Radio, Switch.

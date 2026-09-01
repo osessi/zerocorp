@@ -112,8 +112,14 @@ export const entityTypeSchema = z.object({
   liabilityModel: liabilityModelSchema,
   taxTreatment: taxTreatmentSchema,
   automationLevel: automationLevelSchema,
-  /** In the authority's own currency. D15: cost money, never customer money. */
-  governmentFee: costMoneySchema,
+  /**
+   * In the authority's own currency. D15: cost money, never customer money.
+   *
+   * Null means the fee has not been verified against the authority, which is a
+   * different statement from zero. Quoting must fail loudly on a null rather than
+   * treat an unchecked entity as free.
+   */
+  governmentFee: costMoneySchema.nullable(),
   typicalDaysMin: z.number().int().nonnegative(),
   typicalDaysMax: z.number().int().nonnegative(),
   requiredRegistrations: z.array(requiredRegistrationSchema),

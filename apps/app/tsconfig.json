@@ -29,22 +29,10 @@
   ],
   "references": [
     {
-      "path": "../../packages/ui"
-    },
-    {
-      "path": "../../packages/design-system"
+      "path": "../../packages/ai"
     },
     {
       "path": "../../packages/application"
-    },
-    {
-      "path": "../../packages/contracts"
-    },
-    {
-      "path": "../../packages/config"
-    },
-    {
-      "path": "../../packages/tenancy"
     },
     {
       "path": "../../packages/auth"
@@ -53,13 +41,31 @@
       "path": "../../packages/billing"
     },
     {
+      "path": "../../packages/config"
+    },
+    {
+      "path": "../../packages/contracts"
+    },
+    {
+      "path": "../../packages/db"
+    },
+    {
+      "path": "../../packages/design-system"
+    },
+    {
+      "path": "../../packages/domain"
+    },
+    {
       "path": "../../packages/notifications"
     },
     {
       "path": "../../packages/security"
     },
     {
-      "path": "../../packages/db"
+      "path": "../../packages/tenancy"
+    },
+    {
+      "path": "../../packages/ui"
     }
   ],
   "exclude": [

@@ -1,4 +1,4 @@
-import { text, timestamp, jsonb, integer, boolean, uuid } from "drizzle-orm/pg-core";
+import { text, timestamp, jsonb, integer, bigint, boolean, uuid } from "drizzle-orm/pg-core";
 import { tenantTable } from "./tenant-table";
 
 /**
@@ -114,13 +114,19 @@ export const creditLedger = tenantTable("credit_ledger", {
   refId: uuid("ref_id"),
 });
 
-/** DATABASE.md §14. What a feature actually cost us, for gross-margin analysis. */
+/**
+ * DATABASE.md §14. What a feature actually cost us, for gross-margin analysis.
+ *
+ * MICRO-dollars, not cents — migration 0006. One model call costs a fraction of a
+ * cent, and rounding thousands of them to integer cents biases the margin in a known
+ * direction rather than averaging out.
+ */
 export const usageEvents = tenantTable("usage_events", {
   feature: text("feature").notNull(),
   model: text("model"),
   provider: text("provider"),
   units: integer("units").notNull().default(1),
-  costCents: integer("cost_cents").notNull().default(0),
+  costMicros: bigint("cost_micros", { mode: "number" }).notNull().default(0),
   currency: text("currency").notNull().default("USD"),
   metadata: jsonb("metadata").notNull().default({}),
 });

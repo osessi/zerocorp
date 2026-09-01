@@ -26,6 +26,18 @@ export interface UnitOfWork<TTx = unknown> {
   withTenant<T>(ctx: TenantContext, fn: (tx: TTx) => Promise<T>): Promise<T>;
 }
 
+/**
+ * The GLOBAL unit of work. Implemented by @zerocorp/db as withSystem().
+ *
+ * Not a back door around UnitOfWork. The implementation clears app.tenant_id, so every
+ * tenant-owned RLS policy resolves to NULL and a system transaction sees zero rows in
+ * every tenant table. It reaches the tables that DEFINE tenancy, and the pre-payment
+ * funnel that exists before a tenant does.
+ */
+export interface SystemUnitOfWork<TTx = unknown> {
+  withSystem<T>(requestId: string, fn: (tx: TTx) => Promise<T>): Promise<T>;
+}
+
 /** Domain events leave the transaction through here; the worker consumes them. */
 export interface EventPublisher {
   publish(event: { name: string; tenantId: string; payload: unknown }): Promise<void>;

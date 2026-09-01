@@ -31,8 +31,19 @@ export type CompanySituation = z.infer<typeof companySituationSchema>;
  * `none_needed` exists because it has to be sayable. An architect that can only
  * recommend forming or importing a company will always recommend one of the two,
  * and "you do not need a company for this yet" is often the honest answer.
+ *
+ * `unavailable` was added 2026-09-01, when the schema refinement caught a case the
+ * three values could not express: a founder with no company, selling into a market
+ * ZeroCorp's catalog does not cover.
+ *
+ *   form_new     is meaningless without an entity to name
+ *   none_needed  would be a lie — they may well need one, we cannot provide it
+ *
+ * So there is a fourth answer: "you likely need a company and ZeroCorp cannot form one
+ * for you here yet." The rest of the plan still runs, and the founder is told the truth
+ * instead of being quietly routed away from a need they have.
  */
-export const COMPANY_RECOMMENDATIONS = ["form_new", "use_existing", "none_needed"] as const;
+export const COMPANY_RECOMMENDATIONS = ["form_new", "use_existing", "none_needed", "unavailable"] as const;
 export const companyRecommendationSchema = z.enum(COMPANY_RECOMMENDATIONS);
 export type CompanyRecommendation = z.infer<typeof companyRecommendationSchema>;
 
@@ -44,7 +55,13 @@ export const BUSINESS_KINDS = ["new", "existing"] as const;
 export const businessKindSchema = z.enum(BUSINESS_KINDS);
 export type BusinessKind = z.infer<typeof businessKindSchema>;
 
-/** Which setup a recommendation implies. `none_needed` still has a path: activation. */
+/**
+ * Which setup a recommendation implies.
+ *
+ * Only `form_new` is a launch. Everything else, including `unavailable`, is activation:
+ * ZeroCorp still builds the brand, the site, the email and the content, and that is what
+ * the activation path pays for.
+ */
 export function setupPathFor(recommendation: CompanyRecommendation): "launch" | "activation" {
   return recommendation === "form_new" ? "launch" : "activation";
 }

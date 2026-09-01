@@ -18,7 +18,10 @@
   "dependencies": {
     "@zerocorp/application": "workspace:*",
     "@zerocorp/contracts": "workspace:*",
-    "@zerocorp/config": "workspace:*"
+    "@zerocorp/config": "workspace:*",
+    "zod": "^3.24.1",
+    "zod-to-json-schema": "^3.24.1",
+    "@zerocorp/domain": "workspace:*"
   },
   "devDependencies": {
     "typescript": "^5.7.2",

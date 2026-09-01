@@ -26,12 +26,24 @@ importers:
       '@types/node':
         specifier: ^22.10.2
         version: 22.20.1
+      '@zerocorp/ai':
+        specifier: workspace:*
+        version: link:packages/ai
+      '@zerocorp/application':
+        specifier: workspace:*
+        version: link:packages/application
       '@zerocorp/contracts':
         specifier: workspace:*
         version: link:packages/contracts
       '@zerocorp/db':
         specifier: workspace:*
         version: link:packages/db
+      '@zerocorp/domain':
+        specifier: workspace:*
+        version: link:packages/domain
+      '@zerocorp/security':
+        specifier: workspace:*
+        version: link:packages/security
       dependency-cruiser:
         specifier: ^16.9.0
         version: 16.10.4
@@ -68,6 +80,9 @@ importers:
       '@phosphor-icons/react':
         specifier: ^2.1.10
         version: 2.1.10(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@zerocorp/ai':
+        specifier: workspace:*
+        version: link:../../packages/ai
       '@zerocorp/application':
         specifier: workspace:*
         version: link:../../packages/application
@@ -89,6 +104,9 @@ importers:
       '@zerocorp/design-system':
         specifier: workspace:*
         version: link:../../packages/design-system
+      '@zerocorp/domain':
+        specifier: workspace:*
+        version: link:../../packages/domain
       '@zerocorp/notifications':
         specifier: workspace:*
         version: link:../../packages/notifications
@@ -116,6 +134,9 @@ importers:
       recharts:
         specifier: ^3.10.1
         version: 3.10.1(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react-is@17.0.2)(react@19.2.8)(redux@5.0.1)
+      server-only:
+        specifier: ^0.0.1
+        version: 0.0.1
     devDependencies:
       '@tailwindcss/postcss':
         specifier: ^4.3.3
@@ -233,6 +254,15 @@ importers:
       '@zerocorp/contracts':
         specifier: workspace:*
         version: link:../contracts
+      '@zerocorp/domain':
+        specifier: workspace:*
+        version: link:../domain
+      zod:
+        specifier: ^3.24.1
+        version: 3.25.76
+      zod-to-json-schema:
+        specifier: ^3.24.1
+        version: 3.25.2(zod@3.25.76)
     devDependencies:
       '@types/node':
         specifier: ^22.10.2
@@ -3367,6 +3397,9 @@ packages:
     resolution: {integrity: sha512-6a6dNqipzbCPlTFgztfNP2oG+IGcflMe/01zSzGrQcxGMKbIjOemBBD85pH92klWaJavAUWxAh9Z0aU28zxW6A==}
     deprecated: Rolling release, please update to 0.2.0
 
+  server-only@0.0.1:
+    resolution: {integrity: sha512-qepMx2JxAa5jjfzxG79yPPq+8BuFToHd1hm7kI+Z4zAq1ftQiP7HcxMhDDItrbtwVeLg/cY2JnKnrcFkmiswNA==}
+
   sharp@0.35.4:
     resolution: {integrity: sha512-n++8XWcj+jCOr2IOl7h8LbKnGBDY4aPbmprMONBNFdn0ImXqpGVv5zliDs0V9HbmbCQLpbuo2ej9rAoOQTvMDA==}
     engines: {node: '>=20.9.0'}
@@ -3748,6 +3781,11 @@ packages:
   yocto-queue@0.1.0:
     resolution: {integrity: sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==}
     engines: {node: '>=10'}
+
+  zod-to-json-schema@3.25.2:
+    resolution: {integrity: sha512-O/PgfnpT1xKSDeQYSCfRI5Gy3hPf91mKVDuYLUHZJMiDFptvP41MSnWofm8dnCm0256ZNfZIM7DSzuSMAFnjHA==}
+    peerDependencies:
+      zod: ^3.25.28 || ^4
 
   zod@3.25.76:
     resolution: {integrity: sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ==}
@@ -6441,6 +6479,8 @@ snapshots:
 
   serialize-error-cjs@0.1.4: {}
 
+  server-only@0.0.1: {}
+
   sharp@0.35.4(@types/node@22.20.1):
     dependencies:
       '@img/colour': 1.1.0
@@ -6798,5 +6838,9 @@ snapshots:
       yargs-parser: 21.1.1
 
   yocto-queue@0.1.0: {}
+
+  zod-to-json-schema@3.25.2(zod@3.25.76):
+    dependencies:
+      zod: 3.25.76
 
   zod@3.25.76: {}

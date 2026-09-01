@@ -26,6 +26,7 @@ decision — it is a preference someone wrote down.
 | # | Title | Status | Date | Resolves |
 |---|---|---|---|---|
 | [0001](./0001-runtime-topology.md) | Runtime topology — `sites` + `app` + `worker`, `api` on trigger | **Accepted** | 2026-08-30 | `OPEN_DECISIONS.md` D1 |
+| [0002](./0002-business-architect-contract.md) | The Business Architect contract — closed input, validated output | **Accepted** | 2026-09-01 | — |
 
 ---
 

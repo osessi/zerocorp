@@ -15,6 +15,8 @@ export { withSystem, createSystemUnitOfWork } from "./system";
 export { runMigrations, listMigrationFiles, MigrationChecksumError } from "./migrate";
 export type { AppliedMigration } from "./migrate";
 export * from "./schema";
+export { createFormationCatalog } from "./formation/catalog";
+export { createAssessmentRepository } from "./assessment/repository";
 export type { Tx } from "./types";
 
 /** Integration suites only. See lifecycle.ts for why it is not re-exported directly. */

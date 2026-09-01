@@ -15,3 +15,5 @@
 export * from "./ports";
 export * from "./use-case";
 export * from "./formation";
+export * from "./ai";
+export * from "./assessment";

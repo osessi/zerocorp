@@ -731,13 +731,23 @@ feature
 model
 provider
 units
-cost_cents
+cost_micros        REVISED 2026-09-01 — millionths of one unit of `currency`
 currency
 metadata_json
 created_at
 ```
 
 This allows internal gross-margin analysis.
+
+> **`cost_micros`, not `cost_cents` — migration 0006.** One Business Architect run costs
+> about 1.6 cents. Rounded to an integer cent that is a 25% error, and a *biased* one:
+> rounding half-up across thousands of runs overstates cost consistently rather than
+> averaging out. A margin table wrong by a quarter in a known direction is worse than no
+> table, because it looks like data.
+>
+> This is COST accounting and is allowed its own precision. The customer-facing money
+> model is unchanged: prices, invoices, refunds and the credit ledger stay in integer
+> minor units of the customer's currency (D15).
 
 ---
 

@@ -1,9 +1,9 @@
 /**
  * @zerocorp/security — Layer 3
  *
- * Encryption of OAuth tokens and provider credentials, key rotation, signing and
- * verification of inbound webhooks, rate limiting, and audit-log helpers.
- *
- * Never logs identity documents, access tokens, refresh tokens or API keys.
+ * Encryption, webhook signature verification, token generation and rate limiting.
+ * Every primitive that must be got right exactly once lives here rather than being
+ * re-derived at each call site.
  */
-export const SECURITY_PACKAGE = "@zerocorp/security" as const;
+export { generateToken, hashToken, tokensMatch, tokenService } from "./tokens";
+export type { IssuedToken } from "./tokens";

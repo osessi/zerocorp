@@ -2092,6 +2092,23 @@ screen? bottom sheet?), and the enter/exit motion. Durations must come from §10
 
 ---
 
+### 21.25 `ButtonLink` — added 2026-09-01
+
+A navigation that looks like a Button. It exists because both alternatives are wrong: a
+`<button onClick={router.push}>` loses middle-click, cmd-click, "copy link address" and
+the status-bar preview, and turns a static page into a client component; wrapping a
+`<button>` in a link nests two interactive elements, which assistive technology reads as
+one confused control.
+
+**If it navigates, it is an anchor.** It shares `BUTTON_BASE` with `Button` so the two
+cannot drift, and it deliberately has **no `loading` and no `disabled`**: a disabled link
+is not a link, and a route that should not be reachable belongs behind a guard rather
+than behind a greyed-out anchor.
+
+`as` takes the router's own Link component, so `@zerocorp/ui` never imports `next/link`.
+
+---
+
 ### 21.24 `FocusedFlowLayout` — VALIDATED 2026-09-01
 
 > Numbered 21.24 rather than 21.14 on purpose: the original thirteen patterns are
@@ -2727,6 +2744,8 @@ Also resolved 2026-08-31: the animated focus ring — `COLOR_TRANSITION` replace
 | 18 | **A scrollable container needs `contain-paint`** — without it a wide `<table>` propagated its overflow past the scroll container to the root and scrolled the whole page 345px at 375px. Should this be a CI rule, like `outline-none`? | Every `overflow-x-auto` in the product |
 | 15 | **`--primary` has no dark value** — teal TEXT measures 3.69:1 on `#0A0A0A`, below the 4.5:1 floor. Fine as a fill or a border. `--processing` already carries a lighter dark teal, but it is a status token | Any teal text or teal link in dark. `Button` tertiary works around it today |
 | 16 | **`--primary-hover` and `--destructive-hover`** (§4.1) — PROPOSED, deliberately not validated yet | Any future filled surface with a hover state |
+| 20 | **Plan steps have no colour scale.** There are nine plan categories and six status tones, and the status tones already mean something specific: `warning` is "a person must act", `danger` is "it came back". Reusing them to mark a plan phase would overload a vocabulary the rest of the product depends on. The plan editor ships with a plain `text-overline` phase label. A dedicated scale for the five phases is a design decision, not a gap to fill with a guess | The plan editor, and every later screen that shows plan progress |
+| 21 | **`ai` is a token but not a `StatusTone`.** `--ai` exists in `tokens.css` (§4.5) and the dashboard prototype uses it, but `packages/ui/src/tone.ts` has six tones and `ai` is not one. Promoting it means adding it to `TONE_GLYPH`, `TONE_INK`, `TONE_SURFACE`, `TONE_EDGE` and deciding whether it is assertive | Any product screen wanting the AI tone |
 | 19 | **Should the primary Button be black rather than teal?** The reference reserves colour entirely for status and data, and fills its primary actions with black. Not prototyped — it is more radical than any of the three directions | `Button`, and the product's whole sense of where the brand lives |
 
 ---

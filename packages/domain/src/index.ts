@@ -14,3 +14,4 @@
 export * from "./errors";
 export * from "./state-machine";
 export * from "./formation";
+export * from "./architect";
