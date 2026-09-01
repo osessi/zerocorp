@@ -7,4 +7,5 @@
  * Each app loads only the configuration it is entitled to: apps/sites receives a
  * read-only DATABASE_URL, apps/app and apps/worker receive the read-write one.
  */
-export const CONFIG_PACKAGE = "@zerocorp/config" as const;
+export * from "./env";
+export * from "./pricing";

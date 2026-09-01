@@ -5,8 +5,20 @@
  * `@zerocorp/db/internal/client` is not resolvable from anywhere else in the
  * repository. The raw Drizzle client physically cannot leave this package.
  *
- * Everything tenant-owned goes through withTenant(). There is no second door.
+ * Everything tenant-owned goes through withTenant(). Global tables — the ones that
+ * DEFINE tenancy, and the pre-payment funnel that exists before a tenant does — go
+ * through withSystem(), which clears the tenant setting and therefore sees zero
+ * rows in every tenant-owned table. There is no third door.
  */
 export { withTenant, createUnitOfWork } from "./tenant";
-export { tenantTable, TENANT_OWNED_TABLES } from "./schema/tenant-table";
+export { withSystem, createSystemUnitOfWork } from "./system";
+export { runMigrations, listMigrationFiles, MigrationChecksumError } from "./migrate";
+export type { AppliedMigration } from "./migrate";
+export * from "./schema";
 export type { Tx } from "./types";
+
+/**
+ * Closes every connection pool. Integration suites only — a long-lived process
+ * should keep its pool for its lifetime.
+ */
+export { __closeAllClients as closeAllConnections } from "./internal/client";

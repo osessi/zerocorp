@@ -24,6 +24,7 @@ docs/ARCHITECTURE.md
 docs/DATABASE.md
 docs/DESIGN_SYSTEM.md
 docs/CLAUDE_CODE_RULES.md
+docs/V1_BUILD_PLAN.md
 ```
 
 ### Archived

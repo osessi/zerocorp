@@ -1731,7 +1731,25 @@ lot of information held together by alignment rather than by containers.
 
 ---
 
-### 21.2 `DashboardShell` — PROPOSED
+### 21.1b Which patterns are approved — 2026-09-01
+
+Four patterns are **VALIDATED**: `DashboardShell`, `SidebarNavigation`, `TopCommandBar`
+and `PageHeader`. They were exercised for two days against real content in the prototype
+(§21.19) and are the frame every authenticated screen sits in. They may now be built in
+`packages/ui` and used in product code.
+
+The other nine stay **PROPOSED**. A pattern is validated when a screen actually needs it,
+not in advance: approving a layout nothing has stressed is how a design system accumulates
+components nobody uses. When a screen needs one, prototype it, review it here, then
+promote it.
+
+> The pre-payment funnel (assessment, plan, checkout) is **not** a dashboard screen. It has
+> no sidebar and no command bar, and it must work for a visitor who has never signed in.
+> It uses `FocusedFlowLayout` (§21.24), added 2026-09-01 for exactly this.
+
+---
+
+### 21.2 `DashboardShell` — VALIDATED 2026-09-01
 
 ```text
 ┌────────────┬──────────────────────────────────────────────┐
@@ -1760,7 +1778,7 @@ consistently across every screenshot — about 265px at a 1440px viewport. Our v
 
 ---
 
-### 21.3 `SidebarNavigation` — PROPOSED
+### 21.3 `SidebarNavigation` — VALIDATED 2026-09-01
 
 ```text
   ▸ Logo                      brand mark, generous top padding
@@ -1800,7 +1818,7 @@ and a glyph that appears on some items and not others reads as a bug.
 
 ---
 
-### 21.4 `TopCommandBar` — PROPOSED
+### 21.4 `TopCommandBar` — VALIDATED 2026-09-01
 
 ```text
 [ ⌕  Search or type a command          ]        ⚡•  ⊕  ⌂  │  ⬤ ⌄
@@ -1822,7 +1840,7 @@ and a glyph that appears on some items and not others reads as a bug.
 
 ---
 
-### 21.5 `PageHeader` — PROPOSED
+### 21.5 `PageHeader` — VALIDATED 2026-09-01
 
 Two stacked rows, then a rule.
 
@@ -2071,6 +2089,52 @@ screen? bottom sheet?), and the enter/exit motion. Durations must come from §10
 > ⚠️ **The theme class must be on `document.documentElement`** (§13). A drawer or popup
 > rendered through a portal escapes any wrapper and will render light-mode tokens on a
 > dark page. Verified failure, 2026-08-31.
+
+---
+
+### 21.24 `FocusedFlowLayout` — VALIDATED 2026-09-01
+
+> Numbered 21.24 rather than 21.14 on purpose: the original thirteen patterns are
+> referenced by number from other documents, and renumbering them to insert a
+> fourteenth would silently break those references.
+
+The pre-payment funnel is not a dashboard screen. A visitor arriving from an ad has no
+account, no tenant and no navigation to speak of, and every pixel of chrome is a pixel
+not spent on the one question being asked. `DashboardShell` is the wrong frame for it.
+
+```text
+┌──────────────────────────────────────────────────────────────┐
+│  ZeroCorp                                    Step 2 of 4     │  56px, border-b
+├──────────────────────────────────────────────────────────────┤
+│                                                              │
+│            ┌────────────────────────────────┐                │
+│            │  max-w-2xl, centred            │                │
+│            │                                │                │
+│            │  Eyebrow                       │  text-overline
+│            │  The question                  │  text-h2
+│            │  One line of help              │  text-body-sm muted
+│            │                                │                │
+│            │  [ the control ]               │                │
+│            │                                │                │
+│            └────────────────────────────────┘                │
+│                                                              │
+├──────────────────────────────────────────────────────────────┤
+│  [ Back ]                              [ Continue ]          │  72px, border-t
+└──────────────────────────────────────────────────────────────┘
+```
+
+| Element | Rule |
+|---|---|
+| Header | 56px, `border-b --border`. Word mark left, progress right as `Step N of M` at `text-body-sm text-muted-foreground`. No avatar, no search, no notifications |
+| Progress | A text count, plus a 2px `--primary` rule along the bottom edge of the header at the completed fraction. Never a ring, never a percentage |
+| Content | Single column, `max-w-2xl`, centred, `px-6`. It owns the scroll |
+| Rhythm | Eyebrow, then `text-h2` question, then one `text-body-sm text-muted-foreground` line, then the control. `gap-2` inside that stack, `gap-8` to the control |
+| Footer | 72px, `border-t --border`, sticky to the bottom of the viewport. Back on the left as a tertiary Button, the single forward action on the right as a primary Button |
+| Forward action | Exactly one. A step that offers two ways forward is two steps |
+| Width | `max-w-2xl` (672px) for a question. `max-w-4xl` for a result the visitor reads rather than answers |
+
+Same tokens, same borders, same type scale as every dashboard screen. It is a different
+frame, not a different design system.
 
 ---
 
@@ -2638,6 +2702,8 @@ Items 17 and 18 were raised by the all-components exploration pass (§21.23).
 Resolved 2026-08-31 (second batch): muted text on a muted surface (§4.4, `--muted-foreground`
 now `#707070`), the source policy (§2 — Base UI is the primitive, shadcn is a reference),
 and the engines for calendar, chart and data table (§19). Drawer width (was item 13).
+Resolved 2026-09-01: the four structural patterns the first real journey needs (item 8, partially) and `FocusedFlowLayout` for the pre-payment funnel (§21.24).
+
 Also resolved 2026-08-31: the animated focus ring — `COLOR_TRANSITION` replaced
 `transition-colors` in every control and a CI rule now forbids it (§21.21).
 
@@ -2650,7 +2716,7 @@ Also resolved 2026-08-31: the animated focus ring — `COLOR_TRANSITION` replace
 | 5 | **Flaticon licence** (§11) | Animated icons |
 | 6 | **Border hover in dark mode** (§9) | Dark mode components |
 | 7 | **`dashboard columns` and `editor widths`** (§12) | Dashboard grid, block editor |
-| 8 | **The twelve PROPOSED dashboard patterns** (§21.2–21.13) | Every new screen. None may be built until approved |
+| 8 | ~~The twelve PROPOSED dashboard patterns~~ **PARTIALLY RESOLVED 2026-09-01** — `DashboardShell`, `SidebarNavigation`, `TopCommandBar` and `PageHeader` are VALIDATED (§21.1b) and `FocusedFlowLayout` was added and validated (§21.24). **Nine remain PROPOSED** (§21.6–21.13): `SectionHeader` · `TabbedDetailView` · `DataTableLayout` · `DetailLayout` · `SplitDetailLayout` · `ActivityPanel` · `MetricGrid` · `RecordCardList` · `RightDrawer`. Each is validated when a screen needs it, not in advance | A screen needing one of the nine |
 | 9 | **Sidebar collapsed state** (§21.3) — width and contents; no reference shows it | The collapse control |
 | 10 | ~~Status badge tints~~ **RESOLVED 2026-08-31** — §4.5, direction B: three roles per hue, 100-level tints, measured | — |
 | 11 | **Responsive behaviour of the dashboard patterns** (§21.16) — no narrow reference exists | Sidebar, split detail, tables and drawer below `lg` |

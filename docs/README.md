@@ -32,7 +32,7 @@ ARCHIVED DOCUMENTATION
 
 ## 1. Current source of truth
 
-These six documents are the authoritative specification of ZeroCorp.
+These seven documents are the authoritative specification of ZeroCorp.
 
 | Document | Owns |
 |---|---|
@@ -42,6 +42,7 @@ These six documents are the authoritative specification of ZeroCorp.
 | [`DATABASE.md`](./DATABASE.md) | Schema, tenancy and RLS, identifiers, indexing, migrations, retention |
 | [`DESIGN_SYSTEM.md`](./DESIGN_SYSTEM.md) | Design tokens, foundations, product components, layout patterns, website block and variant system, **component selection policy**, approved component registry, AI visual restrictions |
 | [`CLAUDE_CODE_RULES.md`](./CLAUDE_CODE_RULES.md) | Engineering constitution for Claude Code: process, guardrails, regression strategy, decision protocol |
+| [`V1_BUILD_PLAN.md`](./V1_BUILD_PLAN.md) | The V1 build order, the surface inventory, and the definition of done for each step. Added 2026-09-01 |
 
 ### Precedence between current documents
 
