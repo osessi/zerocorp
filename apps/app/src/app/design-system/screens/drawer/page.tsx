@@ -53,7 +53,7 @@ export default function DrawerScreen() {
                 openId === b.id && "bg-accent",
               )}
             >
-              <Avatar initials={b.owners[0]!} />
+              <Avatar initials={b.owners[0]!} tone={FORMATION_TONE[b.formation]} />
               <span className="flex min-w-0 flex-1 flex-col">
                 <span className="text-body-sm truncate">{b.name}</span>
                 <span className="text-caption text-muted-foreground truncate">{b.founder} · {b.state}</span>
@@ -95,7 +95,7 @@ export default function DrawerScreen() {
             <div className="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto p-6">
               <div className="flex items-start justify-between gap-4">
                 <div className="flex min-w-0 items-center gap-3">
-                  <Avatar initials={business.owners[0]!} size="lg" />
+                  <Avatar initials={business.owners[0]!} size="lg" tone={FORMATION_TONE[business.formation]} />
                   <div className="flex min-w-0 flex-col gap-1">
                     <h3 className="text-h4 truncate">{business.name}</h3>
                     <p className="text-body-sm text-muted-foreground truncate">{business.email}</p>

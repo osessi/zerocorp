@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import type { FormationOrderStatus } from "@zerocorp/contracts";
 import {
   ArrowLeftIcon, EnvelopeSimpleIcon, PhoneIcon, DotsThreeIcon, PlusIcon,
   CheckCircleIcon, CircleIcon, BellIcon, BuildingsIcon, CurrencyDollarIcon,
@@ -9,6 +10,17 @@ import {
 import { PageHeader } from "../../_prototype/shell";
 import { ActivityPanel, Avatar, AvatarStack, Button, PanelLabel, SectionHeader, StatusBadge, Tabs, cx } from "../../_prototype/primitives";
 import { ACTIVITY, TASKS, TASK_HISTORY } from "../../_prototype/data";
+
+/** The seven states a formation order passes through. packages/contracts owns them. */
+const STEP_ORDER = [
+  "draft",
+  "collecting_documents",
+  "verifying_identity",
+  "operator_review",
+  "ready_to_file",
+  "filed",
+  "formed",
+] as const satisfies readonly FormationOrderStatus[];
 
 /**
  * Screen 3 — SplitDetailLayout (§21.9) + RecordCardList (§21.12).
@@ -50,7 +62,49 @@ export default function BusinessScreen() {
             </div>
             <div className="border-border flex flex-col gap-4 border-t pt-6">
               <PanelLabel>Formation</PanelLabel>
-              <ul className="flex flex-col gap-4">
+              {/*
+                This block is the D2 state machine rendered, which makes it the most
+                important fact on the screen. It was three grey tiles reading entity type,
+                state and plan: true, inert, and easy to scroll past.
+
+                What a founder needs first is WHERE THEIR COMPANY IS, and D2 says that is
+                two answers, not one. The filing job and the EIN run on separate clocks and
+                fail separately, so they are shown side by side. A company can be formed
+                while its EIN is still weeks away, and neither fact may hide the other.
+              */}
+              <div className="flex flex-col gap-3">
+                <div className="border-processing bg-processing-subtle flex flex-col gap-2 border p-3">
+                  <span className="text-overline text-processing-ink uppercase">Filing</span>
+                  <span className="text-h4 text-foreground">Filed with Wyoming</span>
+                  <span className="text-caption text-muted-foreground font-mono">
+                    2 Mar · ref WY-2026-88214
+                  </span>
+                  {/* Seven states, and the one you are on. A bar of seven segments says
+                      "there is an end to this" in a way a status word cannot. */}
+                  <span className="mt-1 flex gap-0.5" aria-hidden="true">
+                    {STEP_ORDER.map((step, i) => (
+                      <span
+                        key={step}
+                        className={cx(
+                          "h-1 flex-1",
+                          i < 5 ? "bg-processing" : i === 5 ? "bg-processing" : "bg-border",
+                        )}
+                      />
+                    ))}
+                  </span>
+                  <span className="text-caption text-muted-foreground">Step 6 of 7</span>
+                </div>
+
+                <div className="border-warning bg-warning-subtle flex flex-col gap-1 border p-3">
+                  <span className="text-overline text-warning-ink uppercase">EIN, separate track</span>
+                  <span className="text-body text-foreground">Requested from the IRS</span>
+                  <span className="text-caption text-muted-foreground">
+                    Usually 2 to 6 weeks after formation. The company is active without it.
+                  </span>
+                </div>
+              </div>
+
+              <ul className="border-border flex flex-col gap-4 border-t pt-4">
                 {[
                   { icon: <BuildingsIcon size={16} />, label: "Entity type", value: "LLC, single member" },
                   { icon: <BuildingsIcon size={16} />, label: "State", value: "Wyoming" },

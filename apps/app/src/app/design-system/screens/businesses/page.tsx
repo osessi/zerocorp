@@ -57,12 +57,12 @@ export default function BusinessesScreen() {
           </label>
           <div className="border-input flex h-9 shrink-0 items-center border">
             {[RowsIcon, TableIcon, CalendarBlankIcon].map((Icon, i) => (
-              <button key={i} aria-label={`View ${i + 1}`} className={cx("focus-visible:outline-ring flex size-9 items-center justify-center transition-[color,background-color,border-color] duration-normal focus-visible:outline-2 focus-visible:-outline-offset-2", i === 1 ? "bg-accent" : "hover:bg-accent", i > 0 && "border-input border-l")}>
+              <button key={i} aria-label={`View ${i + 1}`} className={cx("focus-visible:outline-ring flex size-9 items-center justify-center transition-[color,background-color,border-color] duration-normal focus-visible:outline-2 focus-visible:-outline-offset-2", i === 1 ? "bg-accent-subtle text-accent-strong" : "hover:bg-accent text-muted-foreground", i > 0 && "border-input border-l")}>
                 <Icon size={16} />
               </button>
             ))}
           </div>
-          <Button><FunnelIcon size={16} /> Filter <span className="bg-foreground text-background text-caption inline-flex size-4 items-center justify-center">1</span></Button>
+          <Button><FunnelIcon size={16} /> Filter <span className="bg-primary text-primary-foreground text-caption inline-flex size-4 items-center justify-center">1</span></Button>
           <Button>Options <CaretDownIcon size={14} /></Button>
         </div>
 
@@ -70,7 +70,7 @@ export default function BusinessesScreen() {
         <div className="border-border overflow-x-auto border">
           <table className="w-full min-w-[64rem] border-collapse">
             <thead>
-              <tr className="border-border border-b">
+              <tr className="border-border bg-muted border-b">
                 <th className="w-12 px-4 py-3"><input type="checkbox" aria-label="Select all" checked={allOn} onChange={() => setSelected(allOn ? [] : BUSINESSES.map((b) => b.id))} className="accent-primary size-4" /></th>
                 {["Business", "Founder", "State", "Plan", "MRR", "Team", "Progress", "Formation"].map((h) => (
                   <th key={h} className="text-overline text-muted-foreground px-4 py-3 text-left font-medium uppercase">{h}</th>
@@ -132,7 +132,7 @@ export default function BusinessesScreen() {
         <div className="flex items-center justify-center gap-2 pt-6">
           <Button><CaretLeftIcon size={14} /> Previous</Button>
           {["1", "2", "…", "5"].map((p, i) => (
-            <button key={i} className={cx("text-label focus-visible:outline-ring size-9 transition-[color,background-color,border-color] duration-normal focus-visible:outline-2 focus-visible:outline-offset-2", p === "1" ? "bg-foreground text-background" : "hover:bg-accent text-muted-foreground")}>{p}</button>
+            <button key={i} className={cx("text-label focus-visible:outline-ring size-9 transition-[color,background-color,border-color] duration-normal focus-visible:outline-2 focus-visible:outline-offset-2", p === "1" ? "bg-primary text-primary-foreground border-primary border" : "hover:bg-accent text-muted-foreground")}>{p}</button>
           ))}
           <Button>Next <CaretRightIcon size={14} /></Button>
         </div>

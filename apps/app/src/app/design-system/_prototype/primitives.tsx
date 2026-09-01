@@ -130,12 +130,23 @@ export function Button({
   className,
   ...props
 }: React.ComponentPropsWithoutRef<"button"> & { variant?: "primary" | "secondary" | "ghost" }) {
+  /*
+    These mirror packages/ui/src/button/button-styles.ts, which the prototype had drifted
+    from: secondary was still --input grey after the shipped Button moved to a --primary
+    border, and primary still used hover:opacity-90, the opacity trick the real one
+    explicitly avoids in favour of --primary-hover. A toolbar of grey outlines beside a
+    product full of teal ones is why this screen read flat.
+
+    The one thing NOT mirrored is the height. The shipped Button is 32/40/48; this stays
+    at 36 because the dashboard's density is §24.12 and unresolved. Recorded rather than
+    silently changed.
+  */
   const tone =
     variant === "primary"
-      ? "bg-primary text-primary-foreground border-primary hover:opacity-90"
+      ? "bg-primary text-primary-foreground border-primary hover:bg-primary-hover hover:border-primary-hover"
       : variant === "ghost"
         ? "border-transparent hover:bg-accent text-foreground"
-        : "border-input hover:border-input-hover text-foreground bg-background";
+        : "border-primary hover:border-primary-hover text-foreground bg-background";
   return (
     <button
       {...props}
