@@ -36,6 +36,25 @@ const NO_DB_OUTSIDE_COMPOSITION_ROOT = {
   },
 };
 
+/**
+ * The `_` prefix means "deliberately unused".
+ *
+ * Destructuring a key out in order to drop it is a normal idiom, and the alternative —
+ * building the object then deleting from it — is worse code written to satisfy a linter.
+ * The prefix keeps the intent visible to a reader, which is what the rule is protecting.
+ */
+const UNUSED_UNDERSCORE = {
+  files: ["**/*.ts", "**/*.tsx"],
+  rules: {
+    "@typescript-eslint/no-unused-vars": ["error", {
+      argsIgnorePattern: "^_",
+      varsIgnorePattern: "^_",
+      caughtErrorsIgnorePattern: "^_",
+      ignoreRestSiblings: true,
+    }],
+  },
+};
+
 /** Repository tooling runs in Node, not in a browser. */
 const TOOLING_NODE = {
   files: ["tooling/**/*.mjs", "tooling/**/*.js"],
@@ -58,6 +77,7 @@ export default tseslint.config(
   TOOLING_CJS,
   TOOLING_NODE,
   js.configs.recommended,
+  UNUSED_UNDERSCORE,
   ...tseslint.configs.recommended,
   FRAMEWORK_FREE,
   NO_DB_OUTSIDE_COMPOSITION_ROOT,

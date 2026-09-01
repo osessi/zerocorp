@@ -1,4 +1,4 @@
-import { text, timestamp, jsonb, integer, boolean, uuid, index } from "drizzle-orm/pg-core";
+import { text, timestamp, jsonb, integer, boolean, uuid } from "drizzle-orm/pg-core";
 import { tenantTable } from "./tenant-table";
 
 /**
@@ -31,6 +31,8 @@ export const businessProfiles = tenantTable("business_profiles", {
   voiceTranscript: text("voice_transcript"),
   /** The pre-payment assessment this profile was seeded from. Provenance, not a foreign key. */
   sourceAssessmentId: uuid("source_assessment_id"),
+  /** The legal entity, once one exists. Null for a business with no company yet. */
+  companyId: uuid("company_id"),
   version: integer("version").notNull().default(1),
   status: text("status").notNull().default("draft"),
 });
@@ -179,6 +181,7 @@ export const APPEND_ONLY_TABLES = [
   "payment_events",
   "audit_logs",
   "activity_events",
+  "formation_events",
 ] as const;
 
 export const TENANT_TABLES = {
@@ -194,8 +197,8 @@ export const TENANT_TABLES = {
   audit_logs: auditLogs,
 } as const;
 
-export const _indexes = [
-  index("business_plan_steps_plan_idx").on(businessPlanSteps.tenantId, businessPlanSteps.planId),
-  index("agent_runs_tenant_created_idx").on(agentRuns.tenantId, agentRuns.createdAt),
-  index("activity_events_tenant_created_idx").on(activityEvents.tenantId, activityEvents.createdAt),
-];
+/*
+ * Indexes are declared in the SQL migrations, which are the source of truth for
+ * them. A parallel Drizzle declaration here would be a second definition that
+ * nothing applies and nothing checks, which is worse than no declaration at all.
+ */

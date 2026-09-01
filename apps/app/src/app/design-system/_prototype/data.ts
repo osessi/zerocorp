@@ -25,6 +25,10 @@ export const FORMATION_LABEL: Record<FormationState, string> = {
   verifying_identity: "Verifying identity",
   operator_review: "In review",
   ready_to_file: "Ready to file",
+  // Customer-facing wording. It never says WHO holds it, because that is a provider
+  // mechanic and D14 keeps provider mechanics out of the customer-facing model.
+  awaiting_provider: "Submitted",
+  information_requested: "Information needed",
   filed: "Filed",
   formed: "Formed",
   rejected: "Rejected",
@@ -44,13 +48,18 @@ export type Tone = "success" | "warning" | "danger" | "info" | "neutral" | "proc
  *   violet   we are gathering from you
  *   teal     we are working on it
  *   yellow   it is waiting on a human
- *   blue     it is with the state, out of our hands
+ *   blue     an outside party holds it, out of our hands
  *   green    done
  *   red      it came back
  *
  * The rule that makes it readable: the colour says WHO HOLDS IT. Yellow is always "a
- * person must act", blue is always "an authority has it", teal is always "the machine is
- * working". A founder learns three colours and can then read any stage.
+ * person must act", blue is always "someone outside ZeroCorp has it", teal is always
+ * "the machine is working". A founder learns three colours and can then read any stage.
+ *
+ * Blue covers both a filing partner and an authority, on purpose. The difference between
+ * them is a provider mechanic, and D14 keeps provider mechanics out of what a customer
+ * sees. What the founder needs to know is the same either way: it is out of our hands
+ * and there is nothing for them to do.
  */
 export const FORMATION_TONE: Record<FormationState, Tone> = {
   draft: "neutral",
@@ -58,6 +67,10 @@ export const FORMATION_TONE: Record<FormationState, Tone> = {
   verifying_identity: "processing",
   operator_review: "warning",
   ready_to_file: "processing",
+  awaiting_provider: "info",
+  // The founder has to answer something. Same colour as operator_review because the
+  // rule is "a person must act", not "which person".
+  information_requested: "warning",
   filed: "info",
   formed: "success",
   // Reparable, not terminal, but it needs the founder to act, so it reads as danger.

@@ -4,8 +4,11 @@ import {
   ASSESSMENT_STATUSES,
   ASSESSMENT_TERMINAL_STATUSES,
   ASSESSMENT_TRANSITIONS,
+  COMPANY_RECOMMENDATIONS,
+  COMPANY_SITUATIONS,
   assessmentAnswersSchema,
   canTransitionAssessment,
+  setupPathFor,
   type AssessmentStatus,
 } from "./assessment";
 import { CHECKOUT_STATUSES, CHECKOUT_TRANSITIONS, type CheckoutStatus } from "./billing";
@@ -104,6 +107,18 @@ describe("assessment — the rules the funnel depends on", () => {
   });
 });
 
+/** A complete, valid answer set. Each test breaks exactly one thing about it. */
+function answers(over: Record<string, unknown> = {}) {
+  return {
+    business_description: "I design brand identities for early-stage software companies.",
+    current_situation: "Three clients, invoiced personally, no company.",
+    company_situation: "none",
+    twelve_month_goal: "Ten retained clients and a site that sells while I sleep.",
+    target_markets: ["US", "GB"],
+    ...over,
+  };
+}
+
 describe("assessment questions — the free tier stays cheap", () => {
   it("asks between three and five questions, and no more", () => {
     // PRODUCT_SPEC.md §29.3 block 0: "no expensive free onboarding". Every question
@@ -112,33 +127,67 @@ describe("assessment questions — the free tier stays cheap", () => {
     expect(ASSESSMENT_QUESTION_IDS.length).toBeLessThanOrEqual(5);
   });
 
-  it("requires the one question that decides the path", () => {
-    const parsed = assessmentAnswersSchema.safeParse({
-      business_description: "a",
-      current_situation: "b",
-      twelve_month_goal: "c",
-    });
-    expect(parsed.success).toBe(false);
+  it("accepts a complete answer set", () => {
+    // Without this, every negative test below could be passing for the wrong reason.
+    expect(assessmentAnswersSchema.safeParse(answers()).success).toBe(true);
+  });
+
+  it("asks every question the schema requires, and no others", () => {
+    // The two lists drifting apart is how a question gets asked and thrown away, or
+    // required and never asked.
+    expect([...ASSESSMENT_QUESTION_IDS].sort()).toEqual(
+      Object.keys(assessmentAnswersSchema.shape).sort(),
+    );
+  });
+
+  it("requires the company situation, which decides the path", () => {
+    const { company_situation: _omitted, ...rest } = answers();
+    expect(assessmentAnswersSchema.safeParse(rest).success).toBe(false);
+  });
+
+  it("requires at least one target market, because 'everywhere' is not a market", () => {
+    // Jurisdiction routing has no input without this — D14.
+    expect(assessmentAnswersSchema.safeParse(answers({ target_markets: [] })).success).toBe(false);
+  });
+
+  it("takes markets as ISO country codes, not prose", () => {
+    expect(assessmentAnswersSchema.safeParse(answers({ target_markets: ["United States"] })).success).toBe(false);
+    expect(assessmentAnswersSchema.safeParse(answers({ target_markets: ["us"] })).success).toBe(false);
   });
 
   it("caps a free-text answer so a paste bomb cannot become a prompt bomb", () => {
-    const parsed = assessmentAnswersSchema.safeParse({
-      business_kind: "new",
-      business_description: "x".repeat(2_001),
-      current_situation: "b",
-      twelve_month_goal: "c",
-    });
-    expect(parsed.success).toBe(false);
+    expect(assessmentAnswersSchema.safeParse(answers({ business_description: "x".repeat(2_001) })).success).toBe(false);
   });
 
   it("rejects an answer that is only whitespace", () => {
-    const parsed = assessmentAnswersSchema.safeParse({
-      business_kind: "new",
-      business_description: "   ",
-      current_situation: "b",
-      twelve_month_goal: "c",
-    });
-    expect(parsed.success).toBe(false);
+    expect(assessmentAnswersSchema.safeParse(answers({ business_description: "   " })).success).toBe(false);
+  });
+
+  it("rejects a company situation it has no branch for", () => {
+    expect(assessmentAnswersSchema.safeParse(answers({ company_situation: "maybe" })).success).toBe(false);
+  });
+});
+
+describe("situation and recommendation are different things", () => {
+  it("lets the architect conclude that no company is needed", () => {
+    // The rule that stops ZeroCorp recommending an LLC to everybody. An architect
+    // that can only form or import will always do one of the two.
+    expect(COMPANY_RECOMMENDATIONS).toContain("none_needed");
+  });
+
+  it("sends anything but a new company down the activation path", () => {
+    expect(setupPathFor("form_new")).toBe("launch");
+    expect(setupPathFor("use_existing")).toBe("activation");
+    expect(setupPathFor("none_needed")).toBe("activation");
+  });
+
+  it("keeps the two vocabularies from sharing a value", () => {
+    // A situation read as a recommendation, or the reverse, is the bug this split exists
+    // to prevent. Sharing a name is how that happens.
+    const overlap = COMPANY_SITUATIONS.filter((s) =>
+      (COMPANY_RECOMMENDATIONS as readonly string[]).includes(s),
+    );
+    expect(overlap).toEqual([]);
   });
 });
 

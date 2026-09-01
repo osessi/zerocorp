@@ -26,6 +26,12 @@ importers:
       '@types/node':
         specifier: ^22.10.2
         version: 22.20.1
+      '@zerocorp/contracts':
+        specifier: workspace:*
+        version: link:packages/contracts
+      '@zerocorp/db':
+        specifier: workspace:*
+        version: link:packages/db
       dependency-cruiser:
         specifier: ^16.9.0
         version: 16.10.4
@@ -35,6 +41,9 @@ importers:
       happy-dom:
         specifier: ^20.12.0
         version: 20.12.0
+      postgres:
+        specifier: ^3.4.9
+        version: 3.4.9
       turbo:
         specifier: ^2.3.3
         version: 2.10.12

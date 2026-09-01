@@ -1,19 +1,16 @@
 import { z } from "zod";
 import { SETUP_PATH_VALUES, SUBSCRIPTION_PLAN_VALUES } from "./plan";
+import { customerMoneySchema } from "./money";
 
 /**
  * Billing vocabulary.
  *
- * Money is integer minor units plus a currency, with no exceptions — a ZeroCorp
- * invariant and CLAUDE_CODE_RULES.md §20. There is no `number` of dollars
- * anywhere in this repository, and no float arithmetic on money.
+ * Money lives in ./money — integer minor units plus a currency, with no exceptions.
+ * D15: multi-currency internally, USD as the only customer-facing currency in V1.
+ * Everything a customer is quoted, charged or refunded is `CustomerMoney`; a
+ * government or provider fee is `CostMoney` in its own currency and never reaches
+ * the ledger without a recorded conversion.
  */
-
-export const moneySchema = z.object({
-  amountCents: z.number().int(),
-  currency: z.literal("USD"),
-});
-export type Money = z.infer<typeof moneySchema>;
 
 export const CHECKOUT_STATUSES = ["pending", "completed", "expired", "failed"] as const;
 export const checkoutStatusSchema = z.enum(CHECKOUT_STATUSES);
@@ -36,6 +33,13 @@ export const checkoutIntentSchema = z.object({
   subscriptionPlan: z.enum(SUBSCRIPTION_PLAN_VALUES),
 });
 export type CheckoutIntent = z.infer<typeof checkoutIntentSchema>;
+
+/** What the customer is actually charged. USD in V1 — enforced, not assumed. */
+export const checkoutAmountsSchema = z.object({
+  setup: customerMoneySchema,
+  subscription: customerMoneySchema,
+});
+export type CheckoutAmounts = z.infer<typeof checkoutAmountsSchema>;
 
 /** What the payment provider hands back. Provider-neutral on purpose. */
 export const checkoutHandoffSchema = z.object({

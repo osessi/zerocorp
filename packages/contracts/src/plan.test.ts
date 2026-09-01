@@ -3,6 +3,7 @@ import {
   PLAN_CATEGORIES,
   PLAN_PHASES,
   architectOutputSchema,
+  planProposalFieldsSchema,
   planProposalSchema,
   planStepSchema,
 } from "./plan";
@@ -31,7 +32,9 @@ function proposal(over: Record<string, unknown> = {}) {
   return {
     title: "Launch plan",
     summary: "Form the company, build the site, publish, and start finding customers.",
-    businessKind: "new",
+    companyRecommendation: "form_new",
+    recommendedJurisdictionCode: "us-wy",
+    recommendedEntityTypeCode: "us_llc",
     recommendedSetupPath: "launch",
     recommendedSubscriptionPlan: "growth",
     recommendationReason: "You need the content engine, which the launch plan does not include.",
@@ -86,7 +89,7 @@ describe("plan proposal", () => {
   it("has no field a model could put a price in", () => {
     // A model that can quote a price is a model that can quote the wrong price.
     // Prices come from @zerocorp/config.
-    const keys = Object.keys(planProposalSchema.shape);
+    const keys = Object.keys(planProposalFieldsSchema.shape);
     expect(keys.filter((k) => /price|cost|amount|cents|usd|\$/i.test(k))).toEqual([]);
   });
 
@@ -111,5 +114,62 @@ describe("architect output", () => {
       whatIsMissing: [{ title: "No US entity", why: "Clients cannot pay a company that does not exist.", severity: "blocking" }],
     };
     expect(architectOutputSchema.safeParse({ analysis, plan: proposal() }).success).toBe(false);
+  });
+});
+
+describe("the company recommendation cannot be a gesture", () => {
+  it("refuses form_new without an entity type", () => {
+    // "Form a new company" with nothing named is not a recommendation.
+    const p = proposal({ recommendedEntityTypeCode: null });
+    expect(planProposalSchema.safeParse(p).success).toBe(false);
+  });
+
+  it("refuses form_new without a jurisdiction", () => {
+    expect(planProposalSchema.safeParse(proposal({ recommendedJurisdictionCode: null })).success).toBe(false);
+  });
+
+  it("refuses to name an entity while recommending against forming one", () => {
+    // This is the upsell the rule exists to make impossible.
+    const p = proposal({
+      companyRecommendation: "none_needed",
+      recommendedEntityTypeCode: "us_llc",
+      recommendedJurisdictionCode: "us-wy",
+    });
+    expect(planProposalSchema.safeParse(p).success).toBe(false);
+  });
+
+  it("accepts a plan that recommends no new company at all", () => {
+    const p = proposal({
+      companyRecommendation: "none_needed",
+      recommendedEntityTypeCode: null,
+      recommendedJurisdictionCode: null,
+      recommendedSetupPath: "activation",
+    });
+    expect(planProposalSchema.safeParse(p).success).toBe(true);
+  });
+});
+
+describe("constraints survive a regeneration", () => {
+  it("accepts the sentences customers actually say", () => {
+    const p = proposal({
+      constraints: [
+        { kind: "exclude_jurisdiction", jurisdictionCode: "us-de" },
+        { kind: "prefer_jurisdiction", jurisdictionCode: "fr" },
+        { kind: "already_have", category: "website" },
+        { kind: "skip_category", category: "brand" },
+        { kind: "publication_cadence", articlesPerWeek: 10 },
+        { kind: "free_text", text: "My accountant handles VAT." },
+      ],
+    });
+    expect(planProposalSchema.safeParse(p).success).toBe(true);
+  });
+
+  it("refuses to skip a category ZeroCorp does not have", () => {
+    const p = proposal({ constraints: [{ kind: "skip_category", category: "fundraising" }] });
+    expect(planProposalSchema.safeParse(p).success).toBe(false);
+  });
+
+  it("caps a publication cadence at something a human could review", () => {
+    expect(planProposalSchema.safeParse(proposal({ constraints: [{ kind: "publication_cadence", articlesPerWeek: 700 }] })).success).toBe(false);
   });
 });

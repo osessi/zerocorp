@@ -31,6 +31,99 @@ These must be decided before the corresponding code is written.
 
 ---
 
+## D14 — Formation is provider-owned ✅ RESOLVED 2026-09-01
+
+**Decision: ZeroCorp owns the formation abstraction. Providers are replaceable execution
+adapters.** Recorded as an architecture rule, not a preference.
+
+The audit that produced this is [`audit/2026-09-01-formation-engine.md`](./audit/2026-09-01-formation-engine.md).
+
+It found that **no provider is named anywhere in the repository** — the coupling was never
+to a vendor, it was to a shape: one country, one subdivision, one filing, one text column
+called `provider`. It also found that `PRODUCT_SPEC.md` §21 and `ARCHITECTURE.md` §15
+already stated this doctrine and never modelled it.
+
+Three rules follow:
+
+```text
+Provider-specific detail must never reach the customer-facing product model.
+Supporting a new jurisdiction must be additive, never a restructuring.
+A capability is not real until a provider is verified technically AND contractually.
+```
+
+See `CLAUDE_CODE_RULES.md` §44 and `ARCHITECTURE.md` §15.
+
+---
+
+## D15 — Currency ✅ RESOLVED 2026-09-01
+
+UK incorporation costs £100 from 1 February 2026. The money model was `literal("USD")`.
+
+**Decision: multi-currency internally, USD as the only customer-facing currency in V1.**
+
+Two money models, deliberately, because they answer different questions:
+
+```text
+customer money   what we quote, charge, refund and put in the credit ledger
+                 V1: USD only, enforced by a schema and by a test
+
+cost money       what a government or a provider charges US, in ITS currency
+                 GBP for a Companies House filing, whatever a provider bills in
+                 never enters the ledger without an explicit, recorded conversion
+```
+
+Widening the customer side to a second currency later is then **additive**: the type
+already carries a currency, and only the allow-list changes. Had `Money` stayed
+`literal("USD")`, every cost record would have had to lie about its currency, and the
+first real GBP invoice would have forced a migration through the ledger.
+
+The margin exposure is explicit and must stay visible: a foreign fee paid in its own
+currency against a USD price **is** an FX position. It is recorded at its native amount
+and at the rate used, so the exposure can be measured rather than discovered.
+
+Revisit the customer-facing side when non-US formations exceed roughly 20% of volume.
+
+---
+
+## D16 — Business Activation setup price ✅ RESOLVED 2026-09-01 (hypothesis)
+
+**Decision: `$497` as the configured default.**
+
+Still a pricing hypothesis, exactly like every other price in `PRODUCT_SPEC.md` §3, and
+still configurable rather than hard-coded — `packages/config/src/pricing.ts`. It supersedes
+the `$497–$697` range and the `~$497 🟠 TO CONFIRM` marker in §29.3 block 1.
+
+Validate against willingness-to-pay and against the operator time a digital audit actually
+costs, which is the number most likely to move it.
+
+---
+
+## D17 — United Kingdom in V1 ✅ RESOLVED 2026-09-01
+
+Research on 2026-09-01 established three facts that the plan had assumed away:
+
+- **Companies House does not expose incorporation through its REST API Filing service.**
+  That service covers Transactions, Registered Office Address, Insolvency and Registered
+  Email Address. Incorporation is described as a future use case.
+- Incorporation goes through the **legacy XML Gateway** (form IN01), which Companies House
+  has said it will deprecate once the REST API covers it.
+- **ECCTA identity verification is mandatory** for newly appointed directors and PSCs since
+  18 November 2025, and from spring 2026 filings without a personal code can be rejected.
+
+**Decision A: UK Ltd and LLP are visible in the V1 catalog with
+`automation_level = operator_assisted`.** A customer can buy one; a human files it. No
+automation is claimed anywhere in the UI, because none exists.
+
+**Decision B: UK filings route through a partner who is already an Authorised Corporate
+Service Provider.** ZeroCorp does not pursue ACSP registration for V1. ACSP is AML
+supervision with verification, retention and reporting obligations — a company commitment,
+not an engineering task. The provider port makes this reversible.
+
+**Browser automation of the government site is refused as a first solution** and is not in
+any plan.
+
+---
+
 ## D1 — Runtime topology ✅ RESOLVED
 
 **Resolved 2026-08-30 by [ADR 0001](./adr/0001-runtime-topology.md) (Accepted).**

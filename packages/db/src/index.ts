@@ -17,8 +17,5 @@ export type { AppliedMigration } from "./migrate";
 export * from "./schema";
 export type { Tx } from "./types";
 
-/**
- * Closes every connection pool. Integration suites only — a long-lived process
- * should keep its pool for its lifetime.
- */
-export { __closeAllClients as closeAllConnections } from "./internal/client";
+/** Integration suites only. See lifecycle.ts for why it is not re-exported directly. */
+export { closeAllConnections } from "./lifecycle";

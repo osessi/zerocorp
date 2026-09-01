@@ -22,7 +22,16 @@ const clients = new Map<string, Client>();
 export function getClient(databaseUrl: string): Client {
   let client = clients.get(databaseUrl);
   if (!client) {
-    client = drizzle(postgres(databaseUrl, { max: 10 }));
+    client = drizzle(
+      postgres(databaseUrl, {
+        max: 10,
+        // PostgreSQL NOTICEs are informational, and migrations emit one per
+        // `drop ... if exists`. Left on the default handler they bury the actual
+        // output of a migration run under a hundred lines of "does not exist,
+        // skipping". Real problems arrive as exceptions, not notices.
+        onnotice: () => {},
+      }),
+    );
     clients.set(databaseUrl, client);
   }
   return client;

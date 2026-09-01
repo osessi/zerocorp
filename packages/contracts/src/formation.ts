@@ -29,7 +29,20 @@
  *
  * EIN is deliberately absent. It is an IRS filing, not a state filing, it usually lands
  * two to six weeks after formation, and it can fail on its own. Keeping it here would
- * hold the order open for weeks after the company legally exists. See `EinStatus`.
+ * hold the order open for weeks after the company legally exists. See `RegistrationStatus`.
+ *
+ * Two states were added 2026-09-01 with D14, because both already happened in reality
+ * and had nowhere to go:
+ *
+ *   awaiting_provider      an order handed to a provider that has not yet reached the
+ *                          authority. It is not `filed` — nothing has been filed — and
+ *                          it is still cancellable, which `filed` is not.
+ *   information_requested  an RFI. Not a rejection: nothing was refused, something was
+ *                          asked. Collapsing the two loses the difference between "fix
+ *                          this and resubmit" and "answer this and we continue".
+ *
+ * Neither name mentions a provider's own vocabulary. `ProviderOrderStatus` holds the
+ * raw string and the adapter translates it; that string never crosses this boundary.
  */
 export const FORMATION_ORDER_STATUSES = [
   "draft",
@@ -37,6 +50,8 @@ export const FORMATION_ORDER_STATUSES = [
   "verifying_identity",
   "operator_review",
   "ready_to_file",
+  "awaiting_provider",
+  "information_requested",
   "filed",
   "formed",
   "rejected",
@@ -57,10 +72,15 @@ export const FORMATION_ORDER_TRANSITIONS = {
   collecting_documents: ["verifying_identity", "cancelled"],
   verifying_identity: ["operator_review", "collecting_documents", "cancelled"],
   operator_review: ["ready_to_file", "collecting_documents", "cancelled"],
-  ready_to_file: ["filed", "operator_review", "cancelled"],
-  // Once it is with the state, the outcome is theirs to give.
-  filed: ["formed", "rejected"],
-  // Reparable: fix what the state objected to and go round again.
+  // Handed to a provider. Not yet with the authority, so still cancellable.
+  ready_to_file: ["awaiting_provider", "operator_review", "cancelled"],
+  awaiting_provider: ["filed", "information_requested", "rejected", "cancelled"],
+  // An RFI returns to the provider, never straight to filed: a filing that needed
+  // more information is not a filing that has happened.
+  information_requested: ["awaiting_provider", "cancelled"],
+  // Once it is with the authority, the outcome is theirs to give.
+  filed: ["formed", "rejected", "information_requested"],
+  // Reparable: fix what the authority objected to and go round again.
   rejected: ["collecting_documents", "cancelled"],
   formed: [],
   cancelled: [],
@@ -108,40 +128,71 @@ export function canTransitionCompany(from: CompanyStatus, to: CompanyStatus): bo
 }
 
 /* ────────────────────────────────────────────────────────────────────────────
-   EIN — its own track
+   Post-incorporation registrations — each on its own track
    ──────────────────────────────────────────────────────────────────────────── */
 
 /**
- * The IRS employer identification number.
+ * A registration a company obtains AFTER it legally exists.
  *
- * Separate because it is a separate filing, with a separate authority, on a separate
- * clock, that fails separately. A company is `active` the moment the state forms it; the
- * EIN may still be weeks away, and the founder needs to see both facts at once rather
- * than one blocking the other.
+ * An EIN from the IRS. A UTR from HMRC. A VAT number. A payroll registration.
  *
- * `not_started` is a real state, not a null: an EIN is not requested until the company
- * exists, so "we have not asked yet" and "we asked and are waiting" are different things
- * to show a founder.
+ * Generalised 2026-09-01 with D14. The machine is byte-for-byte the one the EIN had —
+ * only the name was US-specific — and that is the point: four `ein_*` columns on
+ * `companies` made a US filing part of the shape of every company in the world.
+ * Modelling it as rows means the next country adds data, not a migration.
+ *
+ * Separate from the order because each is a separate filing, with a separate
+ * authority, on a separate clock, that fails separately. A company is `active` the
+ * moment the authority forms it; its tax id may still be weeks away, and the founder
+ * needs both facts at once rather than one blocking the other.
+ *
+ * `not_started` is a real state, not a null: a registration is not requested until the
+ * company exists, so "we have not asked yet" and "we asked and are waiting" are
+ * different things to show a founder.
  */
-export const EIN_STATUSES = [
+export const REGISTRATION_STATUSES = [
   "not_started",
   "requested",
   "issued",
   "rejected",
 ] as const;
 
-export type EinStatus = (typeof EIN_STATUSES)[number];
+export type RegistrationStatus = (typeof REGISTRATION_STATUSES)[number];
 
-export const EIN_TRANSITIONS = {
+export const REGISTRATION_TRANSITIONS = {
   not_started: ["requested"],
   requested: ["issued", "rejected"],
-  // Reparable, like a state rejection.
+  // Reparable, like an authority rejection.
   rejected: ["requested"],
   issued: [],
-} as const satisfies Record<EinStatus, readonly EinStatus[]>;
+} as const satisfies Record<RegistrationStatus, readonly RegistrationStatus[]>;
 
-export const EIN_TERMINAL: readonly EinStatus[] = ["issued"];
+export const REGISTRATION_TERMINAL: readonly RegistrationStatus[] = ["issued"];
 
-export function canTransitionEin(from: EinStatus, to: EinStatus): boolean {
-  return (EIN_TRANSITIONS[from] as readonly EinStatus[]).includes(to);
+export function canTransitionRegistration(
+  from: RegistrationStatus,
+  to: RegistrationStatus,
+): boolean {
+  return (REGISTRATION_TRANSITIONS[from] as readonly RegistrationStatus[]).includes(to);
 }
+
+/* ── EIN — the US instance of the above ───────────────────────────────────────
+ *
+ * Kept as aliases rather than deleted. The EIN is still a real, named thing the
+ * product talks about, D2 decided its lifecycle, and removing a working export to
+ * make a rename look tidy is exactly what CLAUDE_CODE_RULES.md §36 forbids.
+ *
+ * They are the SAME values, so a `RegistrationStatus` and an `EinStatus` can never
+ * drift apart the way three formation lists once did.
+ */
+
+/** @deprecated Use REGISTRATION_STATUSES. An EIN is one registration kind among several. */
+export const EIN_STATUSES = REGISTRATION_STATUSES;
+/** @deprecated Use RegistrationStatus. */
+export type EinStatus = RegistrationStatus;
+/** @deprecated Use REGISTRATION_TRANSITIONS. */
+export const EIN_TRANSITIONS = REGISTRATION_TRANSITIONS;
+/** @deprecated Use REGISTRATION_TERMINAL. */
+export const EIN_TERMINAL = REGISTRATION_TERMINAL;
+/** @deprecated Use canTransitionRegistration. */
+export const canTransitionEin = canTransitionRegistration;

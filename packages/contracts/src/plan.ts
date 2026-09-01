@@ -1,5 +1,6 @@
 import { z } from "zod";
-import { businessKindSchema } from "./assessment";
+import { companyRecommendationSchema } from "./assessment";
+import { entityTypeCodeSchema } from "./jurisdiction";
 
 /**
  * The Business Architect's output — PRODUCT_SPEC.md §29.3 block 3, "the heart of V1".
@@ -85,6 +86,40 @@ export type PlanStatus = z.infer<typeof planStatusSchema>;
 export const SETUP_PATH_VALUES = ["launch", "activation"] as const;
 export const SUBSCRIPTION_PLAN_VALUES = ["launch", "growth", "autopilot"] as const;
 
+/* ── Constraints and decisions ────────────────────────────────────────────────
+ *
+ * "I don't want a Delaware company." "Focus on France." "I already have a website."
+ * "Skip branding." "Ten articles a week."
+ *
+ * These are the sentences that make a plan theirs, and they must SURVIVE a
+ * regeneration. A constraint that lives only in the chat transcript gets re-argued
+ * every time the customer asks for another proposal, which is the fastest way to make
+ * an AI planner feel like it is not listening.
+ *
+ * The union is closed for everything the planner can act on, and has one `free_text`
+ * arm for everything else. That arm is deliberate honesty: it captures the sentence
+ * and shows it back, without pretending the planner can honour it.
+ */
+export const planConstraintSchema = z.discriminatedUnion("kind", [
+  z.object({ kind: z.literal("exclude_jurisdiction"), jurisdictionCode: z.string().min(1) }),
+  z.object({ kind: z.literal("prefer_jurisdiction"), jurisdictionCode: z.string().min(1) }),
+  z.object({ kind: z.literal("skip_category"), category: planCategorySchema }),
+  z.object({ kind: z.literal("already_have"), category: planCategorySchema, detail: line.optional() }),
+  z.object({ kind: z.literal("publication_cadence"), articlesPerWeek: z.number().int().min(0).max(70) }),
+  z.object({ kind: z.literal("free_text"), text: line }),
+]);
+export type PlanConstraint = z.infer<typeof planConstraintSchema>;
+
+/** A choice the plan embodies, and the reason for it. */
+export const planDecisionSchema = z.object({
+  key: z.string().regex(/^[a-z0-9_]{3,48}$/),
+  question: line,
+  chosen: line,
+  rationale: paragraph,
+  decidedBy: z.enum(["customer", "architect"]),
+});
+export type PlanDecision = z.infer<typeof planDecisionSchema>;
+
 /**
  * What the model is asked to produce, and nothing else.
  *
@@ -92,16 +127,50 @@ export const SUBSCRIPTION_PLAN_VALUES = ["launch", "growth", "autopilot"] as con
  * price of that path comes from configuration (@zerocorp/config). A model that
  * can quote a price is a model that can quote the wrong price.
  */
-export const planProposalSchema = z.object({
+export const planProposalFieldsSchema = z.object({
   title: line,
   summary: paragraph,
-  businessKind: businessKindSchema,
+  /**
+   * What ZeroCorp concluded about the company question. `none_needed` is a real,
+   * permitted answer — recommending a new entity to everybody is forbidden as default
+   * product logic (D14).
+   */
+  companyRecommendation: companyRecommendationSchema,
+  /**
+   * Only when companyRecommendation is `form_new`. Null otherwise, and a null here is
+   * a stronger statement than an omitted field: it says the question was considered.
+   */
+  recommendedJurisdictionCode: z.string().min(1).nullable(),
+  recommendedEntityTypeCode: entityTypeCodeSchema.nullable(),
   recommendedSetupPath: z.enum(SETUP_PATH_VALUES),
   recommendedSubscriptionPlan: z.enum(SUBSCRIPTION_PLAN_VALUES),
   /** Why this plan and not a cheaper one. The customer is about to be shown a price. */
   recommendationReason: paragraph,
   steps: z.array(planStepSchema).min(4).max(14),
+  /** What the customer has ruled in or out. Survives regeneration — see below. */
+  constraints: z.array(planConstraintSchema).max(20).default([]),
+  /** What was decided and why, so an approved plan can be read back months later. */
+  decisions: z.array(planDecisionSchema).max(20).default([]),
 });
+
+/**
+ * The refined schema. `planProposalFieldsSchema` stays exported because `.refine()`
+ * returns a ZodEffects, which has no `.shape` — and the field list is something the
+ * repository asserts on.
+ */
+export const planProposalSchema = planProposalFieldsSchema
+  .refine(
+    (p) => p.companyRecommendation === "form_new"
+      ? p.recommendedEntityTypeCode !== null && p.recommendedJurisdictionCode !== null
+      : p.recommendedEntityTypeCode === null && p.recommendedJurisdictionCode === null,
+    {
+      // "Form a new company" with no entity named is not a recommendation, it is a
+      // gesture. And naming an entity while recommending against forming one is the
+      // upsell this rule exists to make impossible.
+      message: "form_new requires an entity type and a jurisdiction; every other recommendation forbids both",
+      path: ["recommendedEntityTypeCode"],
+    },
+  );
 export type PlanProposal = z.infer<typeof planProposalSchema>;
 
 /** The whole artefact one Business Architect run produces. */
