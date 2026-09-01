@@ -17,7 +17,7 @@ import {
   UsersThreeIcon,
   WarningIcon,
 } from "@phosphor-icons/react/dist/ssr";
-import { cx } from "@zerocorp/ui";
+import { ENTER, REVEAL_MS, cx, staggerStyle } from "@zerocorp/ui";
 import type { AnalysisGap, ArchitectOutput, PlanCategory, PlanStep } from "@zerocorp/contracts";
 
 /**
@@ -177,13 +177,18 @@ function GapCard({ gap }: { gap: AnalysisGap }) {
  * The whole card is the target. Hovering moves the border to the phase colour and fills
  * the tile, so the grid answers "what is this" before anything is clicked.
  */
-function StepCard({ step, index, phase }: { step: PlanStep; index: number; phase: (typeof PHASES)[number] }) {
+function StepCard({ step, index, phase }: { step: PlanStep; index: number; phase: Phase }) {
   const [open, setOpen] = useState(false);
   const Icon = CATEGORY_ICON[step.category];
 
   return (
     <article
+      // Revealed in sequence, 90ms apart. The steps of a plan are the product, and
+      // watching them settle one after another says they were worked out rather than
+      // fetched. Under prefers-reduced-motion they simply appear, all at once.
+      style={staggerStyle(index, 14, REVEAL_MS)}
       className={cx(
+        ENTER,
         "group border-border relative flex flex-col border",
         "transition-[border-color,background-color] duration-normal ease-out",
         phase.wash,

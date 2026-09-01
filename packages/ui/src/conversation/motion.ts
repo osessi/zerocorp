@@ -18,7 +18,17 @@ export const PULSE = "zc-pulse";
  */
 export const STAGGER_MS = 40;
 
+/**
+ * The interval for something being REVEALED rather than merely arriving.
+ *
+ * 90ms, more than double the option stagger, and the difference is deliberate. Options
+ * are a list the visitor is about to scan, so they should be there by the time the eye
+ * lands. The steps of a plan are the product: showing them settle one after another says
+ * they were worked out rather than fetched, and eight of them take under a second.
+ */
+export const REVEAL_MS = 90;
+
 /** Capped so a long list does not end with an item arriving a second late. */
-export function staggerStyle(index: number, cap = 8): { animationDelay: string } {
-  return { animationDelay: `${Math.min(index, cap) * STAGGER_MS}ms` };
+export function staggerStyle(index: number, cap = 8, intervalMs = STAGGER_MS): { animationDelay: string } {
+  return { animationDelay: `${Math.min(index, cap) * intervalMs}ms` };
 }

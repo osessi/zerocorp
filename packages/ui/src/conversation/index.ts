@@ -9,4 +9,4 @@ export { QuestionTimeline, type TimelineItem } from "./QuestionTimeline";
 export { ACCENT_EDGE, ACCENT_EDGE_HOVER, ACCENT_FILL, ACCENT_RULE, ACCENT_TEXT, ACCENT_TINT, ACCENT_VAR, accentFor, type AccentIndex } from "./accent";
 export { SlotProgress, type SlotProgressItem } from "./SlotProgress";
 export { useSpeech, type SpeechState } from "./useSpeech";
-export { ENTER, ENTER_FADE, PULSE, STAGGER_MS, staggerStyle } from "./motion";
+export { ENTER, ENTER_FADE, PULSE, REVEAL_MS, STAGGER_MS, staggerStyle } from "./motion";
