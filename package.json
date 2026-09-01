@@ -20,7 +20,8 @@
     "no-sync": "node tooling/scripts/no-sync.mjs",
     "db:up": "docker compose up -d --wait",
     "db:down": "docker compose down",
-    "db:migrate": "vite-node packages/db/scripts/cli.ts"
+    "db:migrate": "vite-node packages/db/scripts/cli.ts",
+    "seed:demo": "vite-node tooling/scripts/seed-demo.ts"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.5",
