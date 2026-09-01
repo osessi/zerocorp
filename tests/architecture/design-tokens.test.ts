@@ -68,6 +68,38 @@ describe("design tokens — no arbitrary visual values", () => {
     expect(offenders).toEqual([]);
   });
 
+  it("never gives a panel a bare left bar", () => {
+    /*
+      DESIGN_SYSTEM.md §21.27. A coloured left bar is never a panel's only edge.
+
+      Said twice in review and never written down, so it was built a third time. A quote
+      bar with no box is the house style of every AI chat product, and it does not
+      enclose anything: no right edge means no shape, and a stack of them reads as one
+      ragged column rather than as separate things.
+
+      The check is per CLASS STRING, not per file, and that precision is what removes the
+      need for an exception list. `border border-l-2` is allowed and always was: a
+      heavier edge on a box that already exists. `border-l-2` alone is not. Alert and
+      Toast pass on their own merits rather than by being named here, which means the
+      rule describes the actual principle instead of the current violations.
+    */
+    const BARE_LEFT_BAR = /\bborder-l-(?:2|4|8)\b/;
+    // A standalone `border`, not `border-something`.
+    const FULL_BORDER = /\bborder(?=[\s"'`]|$)/;
+
+    const offenders: string[] = [];
+    for (const file of UI_SOURCES) {
+      const raw = readFileSync(file, "utf8");
+      const code = raw.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/.*$/gm, "");
+      for (const [literal] of code.matchAll(/["'`][^"'`\n]*["'`]/g)) {
+        if (!BARE_LEFT_BAR.test(literal)) continue;
+        if (FULL_BORDER.test(literal)) continue;
+        offenders.push(`${relative(ROOT, file)} → ${literal.slice(0, 60)}`);
+      }
+    }
+    expect(offenders).toEqual([]);
+  });
+
   it("never builds a Tailwind class name at runtime", () => {
     /*
       Tailwind scans source files for LITERAL class names.

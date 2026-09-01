@@ -23,7 +23,7 @@ export function AnsweredTurn({
   onEdit?: () => void;
 }) {
   return (
-    <div className={cx(ENTER_FADE, "border-border group flex items-start gap-4 border-l-2 py-2 pl-4")}>
+    <div className={cx(ENTER_FADE, "border-border group flex items-start gap-4 border px-4 py-3")}>
       <div className="flex min-w-0 flex-1 flex-col gap-0.5">
         <p className="text-caption text-muted-foreground">{question}</p>
         <p className="text-body-sm truncate">{answer}</p>

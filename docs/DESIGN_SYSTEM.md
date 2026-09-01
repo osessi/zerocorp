@@ -2173,6 +2173,45 @@ status tones, and those tones already mean something specific.
 
 ---
 
+### 21.27 Panels — VALIDATED 2026-09-01
+
+> **A coloured left bar is never a panel's only edge.**
+
+Said twice in review and never written down, so it was built a third time. It is a rule
+now, and a CI rule, because a convention that lives only in a conversation is a
+convention that gets rebuilt.
+
+```text
+FORBIDDEN   a bare `border-l-2` with nothing around it
+            ┃ Blocking
+            ┃ No legal entity to sell through
+            ┃ You are selling into GB, NL, AE without a company.
+
+ALLOWED     a full border, optionally with a heavier left edge
+            ┌────────────────────────────────────────────┐
+            ┃ Blocking                                   │
+            ┃ No legal entity to sell through            │
+            └────────────────────────────────────────────┘
+
+ALLOWED     a dashed outline, for something provisional or hovered
+            ┌ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┐
+```
+
+**Why.** A quote bar with no box is the house style of every AI chat product, and
+ZeroCorp is sold to founders who have seen all of them. It also does not enclose
+anything: the panel has no right edge, so it has no shape, and a stack of them reads as
+one long ragged column rather than as separate things.
+
+**The two exceptions**, both validated earlier and both keeping a full border:
+`Alert` and `Toast` use `border border-l-2`, where the heavier edge emphasises a box
+that already exists.
+
+**Proportion.** A card's heading takes `text-balance` and its body `text-pretty`. A
+title that breaks with one word alone on the last line looks like a bug, and at these
+widths it happens constantly without them.
+
+---
+
 ### 21.24 `FocusedFlowLayout` — VALIDATED 2026-09-01
 
 > Numbered 21.24 rather than 21.14 on purpose: the original thirteen patterns are

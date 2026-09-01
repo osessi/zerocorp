@@ -79,7 +79,7 @@ function TreatmentB() {
             key={r.label}
             className={cx(
               ROW_BASE,
-              "border-l-2 pl-7",
+              "border border-l-2 pl-7",
               // transparent, not absent — otherwise every row shifts 2px on selection
               on ? "border-l-primary" : "border-l-transparent",
               on && "font-medium",

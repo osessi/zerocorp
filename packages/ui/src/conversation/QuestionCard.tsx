@@ -5,7 +5,7 @@ import { ArrowRightIcon, CheckIcon, PencilSimpleIcon } from "@phosphor-icons/rea
 import type { QuestionCard as Card, QuestionOption } from "@zerocorp/contracts";
 import { Button } from "../button/index";
 import { cx } from "../cx";
-import { ACCENT_EDGE, ACCENT_EDGE_HOVER, ACCENT_FILL, ACCENT_TEXT, ACCENT_VAR, type AccentIndex } from "./accent";
+import { ACCENT_EDGE, ACCENT_EDGE_HOVER, ACCENT_FILL, ACCENT_TEXT, ACCENT_TINT, ACCENT_VAR, type AccentIndex } from "./accent";
 import { ENTER, staggerStyle } from "./motion";
 
 /**
@@ -223,8 +223,9 @@ export function QuestionCard({ card, onAnswer, disabled, accent = 1, eyebrow }: 
     return (
       <div className="flex flex-col gap-8">
         <Heading card={card} accent={accent} {...(eyebrow ? { eyebrow } : {})} />
-        <div className={cx(ENTER, ACCENT_EDGE[accent], "border-l-2 pl-4")}>
-          <p className="text-body">{card.statement}</p>
+        {/* A box, not a quote bar. §21.27. */}
+        <div className={cx(ENTER, ACCENT_EDGE[accent], ACCENT_TINT[accent], "border p-4")}>
+          <p className="text-body text-pretty">{card.statement}</p>
         </div>
         <div className="flex flex-wrap gap-2">
           <Button

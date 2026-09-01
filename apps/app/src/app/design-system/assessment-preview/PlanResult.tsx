@@ -52,25 +52,10 @@ const CATEGORY_ICON: Record<PlanCategory, typeof BuildingsIcon> = {
  * contrast. A `-subtle` chip tint behind a paragraph measured 4.05:1, which is why the
  * two scales are separate.
  */
-const SEVERITY: Record<AnalysisGap["severity"], { label: string; card: string; ink: string; edge: string }> = {
-  blocking: {
-    label: "Blocking",
-    card: "bg-destructive-wash border-destructive",
-    ink: "text-destructive-ink",
-    edge: "bg-destructive",
-  },
-  important: {
-    label: "Important",
-    card: "bg-warning-wash border-warning",
-    ink: "text-warning-ink",
-    edge: "bg-warning",
-  },
-  nice_to_have: {
-    label: "Worth doing",
-    card: "bg-info-wash border-info",
-    ink: "text-info-ink",
-    edge: "bg-info",
-  },
+const SEVERITY: Record<AnalysisGap["severity"], { label: string; card: string; ink: string }> = {
+  blocking: { label: "Blocking", card: "bg-destructive-wash border-destructive", ink: "text-destructive-ink" },
+  important: { label: "Important", card: "bg-warning-wash border-warning", ink: "text-warning-ink" },
+  nice_to_have: { label: "Worth doing", card: "bg-info-wash border-info", ink: "text-info-ink" },
 };
 
 /**
@@ -80,12 +65,29 @@ const SEVERITY: Record<AnalysisGap["severity"], { label: string; card: string; i
  * for literal class names, so the derived one is never generated and the border silently
  * does not appear.
  */
-const PHASES: Array<{ id: PlanStep["phase"]; label: string; rule: string; edge: string; text: string }> = [
-  { id: "understand", label: "Understand", rule: "bg-chart-1", edge: "border-chart-1", text: "text-chart-1" },
-  { id: "plan", label: "Plan", rule: "bg-chart-2", edge: "border-chart-2", text: "text-chart-2" },
-  { id: "build", label: "Build", rule: "bg-chart-3", edge: "border-chart-3", text: "text-chart-3" },
-  { id: "launch", label: "Launch", rule: "bg-chart-4", edge: "border-chart-4", text: "text-chart-4" },
-  { id: "find_customers", label: "Find customers", rule: "bg-chart-5", edge: "border-chart-5", text: "text-chart-5" },
+/**
+ * Every variant written out.
+ *
+ * `rule.replace("bg-", "border-")` is the shape the CI rule forbids: Tailwind scans for
+ * literal class names, so a derived one is never generated and the border silently does
+ * not appear.
+ */
+interface Phase {
+  id: PlanStep["phase"];
+  label: string;
+  edge: string;
+  tint: string;
+  text: string;
+  hoverEdge: string;
+  hoverFill: string;
+}
+
+const PHASES: Phase[] = [
+  { id: "understand", label: "Understand", edge: "border-chart-1", tint: "bg-chart-1/10", text: "text-chart-1", hoverEdge: "hover:border-chart-1", hoverFill: "group-hover:bg-chart-1 group-hover:text-background" },
+  { id: "plan", label: "Plan", edge: "border-chart-2", tint: "bg-chart-2/10", text: "text-chart-2", hoverEdge: "hover:border-chart-2", hoverFill: "group-hover:bg-chart-2 group-hover:text-background" },
+  { id: "build", label: "Build", edge: "border-chart-3", tint: "bg-chart-3/10", text: "text-chart-3", hoverEdge: "hover:border-chart-3", hoverFill: "group-hover:bg-chart-3 group-hover:text-background" },
+  { id: "launch", label: "Launch", edge: "border-chart-4", tint: "bg-chart-4/10", text: "text-chart-4", hoverEdge: "hover:border-chart-4", hoverFill: "group-hover:bg-chart-4 group-hover:text-background" },
+  { id: "find_customers", label: "Find customers", edge: "border-chart-5", tint: "bg-chart-5/10", text: "text-chart-5", hoverEdge: "hover:border-chart-5", hoverFill: "group-hover:bg-chart-5 group-hover:text-background" },
 ];
 
 const RECOMMENDATION = {
@@ -122,7 +124,7 @@ function AnalysisCard({
         <Icon size={16} weight="regular" className={accent} />
         <h3 className="text-overline text-muted-foreground">{eyebrow}</h3>
       </div>
-      <p className="text-body-sm">{body}</p>
+      <p className="text-body-sm text-pretty">{body}</p>
     </article>
   );
 }
@@ -130,66 +132,95 @@ function AnalysisCard({
 function GapCard({ gap }: { gap: AnalysisGap }) {
   const severity = SEVERITY[gap.severity];
   return (
-    <article className={cx("relative flex flex-col gap-2 border p-5 pl-6", severity.card)}>
-      {/* The severity edge. Colour is never the only carrier: the label says it too. */}
-      <span className={cx("absolute inset-y-0 left-0 w-1", severity.edge)} aria-hidden="true" />
+    <article className={cx("flex flex-col gap-2 border p-5", severity.card)}>
       <div className="flex flex-wrap items-center gap-3">
         <span className={cx("text-overline flex items-center gap-1.5", severity.ink)}>
           <WarningIcon size={12} weight="fill" aria-hidden="true" />
           {severity.label}
         </span>
       </div>
-      <h3 className="text-h4">{gap.title}</h3>
-      <p className="text-body-sm text-foreground/80 max-w-prose">{gap.why}</p>
+      <h3 className="text-h4 text-balance">{gap.title}</h3>
+      <p className="text-body-sm text-foreground/80 max-w-prose text-pretty">{gap.why}</p>
     </article>
   );
 }
 
-function StepRow({ step, index, phase }: { step: PlanStep; index: number; phase: (typeof PHASES)[number] }) {
+/**
+ * A step, as a card.
+ *
+ * These are the screen that decides whether someone pays. A row with a number and two
+ * lines of text is a task list; a founder reading a task list is reading admin. Each of
+ * these is a THING THEY GET, so each one gets a shape: a tile carrying its category, a
+ * number that stays out of the way, the outcome in plain words, and the reason one click
+ * down.
+ *
+ * The whole card is the target. Hovering moves the border to the phase colour and fills
+ * the tile, so the grid answers "what is this" before anything is clicked.
+ */
+function StepCard({ step, index, phase }: { step: PlanStep; index: number; phase: (typeof PHASES)[number] }) {
   const [open, setOpen] = useState(false);
   const Icon = CATEGORY_ICON[step.category];
 
   return (
-    <li className="border-border border-b last:border-b-0">
+    <article
+      className={cx(
+        "group border-border relative flex flex-col border",
+        "transition-[border-color,background-color] duration-normal ease-out",
+        phase.hoverEdge,
+      )}
+    >
       <button
         type="button"
         onClick={() => setOpen(!open)}
         aria-expanded={open}
         className={cx(
-          "group grid w-full grid-cols-[2.5rem_2rem_1fr_1.25rem] items-start gap-3 px-4 py-4 text-left",
-          "transition-[background-color] duration-normal ease-out hover:bg-accent",
+          "flex flex-1 flex-col items-start gap-4 p-5 text-left",
           "focus-visible:outline-ring focus-visible:outline-2 focus-visible:-outline-offset-2",
         )}
       >
-        <span className={cx("text-body-sm font-mono tabular-nums pt-0.5", phase.text)}>
-          {String(index + 1).padStart(2, "0")}
+        <div className="flex w-full items-start justify-between gap-4">
+          <span
+            className={cx(
+              "flex size-11 shrink-0 items-center justify-center border",
+              "transition-[color,background-color,border-color] duration-normal ease-out",
+              phase.edge,
+              phase.tint,
+              phase.text,
+              phase.hoverFill,
+            )}
+          >
+            <Icon size={22} weight="regular" aria-hidden="true" />
+          </span>
+
+          {/* Large, faint, and out of the reading path. It orders the plan without
+              competing with what each step actually is. */}
+          <span className="text-h2 text-muted-foreground/25 font-mono tabular-nums leading-none">
+            {String(index + 1).padStart(2, "0")}
+          </span>
+        </div>
+
+        <div className="flex w-full flex-col gap-1.5">
+          <span className={cx("text-overline", phase.text)}>{phase.label}</span>
+          <h4 className="text-h4 text-balance">{step.title}</h4>
+          <p className="text-body-sm text-muted-foreground text-pretty">{step.outcome}</p>
+        </div>
+
+        <span className="text-caption text-muted-foreground mt-auto flex items-center gap-1.5 pt-1">
+          Why this
+          <CaretDownIcon
+            size={12}
+            aria-hidden="true"
+            className={cx("transition-transform duration-emphasis", open && "rotate-180")}
+          />
         </span>
-        <span className="border-border text-muted-foreground group-hover:text-foreground flex size-8 items-center justify-center border transition-[color] duration-normal">
-          <Icon size={16} weight="regular" aria-hidden="true" />
-        </span>
-        <span className="flex min-w-0 flex-col gap-1">
-          <span className="text-body-sm font-medium">{step.title}</span>
-          <span className="text-body-sm text-muted-foreground">{step.outcome}</span>
-        </span>
-        <CaretDownIcon
-          size={16}
-          aria-hidden="true"
-          className={cx("text-muted-foreground mt-1 transition-transform duration-emphasis", open && "rotate-180")}
-        />
       </button>
+
       {open ? (
-        // The same grid as the row above, so the reason lines up under the title rather
-        // than under a margin someone measured once and will not measure again.
-        <div className="grid grid-cols-[2.5rem_2rem_1fr_1.25rem] gap-3 px-4 pb-4">
-          <span aria-hidden="true" />
-          <span aria-hidden="true" />
-          <div className={cx("zc-enter-fade border-l-2 pl-4", phase.edge)}>
-            <p className="text-overline text-muted-foreground pb-1">Why this</p>
-            <p className="text-body-sm text-foreground/80 max-w-prose">{step.rationale}</p>
-          </div>
+        <div className="border-border zc-enter-fade border-t px-5 py-4">
+          <p className="text-body-sm text-foreground/80 text-pretty">{step.rationale}</p>
         </div>
       ) : null}
-    </li>
+    </article>
   );
 }
 
@@ -262,28 +293,20 @@ export function PlanResult({ output }: { output: ArchitectOutput }) {
 
         <p className="text-body-sm text-muted-foreground max-w-prose">{plan.recommendationReason}</p>
 
-        {PHASES.map((phase) => {
-          const steps = included.filter((s) => s.phase === phase.id);
-          if (steps.length === 0) return null;
+        {/*
+          One grid, ordered by phase, with each card carrying its own phase label.
 
-          return (
-            <div key={phase.id} className="flex flex-col gap-3">
-              <div className="flex items-center gap-3">
-                <span className={cx("h-0.5 w-6", phase.rule)} aria-hidden="true" />
-                <h3 className={cx("text-overline", phase.text)}>{phase.label}</h3>
-                <span className="bg-border h-px flex-1" aria-hidden="true" />
-                <span className="text-caption text-muted-foreground font-mono tabular-nums">
-                  {steps.length}
-                </span>
-              </div>
-              <ul className="border-border border">
-                {steps.map((step) => (
-                  <StepRow key={step.key} step={step} index={counter++} phase={phase} />
-                ))}
-              </ul>
-            </div>
-          );
-        })}
+          Grouping them under headings put a divider between every two or three cards and
+          chopped the plan into fragments. The plan is one thing the founder is buying,
+          and it should read as one thing.
+        */}
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          {PHASES.flatMap((phase) =>
+            included
+              .filter((s) => s.phase === phase.id)
+              .map((step) => <StepCard key={step.key} step={step} index={counter++} phase={phase} />),
+          )}
+        </div>
       </section>
 
       {/* ── What happens next ──────────────────────────────────────────── */}
