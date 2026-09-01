@@ -56,6 +56,21 @@ export const ACCENT_EDGE_HOVER: Record<AccentIndex, string> = {
   5: "hover:border-chart-5",
 };
 
+/**
+ * A wash of the hue behind a marker. What tells "being answered now" apart from
+ * "assumed", without adding a second element around the first.
+ *
+ * 10% because it has to survive both themes: darker and it competes with the solid
+ * fill that means done, lighter and it disappears on the dark background.
+ */
+export const ACCENT_TINT: Record<AccentIndex, string> = {
+  1: "bg-chart-1/10",
+  2: "bg-chart-2/10",
+  3: "bg-chart-3/10",
+  4: "bg-chart-4/10",
+  5: "bg-chart-5/10",
+};
+
 /** The connector between steps. Same hue, drawn as a rule. */
 export const ACCENT_RULE: Record<AccentIndex, string> = {
   1: "bg-chart-1",

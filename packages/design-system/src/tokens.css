@@ -502,12 +502,6 @@
     to   { transform: scaleX(1); }
   }
 
-  /* The active step. A soft halo, opacity only, so nothing on the rail moves. */
-  @keyframes zc-halo {
-    0%, 100% { opacity: 0.15; }
-    50%      { opacity: 0.5; }
-  }
-
   /* The thinking indicator. Opacity only: nothing moves while the system is quiet. */
   @keyframes zc-pulse {
     0%, 100% { opacity: 0.25; }
@@ -539,9 +533,6 @@
     animation: zc-underline 500ms var(--ease-out) both;
   }
 
-  .zc-halo {
-    animation: zc-halo 2s var(--ease-in-out) infinite;
-  }
 
   /* §10 — motion is honoured, never imposed. */
   @media (prefers-reduced-motion: reduce) {

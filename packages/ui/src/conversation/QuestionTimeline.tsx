@@ -1,7 +1,7 @@
 "use client";
 
 import { cx } from "../cx";
-import { ACCENT_EDGE, ACCENT_FILL, ACCENT_RULE, ACCENT_TEXT, accentFor } from "./accent";
+import { ACCENT_EDGE, ACCENT_FILL, ACCENT_RULE, ACCENT_TEXT, ACCENT_TINT, accentFor } from "./accent";
 
 /**
  * The conversation so far, down the left.
@@ -43,6 +43,11 @@ export function QuestionTimeline({
         const body = (
           <>
             <span className="relative flex w-6 shrink-0 flex-col items-center">
+              {/*
+                The same three treatments as the rail, on the node itself. An earlier
+                version ringed the active node with a second bordered square, which
+                reads as a doubled box rather than as emphasis.
+              */}
               <span
                 className={cx(
                   "mt-1 flex size-3 shrink-0 items-center justify-center border",
@@ -50,14 +55,10 @@ export function QuestionTimeline({
                   answered
                     ? cx(ACCENT_FILL[accent], ACCENT_EDGE[accent])
                     : active
-                      ? cx(ACCENT_EDGE[accent], "bg-background")
+                      ? cx(ACCENT_EDGE[accent], ACCENT_TINT[accent])
                       : "border-border bg-background",
                 )}
               />
-              {active ? (
-                // A soft halo on the one being answered. Opacity only, so nothing jumps.
-                <span className={cx("zc-pulse absolute top-0 size-5 border", ACCENT_EDGE[accent])} />
-              ) : null}
               {!last ? (
                 <span
                   className={cx(

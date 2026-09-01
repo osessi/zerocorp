@@ -1,7 +1,7 @@
 import { CheckIcon } from "@phosphor-icons/react/dist/ssr";
 import type { ComponentType } from "react";
 import { cx } from "../cx";
-import { ACCENT_EDGE, ACCENT_FILL, ACCENT_RULE, ACCENT_TEXT, accentFor } from "./accent";
+import { ACCENT_EDGE, ACCENT_FILL, ACCENT_RULE, ACCENT_TEXT, ACCENT_TINT, accentFor } from "./accent";
 
 /**
  * The steps, across the top, validating one at a time.
@@ -14,6 +14,10 @@ import { ACCENT_EDGE, ACCENT_FILL, ACCENT_RULE, ACCENT_TEXT, accentFor } from ".
  * sit centred under their own marker. Drawing it between markers instead forces the
  * labels left-aligned, and a left-aligned label under a centred dot reads as belonging
  * to the gap rather than to the step.
+ *
+ * Nothing on this rail loops. The tint fades in once when a step becomes active and then
+ * holds: a marker that keeps pulsing sits in the corner of the eye for as long as the
+ * visitor is composing an answer, which is the whole time.
  */
 export interface WizardStep {
   readonly id: string;
@@ -62,24 +66,29 @@ export function WizardRail({
             ) : null}
 
             <span className="bg-background relative z-10 px-1">
-              {/* The halo marks the live step. Opacity only, so nothing on the rail
-                  moves while the visitor is reading the question below it. */}
-              {active && !settled ? (
-                <span
-                  aria-hidden="true"
-                  className={cx("zc-halo absolute -inset-1 border", ACCENT_EDGE[accent])}
-                />
-              ) : null}
-
               <span
                 className={cx(
                   "relative flex size-6 items-center justify-center border",
                   "transition-[color,background-color,border-color] duration-emphasis ease-out",
+                  /*
+                    Four states, four treatments, and all of them on the marker itself.
+
+                    An earlier version gave the active step a second bordered square
+                    around the first, which reads as a doubled box rather than a glow.
+                    The real problem it was papering over is that "active" and "assumed"
+                    both rendered as an accent outline, so they needed telling apart. A
+                    tint does that, and needs no second element.
+
+                      done      solid accent, with a check
+                      active    accent outline over an accent tint
+                      assumed   accent outline, hollow
+                      upcoming  neutral outline, hollow
+                  */
                   settled
                     ? cx(ACCENT_FILL[accent], ACCENT_EDGE[accent], "zc-pop")
-                    : step.tentative
-                      ? cx(ACCENT_EDGE[accent], ACCENT_TEXT[accent], "bg-background")
-                      : active
+                    : active
+                      ? cx(ACCENT_EDGE[accent], ACCENT_TEXT[accent], ACCENT_TINT[accent], "zc-enter-fade")
+                      : step.tentative
                         ? cx(ACCENT_EDGE[accent], ACCENT_TEXT[accent], "bg-background")
                         : "border-border text-muted-foreground bg-background",
                 )}
