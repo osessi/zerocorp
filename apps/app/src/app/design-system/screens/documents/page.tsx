@@ -40,7 +40,7 @@ export default function DocumentsScreen() {
 
       <div className="px-8">
         <Tabs
-          items={[{ id: "details", label: "Details" }, { id: "documents", label: "Documents", count: DOCUMENTS.length }, { id: "tasks", label: "Tasks", count: 3 }, { id: "billing", label: "Billing" }]}
+          items={[{ id: "details", label: "Details" }, { id: "documents", label: "Documents", count: DOCUMENTS.length, tone: "info" as const }, { id: "tasks", label: "Tasks", count: 3, tone: "warning" as const }, { id: "billing", label: "Billing" }]}
           active={tab}
           onSelect={setTab}
         />
@@ -49,9 +49,28 @@ export default function DocumentsScreen() {
       <div className="mx-auto flex max-w-(--container-content) flex-col gap-8 p-8">
         <MetricGrid
           items={[
-            { label: "Documents owed", value: String(counts.owed), icon: <WarningCircleIcon size={16} /> },
-            { label: "Pending review", value: String(counts.pending), icon: <ClockIcon size={16} /> },
-            { label: "Accepted", value: String(counts.accepted), sub: `/${DOCUMENTS.length}`, icon: <FileTextIcon size={16} /> },
+            {
+              label: "Documents owed",
+              value: String(counts.owed),
+              icon: <WarningCircleIcon size={14} />,
+              tone: "danger",
+              delta: { text: "blocks the Wyoming filing", direction: "down" },
+            },
+            {
+              label: "Pending review",
+              value: String(counts.pending),
+              icon: <ClockIcon size={14} />,
+              tone: "warning",
+              delta: { text: "oldest waiting 2 days", direction: "flat" },
+            },
+            {
+              label: "Accepted",
+              value: String(counts.accepted),
+              sub: `of ${DOCUMENTS.length}`,
+              icon: <FileTextIcon size={14} />,
+              tone: "success",
+              delta: { text: "3 this week", direction: "up" },
+            },
           ]}
           link={<button className="text-body-sm text-foreground focus-visible:outline-ring inline-flex w-fit items-center gap-1 focus-visible:outline-2 focus-visible:outline-offset-2">Go to formation <ArrowRightIcon size={14} /></button>}
         />

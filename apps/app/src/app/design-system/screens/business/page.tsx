@@ -8,7 +8,7 @@ import {
   ClockIcon, WarningCircleIcon,
 } from "@phosphor-icons/react/dist/ssr";
 import { PageHeader } from "../../_prototype/shell";
-import { ActivityPanel, Avatar, AvatarStack, Button, PanelLabel, SectionHeader, StatusBadge, Tabs, cx } from "../../_prototype/primitives";
+import { ActivityPanel, Avatar, AvatarStack, Button, ButtonGroup, GroupButton, PanelLabel, SectionHeader, StatusBadge, Tabs, cx } from "../../_prototype/primitives";
 import { ACTIVITY, TASKS, TASK_HISTORY } from "../../_prototype/data";
 
 /** The seven states a formation order passes through. packages/contracts owns them. */
@@ -43,7 +43,13 @@ export default function BusinessScreen() {
         title="Northbridge Studio LLC"
         subtitle="Wyoming · Growth · Created 12 Aug, 2026"
         people={<AvatarStack people={["AO", "TK", "OK"]} />}
-        actions={<><Button variant="primary"><EnvelopeSimpleIcon size={16} /> Email</Button><Button><PhoneIcon size={16} /> Call</Button><Button><DotsThreeIcon size={16} /> More</Button></>}
+        actions={
+          <ButtonGroup>
+            <GroupButton emphasis="loud"><EnvelopeSimpleIcon size={16} /> Email</GroupButton>
+            <GroupButton><PhoneIcon size={16} /> Call</GroupButton>
+            <GroupButton aria-label="More actions"><DotsThreeIcon size={16} /></GroupButton>
+          </ButtonGroup>
+        }
       />
 
       {/*
@@ -127,9 +133,9 @@ export default function BusinessScreen() {
         <div className="min-w-0 flex-1 overflow-y-auto px-8">
           <Tabs
             items={[
-              { id: "details", label: "Details" }, { id: "documents", label: "Documents" },
-              { id: "tasks", label: "Tasks", count: TASKS.length }, { id: "content", label: "Content" },
-              { id: "agents", label: "Agents" }, { id: "billing", label: "Billing" },
+              { id: "details", label: "Details" }, { id: "documents", label: "Documents", count: 6, tone: "info" as const },
+              { id: "tasks", label: "Tasks", count: TASKS.length, tone: "warning" as const }, { id: "content", label: "Content" },
+              { id: "agents", label: "Agents", count: 3, tone: "processing" as const }, { id: "billing", label: "Billing" },
             ]}
             active={mainTab}
             onSelect={setMainTab}
@@ -214,9 +220,13 @@ export default function BusinessScreen() {
             <section className="flex flex-col gap-4">
               <SectionHeader title="Task history" subtitle="28 August, 2026" />
               {TASK_HISTORY.map((t) => (
-                <article key={t.id} className="border-border bg-muted flex items-start justify-between gap-4 border p-4">
+                <article key={t.id} className="border-border bg-muted flex items-start justify-between gap-4 border border-dashed p-4">
                   <div className="flex min-w-0 items-start gap-3">
-                    <CheckCircleIcon size={20} weight="fill" className="text-success shrink-0" />
+                    {/* Filled check on its own tint: history is done, and should read as
+                        settled rather than as a second list of open work. */}
+                    <span className="bg-success-subtle border-success text-success-ink flex size-6 shrink-0 items-center justify-center border">
+                      <CheckCircleIcon size={14} weight="fill" />
+                    </span>
                     <div className="flex min-w-0 flex-col gap-1">
                       <h3 className="text-body text-muted-foreground line-through">{t.title}</h3>
                       <p className="text-body-sm text-muted-foreground">{t.detail}</p>

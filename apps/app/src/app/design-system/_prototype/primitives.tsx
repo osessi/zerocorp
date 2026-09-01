@@ -124,6 +124,48 @@ export function AvatarStack({ people, max = 3 }: { people: string[]; max?: numbe
 
 /* ── Button ──────────────────────────────────────────────────────────────────
    Outlined by default, one filled primary per screen. Teal is the only accent. */
+/**
+ * ButtonGroup — segmented record actions.
+ *
+ * Email, Call and More were three identical outlined rectangles with gaps between them,
+ * which says "three unrelated things" when they are one thing: ways to reach this record.
+ * Segmenting them says it in the layout, and lets the first action carry weight without
+ * the other two competing.
+ *
+ * A new pattern, and §24.8 holds the twelve §21 patterns as PROPOSED. Built here in the
+ * prototype where new patterns are judged, not promoted to @zerocorp/ui.
+ */
+export function ButtonGroup({ children }: { children: ReactNode }) {
+  return (
+    <span className="border-primary inline-flex items-stretch border divide-x divide-(--primary)">
+      {children}
+    </span>
+  );
+}
+
+/** A cell inside a ButtonGroup. Square corners come free; the group owns the border. */
+export function GroupButton({
+  children,
+  emphasis = "quiet",
+  ...props
+}: React.ComponentPropsWithoutRef<"button"> & { emphasis?: "loud" | "quiet" }) {
+  return (
+    <button
+      {...props}
+      className={cx(
+        "text-label inline-flex h-9 shrink-0 items-center gap-2 px-3",
+        "transition-[color,background-color] duration-normal ease-out",
+        "focus-visible:outline-ring focus-visible:outline-2 focus-visible:-outline-offset-2",
+        emphasis === "loud"
+          ? "bg-primary text-primary-foreground hover:bg-primary-hover"
+          : "text-accent-strong hover:bg-accent-subtle bg-background",
+      )}
+    >
+      {children}
+    </button>
+  );
+}
+
 export function Button({
   children,
   variant = "secondary",

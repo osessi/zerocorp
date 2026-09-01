@@ -74,7 +74,7 @@ export default function OverviewScreen() {
         {/* Chart placeholder — see the note above and §21.14 */}
         <section className="flex flex-col gap-4">
           <SectionHeader title="Revenue" subtitle="Recurring revenue by plan" action={<Button>See all</Button>} />
-          <div className="border-border flex h-56 flex-col items-center justify-center gap-2 border">
+          <div className="border-border bg-muted flex h-56 flex-col items-center justify-center gap-2 border border-dashed">
             <p className="text-body-sm text-muted-foreground">Chart region</p>
             <p className="text-caption text-muted-foreground">
               Chart tokens are open item 14 — not derivable from the reference
@@ -87,13 +87,16 @@ export default function OverviewScreen() {
             <SectionHeader title="Recent businesses" count={BUSINESSES.length} action={<Button>View all</Button>} />
             <div className="border-border border">
               {BUSINESSES.slice(0, 5).map((b, i) => (
-                <div key={b.id} className={`flex items-center gap-4 px-4 py-3 ${i > 0 ? "border-border border-t" : ""}`}>
-                  <Avatar initials={b.owners[0]!} size="sm" />
+                <div
+                  key={b.id}
+                  className={`hover:bg-accent flex items-center gap-4 px-4 py-3 transition-[background-color] duration-fast ${i > 0 ? "border-border border-t" : ""}`}
+                >
+                  <Avatar initials={b.owners[0]!} size="sm" tone={FORMATION_TONE[b.formation]} />
                   <div className="flex min-w-0 flex-1 flex-col">
                     <span className="text-body-sm truncate">{b.name}</span>
                     <span className="text-caption text-muted-foreground truncate">{b.state} · {b.plan}</span>
                   </div>
-                  <span className="text-body-sm hidden font-mono sm:block">{money(b.mrrCents)}</span>
+                  <span className="text-body-sm text-foreground hidden font-mono sm:block">{money(b.mrrCents)}</span>
                   <StatusBadge tone={FORMATION_TONE[b.formation]}>{FORMATION_LABEL[b.formation]}</StatusBadge>
                 </div>
               ))}
