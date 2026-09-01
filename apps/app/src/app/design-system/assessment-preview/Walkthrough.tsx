@@ -43,8 +43,8 @@ import { PlanResult } from "./PlanResult";
  * mock data. A preview built from fixtures shows what someone hoped the experience would
  * be; this shows what it does.
  *
- * The one thing it fakes is latency, so the thinking state can actually be seen. The
- * real path is a network call and will be slower, not faster.
+ * The one thing it fakes is latency, so the thinking state can be seen at all. The real
+ * path is a network call and will be slower, not faster.
  */
 
 const THINKING_MS = 700;
@@ -52,9 +52,9 @@ const THINKING_MS = 700;
 /**
  * A label and a glyph per step.
  *
- * The glyph is what the step IS, not a decoration: a pin for where you are, a globe for
- * where you sell. A numbered circle tells a visitor how many are left; an icon tells
- * them what each one is about before they have read the word underneath it.
+ * The glyph is what the step IS, not decoration: a pin for where you are, a globe for
+ * where you sell. A numbered circle tells a visitor how many are left; an icon tells them
+ * what each one is about before they have read the word underneath it.
  */
 const SLOT_STEPS: Record<SlotId, { label: string; icon: typeof BriefcaseIcon }> = {
   business_description: { label: "Business", icon: BriefcaseIcon },
@@ -80,16 +80,43 @@ const CATALOG = [
   },
 ];
 
+/**
+ * One answered turn, with everything needed to undo it.
+ *
+ * The state used to be three parallel pieces — answers, sources and a transcript — and
+ * rewinding to turn three meant guessing which of them turn four had touched. Keeping
+ * the patch beside the turn makes going back exact: drop the entries after it and
+ * recompute. Answers are DERIVED from this list rather than stored again, so the two can
+ * never disagree.
+ */
+interface Answered {
+  readonly turn: InterviewTurn;
+  readonly patch: PartialAssessmentAnswers;
+  readonly stated: SlotId | null;
+  readonly inferred: readonly SlotId[];
+}
+
 export function Walkthrough() {
-  const [answers, setAnswers] = useState<PartialAssessmentAnswers>({});
-  const [sources, setSources] = useState<Partial<Record<SlotId, "stated" | "inferred">>>({});
-  const [transcript, setTranscript] = useState<InterviewTurn[]>([]);
-  // The landing IS the first question, so the conversation starts empty and the hero
-  // holds the opening card until it is answered.
   const [started, setStarted] = useState(false);
+  const [history, setHistory] = useState<Answered[]>([]);
   const [card, setCard] = useState<Card | null>(OPENING_QUESTION);
   const [thinking, setThinking] = useState(false);
   const [plan, setPlan] = useState<ArchitectOutput | null>(null);
+
+  const answers = useMemo<PartialAssessmentAnswers>(
+    () => history.reduce<PartialAssessmentAnswers>((all, step) => ({ ...all, ...step.patch }), {}),
+    [history],
+  );
+
+  const sources = useMemo(() => {
+    const out: Partial<Record<SlotId, "stated" | "inferred">> = {};
+    for (const step of history) {
+      for (const id of step.inferred) out[id] = "inferred";
+      // Stated last, and unconditionally: being asked outranks having been guessed.
+      if (step.stated) out[step.stated] = "stated";
+    }
+    return out;
+  }, [history]);
 
   const slots = useMemo(() => slotsFrom(answers, sources), [answers, sources]);
 
@@ -101,20 +128,13 @@ export function Walkthrough() {
     ...(slots[id].source === "inferred" ? { tentative: true } : {}),
   }));
 
-  const answeredCount = SLOT_IDS.filter((id) => slots[id].filled && slots[id].source !== "inferred").length;
+  const understood = SLOT_IDS.filter((id) => slots[id].filled && slots[id].source !== "inferred").length;
 
-  /**
-   * The timeline: everything asked, plus the one being asked.
-   *
-   * Built from the transcript rather than from the slots, because a question and a slot
-   * are not the same thing. One answer can fill three slots, and a confirm question
-   * fills none.
-   */
   const timeline: TimelineItem[] = [
-    ...transcript.map((turn, i) => ({
+    ...history.map((step, i) => ({
       id: `turn-${i}`,
-      question: turn.question.question,
-      answer: turn.answer,
+      question: step.turn.question.question,
+      answer: step.turn.answer,
       state: "answered" as const,
     })),
     ...(card ? [{ id: "active", question: card.question, state: "active" as const }] : []),
@@ -124,55 +144,77 @@ export function Walkthrough() {
     async (text: string, values?: string[]) => {
       if (!card) return;
 
-      // The slot this card was asking about is STATED, whatever else gets inferred from
-      // the same sentence.
-      const stated = new Set<SlotId>();
-      const next: Record<string, unknown> = { ...answers };
-      if (card.slot) {
-        stated.add(card.slot);
-        next[card.slot] =
-          card.slot === "target_markets"
+      const stated = card.slot;
+      const patch: Record<string, unknown> = {};
+      if (stated) {
+        patch[stated] =
+          stated === "target_markets"
             ? (values ?? []).map((v) => v.toUpperCase())
-            : card.slot === "company_situation"
+            : stated === "company_situation"
               ? (values?.[0] ?? text)
               : text;
       }
 
       const turn: InterviewTurn = { question: card, answer: text };
-      const history = [...transcript, turn];
-      setTranscript(history);
+      const nextAnswers = { ...answers, ...(patch as PartialAssessmentAnswers) };
+
       setCard(null);
       setThinking(true);
-
       await new Promise((r) => setTimeout(r, THINKING_MS));
 
       const result = await interviewer.next({
-        slots: slotsFrom(next as PartialAssessmentAnswers, sources),
-        transcript: history,
-        turnsRemaining: Math.max(0, MAX_INTERVIEW_TURNS - history.length),
+        slots: slotsFrom(nextAnswers, sources),
+        transcript: [...history.map((h) => h.turn), turn],
+        turnsRemaining: Math.max(0, MAX_INTERVIEW_TURNS - history.length - 1),
         locale: "en",
       });
 
-      const merged = mergeExtraction(next as PartialAssessmentAnswers, result.extracted, stated);
-      setAnswers(merged.answers);
-      setSources((s) => {
-        const updated = { ...s };
-        if (card.slot) updated[card.slot] = "stated";
-        for (const id of merged.inferred) updated[id] = "inferred";
-        return updated;
-      });
+      const merged = mergeExtraction(
+        nextAnswers,
+        result.extracted,
+        new Set(stated ? [stated] : []),
+      );
 
+      setHistory((h) => [
+        ...h,
+        {
+          turn,
+          patch: { ...(patch as PartialAssessmentAnswers), ...pick(merged.answers, merged.inferred) },
+          stated,
+          inferred: merged.inferred,
+        },
+      ]);
       setThinking(false);
       setCard(result.next);
     },
-    [answers, card, sources, transcript],
+    [answers, card, history, sources],
+  );
+
+  /**
+   * Go back to an answered question.
+   *
+   * Everything after it is dropped, not merely re-asked: a founder who realises at
+   * question five that they misread question two is correcting the answers that followed
+   * from it, and leaving those in place would build the plan on the version they just
+   * rejected.
+   */
+  const rewind = useCallback(
+    (id: string) => {
+      if (thinking) return;
+      const index = Number.parseInt(id.replace("turn-", ""), 10);
+      const target = history[index];
+      if (!target) return;
+      setPlan(null);
+      setHistory((h) => h.slice(0, index));
+      setCard(target.turn.question);
+    },
+    [history, thinking],
   );
 
   // Every slot filled and no card left: produce the plan.
   useEffect(() => {
-    if (card !== null || thinking || plan !== null || transcript.length === 0) return;
-    const complete = SLOT_IDS.every((id) => slots[id].filled);
-    if (!complete) return;
+    if (card !== null || thinking || plan !== null || history.length === 0) return;
+    if (!SLOT_IDS.every((id) => slots[id].filled)) return;
 
     setThinking(true);
     void (async () => {
@@ -188,13 +230,11 @@ export function Walkthrough() {
       setPlan(run.output);
       setThinking(false);
     })();
-  }, [answers, card, plan, slots, thinking, transcript.length]);
+  }, [answers, card, history.length, plan, slots, thinking]);
 
   function reset() {
     setStarted(false);
-    setAnswers({});
-    setSources({});
-    setTranscript([]);
+    setHistory([]);
     setCard(OPENING_QUESTION);
     setPlan(null);
     setThinking(false);
@@ -234,14 +274,13 @@ export function Walkthrough() {
     );
   }
 
-  const activeIndex = card?.slot ? SLOT_IDS.indexOf(card.slot) : transcript.length;
-  const accent = accentFor(activeIndex);
+  const activeIndex = card?.slot ? SLOT_IDS.indexOf(card.slot) : history.length;
 
   return (
     <ConversationLayout
-      status={`${answeredCount} of ${SLOT_IDS.length} understood`}
+      status={`${understood} of ${SLOT_IDS.length} understood`}
       rail={<WizardRail steps={steps} activeId={card?.slot ?? null} />}
-      timeline={<QuestionTimeline items={timeline} />}
+      timeline={<QuestionTimeline items={timeline} onSelect={rewind} />}
       dock={
         <PromptDock
           onSubmit={(text) => void answer(text)}
@@ -253,11 +292,12 @@ export function Walkthrough() {
       }
     >
       {thinking ? (
-        <Thinking label={transcript.length >= 4 ? "Building your plan" : "Thinking"} />
+        <Thinking label={history.length >= 4 ? "Building your plan" : "Thinking"} />
       ) : card ? (
         <QuestionCard
+          key={`${card.question}-${history.length}`}
           card={card}
-          accent={accent}
+          accent={accentFor(activeIndex)}
           {...(card.slot ? { eyebrow: SLOT_STEPS[card.slot].label } : {})}
           onAnswer={(text, values) => void answer(text, values)}
         />
@@ -266,4 +306,13 @@ export function Walkthrough() {
       )}
     </ConversationLayout>
   );
+}
+
+/** The subset of an object named by a list of keys. */
+function pick(source: PartialAssessmentAnswers, keys: readonly SlotId[]): PartialAssessmentAnswers {
+  const out: Record<string, unknown> = {};
+  for (const key of keys) {
+    if (source[key] !== undefined) out[key] = source[key];
+  }
+  return out as PartialAssessmentAnswers;
 }

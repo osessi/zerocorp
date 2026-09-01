@@ -533,6 +533,15 @@
     animation: zc-underline 500ms var(--ease-out) both;
   }
 
+  /*
+    A connector filling.
+
+    Slower than the interface's other motion on purpose: 600ms. This is the one moment
+    that says "that answer counted", and at 200ms it is over before the eye that just
+    left the option has arrived at the rail. Everything else here stays fast.
+  */
+  --duration-fill: 600ms;
+
 
   /* §10 — motion is honoured, never imposed. */
   @media (prefers-reduced-motion: reduce) {

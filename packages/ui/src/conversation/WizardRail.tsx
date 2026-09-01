@@ -55,11 +55,15 @@ export function WizardRail({
               <>
                 <span className="border-border absolute top-3 left-1/2 w-full border-t border-dashed" aria-hidden="true" />
                 <span
-                  className={cx(
-                    "absolute top-3 left-1/2 h-px transition-[width] duration-modal ease-out",
-                    ACCENT_RULE[accent],
-                  )}
-                  style={{ width: settled ? "100%" : "0%" }}
+                  className={cx("absolute top-3 left-1/2 h-0.5 ease-out", ACCENT_RULE[accent])}
+                  style={{
+                    width: settled ? "100%" : "0%",
+                    // 600ms, not the usual 200. This is the one moment that says "that
+                    // answer counted", and at 200ms it is over before the eye that just
+                    // left the option has reached the rail.
+                    transitionProperty: "width",
+                    transitionDuration: "600ms",
+                  }}
                   aria-hidden="true"
                 />
               </>

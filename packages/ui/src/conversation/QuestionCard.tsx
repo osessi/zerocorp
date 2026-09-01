@@ -103,12 +103,17 @@ function Heading({ card, accent, eyebrow }: { card: Card; accent: AccentIndex; e
       {eyebrow ? <p className={cx("text-overline", ACCENT_TEXT[accent])}>{eyebrow}</p> : null}
       <div className="flex flex-col gap-3">
         <h2 className="text-h2 text-balance">{card.question}</h2>
-        {/* Drawn once, left to right, as the question arrives. A question that replaces
-            the last one in the same position is easy to miss, especially for someone who
-            looked away while the system was thinking. Punctuation, not decoration. */}
+        {/*
+          Drawn once, left to right, as the question arrives.
+
+          Full width rather than a stub. A twelve-unit dash under a two-line heading
+          reads as a bullet someone forgot to finish; a rule the width of the question
+          reads as the question being underlined, which is the thing being said: this is
+          the one you are answering now.
+        */}
         <span
           aria-hidden="true"
-          className={cx("zc-underline h-0.5 w-12 origin-left", ACCENT_RULE[accent])}
+          className={cx("zc-underline h-0.5 w-full origin-left", ACCENT_RULE[accent])}
         />
       </div>
       {card.kind !== "confirm" && card.help ? (

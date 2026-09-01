@@ -66,9 +66,17 @@ export function ConversationLayout({
       ) : null}
 
       <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
+        {/*
+          The timeline is centred, so it sits level with the question rather than pinned
+          to the top of a tall empty column. Two things that belong together should not
+          start at different heights.
+
+          It scrolls once it outgrows the column, which is also when centring stops being
+          right: a list longer than its container would have its beginning hidden.
+        */}
         {timeline ? (
-          <aside className="border-border order-2 shrink-0 overflow-y-auto border-t px-5 py-6 lg:order-1 lg:w-72 lg:border-t-0 lg:border-r lg:px-6 lg:py-8">
-            {timeline}
+          <aside className="border-border order-2 shrink-0 overflow-y-auto border-t px-5 py-6 lg:order-1 lg:flex lg:w-72 lg:items-center lg:border-t-0 lg:border-r lg:px-6 lg:py-8">
+            <div className="w-full">{timeline}</div>
           </aside>
         ) : null}
 
