@@ -211,15 +211,30 @@ export function Button({
 }
 
 /* ── SectionHeader (§21.6) ────────────────────────────────────────────────── */
+/** A quantity carries a tone, and defaults to the accent. Geist Mono, because a count is
+    a number a founder compares against another count (§5). */
+const COUNT_TONE: Record<Tone, string> = {
+  success: "bg-success-subtle border-success text-success-ink",
+  warning: "bg-warning-subtle border-warning text-warning-ink",
+  danger: "bg-destructive-subtle border-destructive text-destructive-ink",
+  info: "bg-info-subtle border-info text-info-ink",
+  processing: "bg-processing-subtle border-processing text-processing-ink",
+  ai: "bg-ai-subtle border-ai text-ai-ink",
+  neutral: "border-border text-muted-foreground",
+};
+
 export function SectionHeader({
   title,
   subtitle,
   count,
+  countTone,
   action,
 }: {
   title: string;
   subtitle?: string;
   count?: number;
+  /** The tone the count reads as. Defaults to the accent, never black. */
+  countTone?: Tone;
   action?: ReactNode;
 }) {
   return (
@@ -227,8 +242,22 @@ export function SectionHeader({
       <div className="flex flex-col gap-1">
         <div className="flex items-center gap-2">
           <h2 className="text-h4">{title}</h2>
+          {/*
+            A quantity is never black. A black chip is the same weight as the heading beside
+            it, so "Recent businesses 7" read as one long title rather than a title and a
+            number. The count is the thing a founder scans for, and it should be findable
+            without reading the words around it.
+
+            Tinted rather than filled: a solid chip at every heading would out-shout the
+            headings themselves once a page carries four of them.
+          */}
           {count !== undefined ? (
-            <span className="bg-foreground text-background text-caption inline-flex size-5 items-center justify-center">
+            <span
+              className={cx(
+                "text-caption inline-flex min-w-5 items-center justify-center border px-1 font-mono",
+                COUNT_TONE[countTone ?? "processing"],
+              )}
+            >
               {count}
             </span>
           ) : null}
@@ -248,6 +277,16 @@ export function PanelLabel({ children }: { children: ReactNode }) {
 /* ── MetricGrid (§21.11) ──────────────────────────────────────────────────────
    Equal cells inside ONE bordered container divided by internal rules — never
    three floating cards.                                                        */
+const METRIC_VALUE: Record<Tone, string> = {
+  success: "text-success-ink",
+  warning: "text-warning-ink",
+  danger: "text-destructive-ink",
+  info: "text-info-ink",
+  processing: "text-processing-ink",
+  ai: "text-ai-ink",
+  neutral: "text-foreground",
+};
+
 const METRIC_WASH: Record<Tone, string> = {
   success: "bg-success-wash",
   warning: "bg-warning-wash",
@@ -310,7 +349,10 @@ export function MetricGrid({
               ) : null}
               {m.label}
             </span>
-            <span className="text-h2 text-foreground font-mono">
+            {/* The value takes the metric's tone. It was --foreground at every card, so
+                three different measurements arrived in the same ink and the tinted tile
+                beside them was doing all the work alone. */}
+            <span className={cx("text-h2 font-mono", m.tone ? METRIC_VALUE[m.tone] : "text-foreground")}>
               {m.value}
               {m.sub ? <span className="text-body-sm text-muted-foreground ml-1 font-sans">{m.sub}</span> : null}
             </span>

@@ -305,6 +305,25 @@ The percentage beside the bar takes the matching ink, so the number and the bar 
 the figure stays legible without the hue. One rule, in one place: a rule copied into two
 files is a rule that will disagree with itself.
 
+#### A quantity is never black
+
+Anywhere a number means a count, a total or an amount, it carries a tone. It was
+`--foreground` or a filled black chip, which gave it exactly the weight of the heading
+beside it: "Recent businesses **7**" read as one long title rather than a title and a
+number.
+
+```text
+section count   a tinted chip, Geist Mono, tone says what is counted
+metric value    the metric's own ink, not --foreground
+money           --success-ink, the same ink its column heading wears
+```
+
+Tinted rather than filled. A solid chip at every heading would out-shout the headings
+themselves once a page carries four of them.
+
+The count is the thing a founder scans for. It should be findable without reading the
+words around it.
+
 #### The record vocabulary is shared, or it is worthless
 
 `STATE_TONE`, `PLAN_TONE` and `FIELD_INK` live in one module and every surface reads them.

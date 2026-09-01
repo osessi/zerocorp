@@ -143,7 +143,7 @@ export default function BusinessScreen() {
 
           <div className="flex flex-col gap-8 py-6">
             <section className="flex flex-col gap-4">
-              <SectionHeader title="Open tasks" action={<Button variant="primary"><PlusIcon size={16} /> Create task</Button>} />
+              <SectionHeader title="Open tasks" count={TASKS.length} countTone="warning" action={<Button variant="primary"><PlusIcon size={16} /> Create task</Button>} />
               <div className="flex flex-col gap-4">
                 {TASKS.map((t) => {
                   /*

@@ -136,7 +136,10 @@ export default function BusinessesScreen() {
                       {b.plan}
                     </span>
                   </td>
-                  <td className="text-body-sm text-foreground px-4 py-4 font-mono">{money(b.mrrCents)}</td>
+                  {/* Money reads green, the same ink its column heading wears. It was --foreground, so
+                      the one number a founder compares was the same weight as the business name
+                      beside it. */}
+                  <td className="text-body-sm text-success-ink px-4 py-4 font-mono">{money(b.mrrCents)}</td>
                   <td className="px-4 py-4"><AvatarStack people={b.owners} /></td>
                   <td className="px-4 py-4"><Progress value={b.progress} /></td>
                   <td className="px-4 py-4"><StatusBadge tone={FORMATION_TONE[b.formation]}>{FORMATION_LABEL[b.formation]}</StatusBadge></td>

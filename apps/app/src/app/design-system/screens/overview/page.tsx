@@ -87,7 +87,7 @@ export default function OverviewScreen() {
 
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_20rem]">
           <section className="flex flex-col gap-4">
-            <SectionHeader title="Recent businesses" count={BUSINESSES.length} action={<Button>View all</Button>} />
+            <SectionHeader title="Recent businesses" count={BUSINESSES.length} countTone="info" action={<Button>View all</Button>} />
             <div className="border-border border">
               {BUSINESSES.slice(0, 5).map((b, i) => (
                 <div
@@ -99,7 +99,7 @@ export default function OverviewScreen() {
                     <span className="text-body-sm truncate">{b.name}</span>
                     <span className="text-caption text-muted-foreground truncate">{b.state} · {b.plan}</span>
                   </div>
-                  <span className="text-body-sm text-foreground hidden font-mono sm:block">{money(b.mrrCents)}</span>
+                  <span className="text-body-sm text-success-ink hidden font-mono sm:block">{money(b.mrrCents)}</span>
                   <StatusBadge tone={FORMATION_TONE[b.formation]}>{FORMATION_LABEL[b.formation]}</StatusBadge>
                 </div>
               ))}
@@ -107,7 +107,7 @@ export default function OverviewScreen() {
           </section>
 
           <section className="flex flex-col gap-4">
-            <SectionHeader title="Activity" action={<FileTextIcon size={16} className="text-muted-foreground" />} />
+            <SectionHeader title="Activity" count={ACTIVITY.length} countTone="ai" action={<FileTextIcon size={16} className="text-muted-foreground" />} />
             <ActivityPanel events={ACTIVITY} />
           </section>
         </div>

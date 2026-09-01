@@ -189,12 +189,12 @@ export default function DrawerScreen() {
               </div>
 
               <div className="border-border flex flex-col gap-4 border-t pt-6">
-                <SectionHeader title="Latest activity" count={ACTIVITY.length} action={<Button><ClockCounterClockwiseIcon size={16} /> View all</Button>} />
+                <SectionHeader title="Latest activity" count={ACTIVITY.length} countTone="ai" action={<Button><ClockCounterClockwiseIcon size={16} /> View all</Button>} />
                 <ActivityPanel events={ACTIVITY.slice(0, 3)} />
               </div>
 
               <div className="border-border flex flex-col gap-4 border-t pt-6">
-                <SectionHeader title="Notes" count={2} action={<Button><PlusIcon size={16} /> Add note</Button>} />
+                <SectionHeader title="Notes" count={2} countTone="warning" action={<Button><PlusIcon size={16} /> Add note</Button>} />
                 {/*
                   A note is somebody's hand-written aside in a screen otherwise full of
                   machine-generated fact, so it gets the wash rather than blending in.
