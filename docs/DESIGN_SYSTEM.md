@@ -172,6 +172,82 @@ ink on light red, so the fill lightens to raise contrast. 6.47:1 light, 7.16:1 d
 > means the two roles are visually indistinguishable. If a hover state ever needs to read
 > against a muted surface, `--accent` must diverge. Recorded, not changed.
 
+### 4.5 Semantic surfaces and the teal ramp — VALIDATED 2026-08-31
+
+Direction **B**, chosen after comparing three. The dashboard read monotone beside the
+visual references, and counting said why:
+
+```text
+neutral token uses     169
+chromatic token uses    21
+colour reaching a SURFACE   1     (`bg-success`, once, across every screen)
+```
+
+Everywhere else colour lived in a 1px border and 12–16px of text — **1–3% of a
+component's pixels**. The palette was not too small; it had nowhere to land. §24.10 had
+already asked for a subtle scale.
+
+Seeing the reference corrected the diagnosis twice, and both corrections shaped this:
+
+- **The reference's chrome is MORE neutral than ours**, with black primary buttons and
+  colour reserved almost entirely for status and data. The answer was a stricter
+  monochrome frame with louder status chips, not more colour everywhere.
+- **Its chips are bright; ours were dark and muddy.** §4.3 tuned the five status colours
+  to 4.83–5.36:1 *as text on white*, and that constraint forces desaturated hues. On a
+  coloured tint the same floor is reachable with a far brighter colour, because the tint
+  carries part of the contrast.
+
+#### Three roles per hue
+
+| Role | Token | Job |
+|---|---|---|
+| colour | `--{tone}` | §4.3, **unchanged**. Borders and solid fills |
+| surface | `--{tone}-subtle` | the tint |
+| ink | `--{tone}-ink` | text **on** that tint |
+
+The third role is load-bearing, not tidiness. Measured at the 100-level tint, `--info`
+reached **4.24** and `--destructive` **3.95** — both under 4.5 — while their borders
+passed comfortably. `-ink` is one step darker and measures **5.30–6.80:1**.
+
+> Splitting the roles is what makes a bright tint safe. Without it the choice is a dull
+> tint or a failing label.
+
+Light tints are **100-level, not 50**: a 50 tint reads as slightly-off-white. Dark tints
+are dark washes of the same hue, each ≥1.1 against the page — a **perceptibility** floor,
+not an accessibility one, because a tint carries no meaning on its own. `--ai-subtle` was
+`#1A1030` and measured 1.09; `#211640` gives 1.18.
+
+`neutral` gets no tint. It is the absence of a status, and a sixth tint for "nothing yet"
+would give it more presence than the five that mean something.
+
+#### The teal ramp
+
+`--teal-50 · 100 · 200 · 500 · 700 · 900`, **theme-stable**: 50 is always the lightest and
+900 the darkest, so the numbers never lie. Two semantic aliases flip instead, and those
+are what components use:
+
+```text
+--accent-subtle   teal-50  light  ·  teal-900  dark
+--accent-strong   teal-900 light  ·  teal-200  dark
+```
+
+#### One added hue — `--ai`
+
+`#6D28D9` light, `#A78BFA` dark. It has a job, not a mood: agent output was borrowing
+`--processing`, which **is** the brand teal, so *"an agent is working"* and *"ZeroCorp"*
+were the same colour — in a product whose destination is autopilot.
+
+#### What was rejected
+
+Direction **C** would have added amber for "waiting on you" and a six-series chart ramp.
+Deferred: chart tokens are §24.14 and deserve their own review, and bundling them here
+would have hidden them.
+
+> One thing no palette supplies: the reference is full of avatar photographs. Faces bring
+> colour that tokens cannot. Worth knowing before concluding the palette is at fault.
+
+---
+
 ### 4.2 Dark mode — PARTIALLY VALIDATED
 
 | Token | Value | Status |
@@ -2413,7 +2489,7 @@ Also resolved 2026-08-31: the animated focus ring — `COLOR_TRANSITION` replace
 | 7 | **`dashboard columns` and `editor widths`** (§12) | Dashboard grid, block editor |
 | 8 | **The twelve PROPOSED dashboard patterns** (§21.2–21.13) | Every new screen. None may be built until approved |
 | 9 | **Sidebar collapsed state** (§21.3) — width and contents; no reference shows it | The collapse control |
-| 10 | **Status badge tints** (§21.0) — the reference fills badges with pastels; we have five solid colours and no subtle scale | `StatusBadge`, table stage cells |
+| 10 | ~~Status badge tints~~ **RESOLVED 2026-08-31** — §4.5, direction B: three roles per hue, 100-level tints, measured | — |
 | 11 | **Responsive behaviour of the dashboard patterns** (§21.16) — no narrow reference exists | Sidebar, split detail, tables and drawer below `lg` |
 | 12 | **Table row height, column widths, hover and click target** (§21.8) — engine now decided (TanStack), these are still open. The exploration pass measured sort buttons at 11px high, under the 24×24 of WCAG 2.5.8 | `DataTableLayout` |
 | 13 | ~~Drawer width~~ **RESOLVED 2026-08-31** — `min(40vw, 640px)` desktop, `100vw` mobile. Motion still open | `RightDrawer` |
@@ -2422,6 +2498,7 @@ Also resolved 2026-08-31: the animated focus ring — `COLOR_TRANSITION` replace
 | 18 | **A scrollable container needs `contain-paint`** — without it a wide `<table>` propagated its overflow past the scroll container to the root and scrolled the whole page 345px at 375px. Should this be a CI rule, like `outline-none`? | Every `overflow-x-auto` in the product |
 | 15 | **`--primary` has no dark value** — teal TEXT measures 3.69:1 on `#0A0A0A`, below the 4.5:1 floor. Fine as a fill or a border. `--processing` already carries a lighter dark teal, but it is a status token | Any teal text or teal link in dark. `Button` tertiary works around it today |
 | 16 | **`--primary-hover` and `--destructive-hover`** (§4.1) — PROPOSED, deliberately not validated yet | Any future filled surface with a hover state |
+| 19 | **Should the primary Button be black rather than teal?** The reference reserves colour entirely for status and data, and fills its primary actions with black. Not prototyped — it is more radical than any of the three directions | `Button`, and the product's whole sense of where the brand lives |
 
 ---
 

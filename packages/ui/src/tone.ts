@@ -46,19 +46,46 @@ export const TONE_GLYPH = {
 } as const satisfies Record<StatusTone, unknown>;
 
 /**
- * Tone as ink.
+ * Tone as ink, ON A TINTED SURFACE.
+ *
+ * NOT the §4.3 colour. That one is tuned as text on WHITE, which on a coloured tint falls
+ * short: measured at the 100-level tint, --info reached 4.24 and --destructive 3.95, both
+ * under 4.5, while their borders passed comfortably. The `-ink` step is one darker and
+ * measures 5.30–6.80:1. §4.5.
  *
  * `neutral` takes --muted-foreground: §4.3 gives colours to five of the six, and "no
- * status yet" is genuinely the absence of one rather than a sixth colour competing with
- * the five.
+ * status yet" is genuinely the absence of one rather than a sixth colour competing.
  */
 export const TONE_INK: Record<StatusTone, string> = {
-  success: "text-success",
-  processing: "text-processing",
-  warning: "text-warning",
-  danger: "text-destructive",
-  info: "text-info",
+  success: "text-success-ink",
+  processing: "text-processing-ink",
+  warning: "text-warning-ink",
+  danger: "text-destructive-ink",
+  info: "text-info-ink",
   neutral: "text-muted-foreground",
+};
+
+/**
+ * Tone as a surface.
+ *
+ * The point of direction B. Across the whole dashboard, colour reached a surface exactly
+ * once — everywhere else it lived in a 1px border and 12–16px of text, 1–3% of a
+ * component's pixels. A palette with nowhere to land reads as no palette.
+ *
+ * In light these are 100-level tints, not 50: a 50 tint reads as slightly-off-white. In
+ * dark they are dark washes of the same hue. Each is ≥1.1 against the page — a
+ * perceptibility floor, not an accessibility one, because a tint carries no meaning alone.
+ *
+ * `neutral` stays --muted. It is the absence of a status, and inventing a sixth tint for
+ * "nothing yet" would give it more presence than the five that mean something.
+ */
+export const TONE_SURFACE: Record<StatusTone, string> = {
+  success: "bg-success-subtle",
+  processing: "bg-processing-subtle",
+  warning: "bg-warning-subtle",
+  danger: "bg-destructive-subtle",
+  info: "bg-info-subtle",
+  neutral: "bg-muted",
 };
 
 /**

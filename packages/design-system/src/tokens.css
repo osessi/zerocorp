@@ -71,6 +71,59 @@
      dark ink on light red, so the fill lightens to raise contrast. 6.47:1 / 7.16:1. */
   --primary-hover: #005e57;
   --destructive-hover: #b91c1c;
+
+  /* -------------------------------------------------------------------------
+     Direction B — tinted surfaces, teal ramp, one AI hue. §4.5, decided 2026-08-31.
+
+     The dashboard read monotone, and counting said why: colour reached a SURFACE
+     exactly once across every screen. Everywhere else it was a 1px border or 12–16px
+     of text — 1–3% of a component's pixels. The palette was not too small; it had
+     nowhere to land. §24.10 had already asked for a subtle scale.
+     ------------------------------------------------------------------------- */
+
+  /* Each status hue now carries THREE roles, not one.
+
+       --{tone}          §4.3, unchanged. Borders and solid fills.
+       --{tone}-subtle   the surface.
+       --{tone}-ink      text ON that surface.
+
+     The third role is load-bearing, not tidiness. §4.3 tuned the status colours as text
+     on WHITE, which forces dark, desaturated hues. On a coloured tint they need one step
+     darker still: measured at the 100-level tint, --info landed at 4.24 and --destructive
+     at 3.95, both under the 4.5 floor, while their borders passed. Splitting the roles is
+     what makes a bright tint safe — without it the choice is a dull tint or a failing
+     label. Measured 5.30–6.80:1. */
+  --success-subtle: #dcfce7;
+  --success-ink: #166534;
+  --warning-subtle: #fef3c7;
+  --warning-ink: #92400e;
+  --info-subtle: #dbeafe;
+  --info-ink: #1d4ed8;
+  --processing-subtle: #ccfbf1;
+  --processing-ink: #005e57;
+  --destructive-subtle: #fee2e2;
+  --destructive-ink: #b91c1c;
+
+  /* The teal ramp. Theme-STABLE: 50 is always the lightest teal and 900 the darkest, so
+     the numbers never lie. The semantic aliases below flip instead. */
+  --teal-50: #f0fdfa;
+  --teal-100: #ccfbf1;
+  --teal-200: #99f6e4;
+  --teal-500: #14b8a6;
+  --teal-700: #00786f;
+  --teal-900: #004b45;
+
+  /* Semantic aliases — these are what components use. They flip; the ramp does not. */
+  --accent-subtle: var(--teal-50);
+  --accent-strong: var(--teal-900);
+
+  /* One added hue, with a job: "a machine produced this".
+     Agent output currently borrows --processing, which is the brand teal — so "an agent
+     is working" and "ZeroCorp" are the same colour, in a product whose destination is
+     autopilot. This separates them. */
+  --ai: #6d28d9;
+  --ai-subtle: #ede9fe;
+  --ai-ink: #6d28d9;
 }
 
 /* ---------------------------------------------------------------------------
@@ -111,6 +164,30 @@
 
   /* --primary-hover is deliberately NOT redefined here. See the light block. */
   --destructive-hover: #f87171; /* #0A0A0A on it: 7.16:1 */
+
+  /* In dark a tint is a dark WASH, not a pale one — the same hue pulled toward the page.
+     Each is measured ≥1.1 against #0A0A0A, which is a perceptibility floor rather than an
+     accessibility one: a tint carries no meaning on its own, so it only has to be seen.
+     --ai-subtle was #1A1030 and measured 1.09; #211640 gives 1.18. */
+  --success-subtle: #0c1f14;
+  --warning-subtle: #241703;
+  --info-subtle: #0d1a33;
+  --processing-subtle: #082220;
+  --destructive-subtle: #2a0e0e;
+  --ai-subtle: #211640;
+
+  /* On a dark wash the bright §4.2 status colour IS the right ink. 4.71–8.95:1. */
+  --success-ink: #22c55e;
+  --warning-ink: #f59e0b;
+  --info-ink: #3b82f6;
+  --processing-ink: #2dd4bf;
+  --destructive-ink: #ef4444;
+  --ai: #a78bfa;
+  --ai-ink: #a78bfa;
+
+  /* The ramp itself does not flip — only these two aliases do. */
+  --accent-subtle: var(--teal-900);
+  --accent-strong: var(--teal-200);
 }
 
 /* ---------------------------------------------------------------------------
@@ -144,6 +221,27 @@
   --color-destructive-foreground: var(--destructive-foreground);
   --color-primary-hover: var(--primary-hover);
   --color-destructive-hover: var(--destructive-hover);
+  --color-success-subtle: var(--success-subtle);
+  --color-success-ink: var(--success-ink);
+  --color-warning-subtle: var(--warning-subtle);
+  --color-warning-ink: var(--warning-ink);
+  --color-info-subtle: var(--info-subtle);
+  --color-info-ink: var(--info-ink);
+  --color-processing-subtle: var(--processing-subtle);
+  --color-processing-ink: var(--processing-ink);
+  --color-destructive-subtle: var(--destructive-subtle);
+  --color-destructive-ink: var(--destructive-ink);
+  --color-teal-50: var(--teal-50);
+  --color-teal-100: var(--teal-100);
+  --color-teal-200: var(--teal-200);
+  --color-teal-500: var(--teal-500);
+  --color-teal-700: var(--teal-700);
+  --color-teal-900: var(--teal-900);
+  --color-accent-subtle: var(--accent-subtle);
+  --color-accent-strong: var(--accent-strong);
+  --color-ai: var(--ai);
+  --color-ai-subtle: var(--ai-subtle);
+  --color-ai-ink: var(--ai-ink);
 }
 
 @theme {

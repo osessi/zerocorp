@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { cx } from "../field/control-styles";
-import { TONE_EDGE, TONE_GLYPH, TONE_INK, isAssertive, type StatusTone } from "../tone";
+import { TONE_EDGE, TONE_GLYPH, TONE_INK, TONE_SURFACE, isAssertive, type StatusTone } from "../tone";
 
 /**
  * Alert — status in the flow of the page.
@@ -32,7 +32,12 @@ export function Alert({ tone, title, children, action, className }: AlertProps) 
         message abandon whatever a screen reader was mid-sentence on.
       */
       role={isAssertive(tone) ? "alert" : "status"}
-      className={cx("border-border flex gap-3 border border-l-2 p-3", TONE_EDGE[tone], className)}
+      className={cx(
+        "border-border flex gap-3 border border-l-2 p-3",
+        TONE_EDGE[tone],
+        TONE_SURFACE[tone],
+        className,
+      )}
     >
       <Glyph
         size={20}

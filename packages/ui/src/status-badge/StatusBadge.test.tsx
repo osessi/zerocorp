@@ -13,11 +13,33 @@ describe("StatusBadge — one component, two emphases", () => {
     expect(screen.getByText("Active")).toBeInTheDocument();
   });
 
-  it("defaults to the outlined emphasis", () => {
+  it("defaults to the outlined emphasis, tinted but not filled", () => {
+    // Direction B, 2026-08-31. The default carries its own tint now — colour reached a
+    // surface exactly once across the whole dashboard before this, which is why it read
+    // monotone. `bg-success-subtle` is the tint; `bg-success` remains the solid fill and
+    // belongs to `prominent` alone, or the two emphases stop meaning different things.
     render(<StatusBadge tone="success">Active</StatusBadge>);
     const badge = screen.getByText("Active").closest("span");
     expect(badge?.className).toContain("border-success");
-    expect(badge?.className).not.toContain("bg-success");
+    expect(badge?.className).toContain("bg-success-subtle");
+    expect(badge?.className).not.toMatch(/bg-success(?![-\w])/);
+  });
+
+  it("inks the default with the -ink step, never the §4.3 colour", () => {
+    // §4.3 is tuned as text on WHITE. On a coloured tint it falls short: measured, --info
+    // reached 4.24 and --destructive 3.95, both under 4.5, while their borders passed.
+    // The -ink step is one darker and measures 5.30–6.80:1. Splitting the roles is what
+    // makes a bright tint safe.
+    for (const [tone, ink] of [
+      ["success", "text-success-ink"],
+      ["info", "text-info-ink"],
+      ["danger", "text-destructive-ink"],
+    ] as const) {
+      cleanup();
+      render(<StatusBadge tone={tone}>Status</StatusBadge>);
+      const badge = screen.getByText("Status").closest("span");
+      expect(badge?.className).toContain(ink);
+    }
   });
 
   it("fills the container when emphasis is prominent", () => {

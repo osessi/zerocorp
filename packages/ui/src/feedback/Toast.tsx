@@ -6,7 +6,7 @@ import type { ReactNode } from "react";
 import { IconButton } from "../button/IconButton";
 import { cx } from "../field/control-styles";
 import { COLOR_TRANSITION } from "../motion";
-import { TONE_EDGE, TONE_GLYPH, TONE_INK, isAssertive, type StatusTone } from "../tone";
+import { TONE_EDGE, TONE_GLYPH, TONE_INK, TONE_SURFACE, isAssertive, type StatusTone } from "../tone";
 
 /**
  * Toast — transient status, bottom right.
@@ -52,8 +52,9 @@ function ToastList() {
             */
             role={isAssertive(tone) ? "alert" : "status"}
             className={cx(
-              "bg-surface-elevated border-input shadow-floating flex w-80 max-w-[calc(100vw-2rem)] gap-3 border border-l-2 p-3",
+              "border-input shadow-floating flex w-80 max-w-[calc(100vw-2rem)] gap-3 border border-l-2 p-3",
               TONE_EDGE[tone],
+              TONE_SURFACE[tone],
               COLOR_TRANSITION,
               "transition-[opacity,transform] duration-emphasis ease-out",
               "data-starting-style:opacity-0 data-ending-style:opacity-0",

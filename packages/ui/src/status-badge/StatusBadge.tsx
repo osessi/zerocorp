@@ -50,7 +50,11 @@ export interface StatusBadgeProps {
 // The glyph map lives in ../tone.ts — StatusBadge, Alert and Toast all read it.
 
 /**
- * Outlined. Border and label both take the status colour.
+ * Outlined, and now filled with its own tint — direction B, §4.5.
+ *
+ * It was border + label only, which is why the dashboard read monotone: colour touched a
+ * surface exactly once across every screen. The border keeps the §4.3 colour; the label
+ * moves to the darker `-ink` step, which is what makes a bright tint safe.
  *
  * `neutral` uses --muted-foreground for its border, NOT --border. --border measures
  * 1.26:1 in light and 1.31:1 in dark, the same WCAG 1.4.11 failure §4.4 fixed for form
@@ -58,12 +62,12 @@ export interface StatusBadgeProps {
  * 7.85:1, and makes neutral consistent with the other five, where border == label.
  */
 const OUTLINE: Record<StatusTone, string> = {
-  success: "text-success border-success",
-  processing: "text-processing border-processing",
-  warning: "text-warning border-warning",
-  danger: "text-destructive border-destructive",
-  info: "text-info border-info",
-  neutral: "text-muted-foreground border-muted-foreground",
+  success: "bg-success-subtle text-success-ink border-success",
+  processing: "bg-processing-subtle text-processing-ink border-processing",
+  warning: "bg-warning-subtle text-warning-ink border-warning",
+  danger: "bg-destructive-subtle text-destructive-ink border-destructive",
+  info: "bg-info-subtle text-info-ink border-info",
+  neutral: "bg-muted text-muted-foreground border-muted-foreground",
 };
 
 /**

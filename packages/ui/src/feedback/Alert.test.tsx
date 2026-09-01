@@ -69,7 +69,7 @@ describe("Alert — colour is never the only carrier", () => {
 });
 
 describe("Alert — the body is not tinted", () => {
-  it("colours the title but leaves the body --foreground", () => {
+  it("inks the title with the -ink step, so it survives its own tint", () => {
     // A whole paragraph in a status colour is harder to read and adds nothing — the same
     // finding as the Select label, where teal failed as text and passed as a border at
     // the identical 3.18:1.
@@ -78,16 +78,21 @@ describe("Alert — the body is not tinted", () => {
         Northwind Studio LLC must file by 1 March.
       </Alert>,
     );
-    expect(screen.getByText("Renewal due").className).toContain("text-warning");
+    expect(screen.getByText("Renewal due").className).toContain("text-warning-ink");
     expect(screen.getByText(/Northwind Studio LLC must file/).className).toContain("text-foreground");
   });
 
-  it("uses a left rule, never a tinted fill", () => {
-    // There is no tint scale in the system, and a tinted panel changes the background
-    // every piece of text inside it sits on.
+  it("carries both a left rule and its own tint", () => {
+    // This test used to assert the opposite, on the grounds that there was no tint scale
+    // and that a tinted panel changes the ground every piece of text inside it sits on.
+    // Direction B answered both: the scale exists (§4.5), and the -ink role handles the
+    // changed ground. Reversed 2026-08-31 by decision, not by drift.
     const { container } = render(<Alert tone="info" title="Note" />);
     const cls = (container.firstChild as HTMLElement).className;
     expect(cls).toContain("border-l-info");
-    expect(cls).not.toContain("bg-info");
+    expect(cls).toContain("bg-info-subtle");
+    // The solid fill still belongs to nothing on an Alert — a filled panel would out-shout
+    // the page it is reporting on.
+    expect(cls).not.toMatch(/bg-info(?![-\w])/);
   });
 });
