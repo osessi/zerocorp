@@ -1,40 +1,35 @@
 import type { ReactNode } from "react";
-import { cx } from "../cx";
 
 /**
  * ConversationLayout — the frame for the adaptive assessment (D18).
  *
  * ```text
  * ┌──────────────────────────────────────────────────────────┐
- * │  brand                                        3 of 5     │  h-14
- * ├──────────────────────────────────────────────────────────┤
- * │  ▪────▪────◈┈┈┈○┈┈┈┈○   the rail, validating step by step │  h-20
+ * │  brand                                   3 of 5 understood│  h-14, full width
  * ├────────────────┬─────────────────────────────────────────┤
- * │  timeline      │  the one question being asked           │
- * │  of what has   │                                         │
- * │  been asked    │                                         │
+ * │  timeline      │   ▪───▪───◈┈┈○┈┈┈○   the rail            │
+ * │  of what has   ├─────────────────────────────────────────┤
+ * │  been asked    │   the one question being asked           │
  * │                ├─────────────────────────────────────────┤
- * │  w-72          │  [ dock ]                               │
+ * │  w-72          │   [ dock ]                               │
  * └────────────────┴─────────────────────────────────────────┘
  * ```
  *
- * Three zones because they answer three different questions: what is still needed
- * (top), what has been said (left), and what is being asked right now (centre). A
- * single column has to interleave all three, and the one that matters ends up
- * competing with a history nobody is reading.
+ * The rail lives INSIDE the content column, not across the whole window.
  *
- * The rail is not a progress bar. A bar claims to know how far through you are, and
- * this interview may end at turn three or turn eight. The rail says something true
- * instead: here are the five things we need, and three are settled.
+ * Centring it on the viewport put it visibly off-centre from the question, because the
+ * sidebar takes 288px out of one side and nothing out of the other. Two things that
+ * belong to the same column have to be centred on that column; centring them on
+ * different things is what makes a layout look almost right and slightly wrong.
  *
- * Below `lg` the timeline moves under the question, because a 288px rail on a 390px
- * screen leaves nothing for the question itself.
+ * The rail and the question share one max-width for the same reason: a step marker
+ * should sit over the content it is about.
  */
 export interface ConversationLayoutProps {
   brand?: string;
   /** Right of the brand. A count, not a percentage. */
   status?: ReactNode;
-  /** The WizardRail. */
+  /** The WizardRail. Rendered above the question, inside the content column. */
   rail?: ReactNode;
   /** The QuestionTimeline. */
   timeline?: ReactNode;
@@ -59,35 +54,32 @@ export function ConversationLayout({
         {status ? <span className="text-body-sm text-muted-foreground">{status}</span> : null}
       </header>
 
-      {rail ? (
-        <div className="border-border shrink-0 border-b px-5 py-5 sm:px-8">
-          <div className="mx-auto w-full max-w-5xl">{rail}</div>
-        </div>
-      ) : null}
-
       <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
         {/*
-          The timeline is centred, so it sits level with the question rather than pinned
-          to the top of a tall empty column. Two things that belong together should not
-          start at different heights.
-
-          It scrolls once it outgrows the column, which is also when centring stops being
-          right: a list longer than its container would have its beginning hidden.
+          The timeline scrolls independently and starts at the top. Centring it made it
+          drift down the column as answers were added, so the same item sat at a
+          different height on every turn.
         */}
         {timeline ? (
-          <aside className="border-border order-2 shrink-0 overflow-y-auto border-t px-5 py-6 lg:order-1 lg:flex lg:w-72 lg:items-center lg:border-t-0 lg:border-r lg:px-6 lg:py-8">
-            <div className="w-full">{timeline}</div>
+          <aside className="border-border order-2 shrink-0 overflow-y-auto border-t px-5 py-6 lg:order-1 lg:w-72 lg:border-t-0 lg:border-r lg:px-6 lg:py-8">
+            {timeline}
           </aside>
         ) : null}
 
         <div className="order-1 flex min-h-0 min-w-0 flex-1 flex-col lg:order-2">
-          <main className="flex min-h-0 flex-1 items-start justify-center overflow-y-auto px-5 py-10 sm:px-8 lg:items-center lg:py-12">
-            <div className="w-full max-w-xl">{children}</div>
+          {rail ? (
+            <div className="border-border shrink-0 border-b px-5 py-5 sm:px-8">
+              <div className="mx-auto w-full max-w-2xl">{rail}</div>
+            </div>
+          ) : null}
+
+          <main className="flex min-h-0 flex-1 items-start justify-center overflow-y-auto px-5 py-10 sm:px-8 lg:py-14">
+            <div className="w-full max-w-2xl">{children}</div>
           </main>
 
           {dock ? (
-            <div className={cx("border-border shrink-0 border-t px-5 py-4 sm:px-8")}>
-              <div className="mx-auto w-full max-w-xl">{dock}</div>
+            <div className="border-border shrink-0 border-t px-5 py-4 sm:px-8">
+              <div className="mx-auto w-full max-w-2xl">{dock}</div>
             </div>
           ) : null}
         </div>

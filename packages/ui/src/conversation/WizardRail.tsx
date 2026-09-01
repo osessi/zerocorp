@@ -18,6 +18,9 @@ import { ACCENT_EDGE, ACCENT_FILL, ACCENT_RULE, ACCENT_TEXT, ACCENT_TINT, accent
  * Nothing on this rail loops. The tint fades in once when a step becomes active and then
  * holds: a marker that keeps pulsing sits in the corner of the eye for as long as the
  * visitor is composing an answer, which is the whole time.
+ *
+ * An answered step is a button. The rail is the clearest map of the interview on the
+ * screen, and a map you cannot navigate from is a decoration.
  */
 export interface WizardStep {
   readonly id: string;
@@ -32,10 +35,13 @@ export interface WizardStep {
 export function WizardRail({
   steps,
   activeId,
+  onSelect,
   className,
 }: {
   steps: readonly WizardStep[];
   activeId?: string | null;
+  /** Given, an answered step becomes a button that jumps back to its question. */
+  onSelect?: (id: string) => void;
   className?: string;
 }) {
   return (
@@ -46,6 +52,13 @@ export function WizardRail({
         const settled = step.done && !step.tentative;
         const Icon = step.icon;
         const last = i === steps.length - 1;
+
+        const clickable = onSelect !== undefined && step.done && step.id !== activeId;
+
+        // A button when it can be revisited, a plain span otherwise. Rendering a
+        // disabled button for an unreachable step puts it in the tab order and then
+        // refuses to do anything, which is worse than not being focusable at all.
+        const Marker = clickable ? "button" : "span";
 
         return (
           <li key={step.id} className="relative flex min-w-0 flex-1 flex-col items-center gap-2.5">
@@ -69,7 +82,19 @@ export function WizardRail({
               </>
             ) : null}
 
-            <span className="bg-background relative z-10 px-1">
+            <Marker
+              {...(clickable
+                ? {
+                    type: "button" as const,
+                    onClick: () => onSelect(step.id),
+                    "aria-label": `Go back to: ${step.label}`,
+                  }
+                : {})}
+              className={cx(
+                "bg-background relative z-10 flex flex-col items-center gap-2.5 px-1",
+                clickable && "cursor-pointer focus-visible:outline-ring focus-visible:outline-2 focus-visible:outline-offset-2",
+              )}
+            >
               <span
                 className={cx(
                   "relative flex size-6 items-center justify-center border",
@@ -95,6 +120,7 @@ export function WizardRail({
                       : step.tentative
                         ? cx(ACCENT_EDGE[accent], ACCENT_TEXT[accent], "bg-background")
                         : "border-border text-muted-foreground bg-background",
+                  clickable && "group-hover/step:brightness-110",
                 )}
               >
                 {settled ? (
@@ -107,20 +133,20 @@ export function WizardRail({
                   </span>
                 )}
               </span>
-            </span>
 
-            <span
-              className={cx(
-                "text-caption w-full truncate px-1 text-center transition-[color] duration-emphasis ease-out",
-                settled ? ACCENT_TEXT[accent] : active ? cx(ACCENT_TEXT[accent], "font-medium") : "text-muted-foreground",
-              )}
-            >
-              {step.label}
-            </span>
+              <span
+                className={cx(
+                  "text-caption w-full truncate text-center transition-[color] duration-emphasis ease-out",
+                  settled ? ACCENT_TEXT[accent] : active ? cx(ACCENT_TEXT[accent], "font-medium") : "text-muted-foreground",
+                )}
+              >
+                {step.label}
+              </span>
 
-            <span className="sr-only">
-              {settled ? "done" : active ? "current step" : step.tentative ? "assumed, not confirmed" : "not yet"}
-            </span>
+              <span className="sr-only">
+                {settled ? "done" : active ? "current step" : step.tentative ? "assumed, not confirmed" : "not yet"}
+              </span>
+            </Marker>
           </li>
         );
       })}

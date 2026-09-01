@@ -123,6 +123,7 @@ export function Gallery() {
         note="Not a progress bar. A bar claims to know how far through you are; this interview may end at turn three or turn eight. The rail says something true instead: five things are needed, two are settled. Each step carries one of the five chart hues, because the status tones already mean something and Markets should not inherit the colour of an alert."
       >
         <WizardRail
+          onSelect={record}
           steps={[
             { id: "a", label: "Business", done: true, icon: BriefcaseIcon },
             { id: "b", label: "Situation", done: true, icon: MapPinIcon },
@@ -142,9 +143,9 @@ export function Gallery() {
           <QuestionTimeline
             onSelect={record}
             items={[
-              { id: "1", question: "What are you building?", answer: "Brand identities for early-stage software companies.", state: "answered" },
-              { id: "2", question: "Where are you today?", answer: "Three clients, invoiced personally, no company.", state: "answered" },
-              { id: "3", question: "Do you already have a company?", state: "active" },
+              { id: "1", question: "What are you building?", answer: "Brand identities for early-stage software companies.", state: "answered", icon: BriefcaseIcon },
+              { id: "2", question: "Where are you today?", answer: "Three clients, invoiced personally, no company.", state: "answered", icon: MapPinIcon },
+              { id: "3", question: "Do you already have a company?", state: "active", icon: BuildingsIcon },
             ]}
           />
         </div>

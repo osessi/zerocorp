@@ -103,6 +103,17 @@ export function Walkthrough() {
   const [thinking, setThinking] = useState(false);
   const [plan, setPlan] = useState<ArchitectOutput | null>(null);
 
+  /**
+   * Which answered turn is being changed, and what to return to afterwards.
+   *
+   * Nothing is discarded. An earlier version dropped every answer after the one being
+   * revisited, on the argument that they had followed from it. That is defensible and it
+   * is not what a founder expects: they came back to fix one sentence and found four
+   * answers gone. Everything typed stays typed, and changing question two leaves
+   * questions three to five exactly where they were.
+   */
+  const [editing, setEditing] = useState<{ index: number; resume: Card | null } | null>(null);
+
   const answers = useMemo<PartialAssessmentAnswers>(
     () => history.reduce<PartialAssessmentAnswers>((all, step) => ({ ...all, ...step.patch }), {}),
     [history],
@@ -135,9 +146,21 @@ export function Walkthrough() {
       id: `turn-${i}`,
       question: step.turn.question.question,
       answer: step.turn.answer,
-      state: "answered" as const,
+      ...(step.turn.question.slot ? { icon: SLOT_STEPS[step.turn.question.slot].icon } : {}),
+      // The one being changed is marked active rather than answered, so the list shows
+      // where you are instead of showing two active rows or none.
+      state: editing?.index === i ? ("active" as const) : ("answered" as const),
     })),
-    ...(card ? [{ id: "active", question: card.question, state: "active" as const }] : []),
+    ...(card && editing === null
+      ? [
+          {
+            id: "active",
+            question: card.question,
+            state: "active" as const,
+            ...(card.slot ? { icon: SLOT_STEPS[card.slot].icon } : {}),
+          },
+        ]
+      : []),
   ];
 
   const answer = useCallback(
@@ -156,6 +179,23 @@ export function Walkthrough() {
       }
 
       const turn: InterviewTurn = { question: card, answer: text };
+
+      // Changing an existing answer: replace it in place, keep everything after it, and
+      // go back to where the visitor was. No model call, because no new question is
+      // being chosen.
+      if (editing !== null) {
+        setHistory((h) =>
+          h.map((step, i) =>
+            i === editing.index
+              ? { ...step, turn, patch: { ...step.patch, ...(patch as PartialAssessmentAnswers) } }
+              : step,
+          ),
+        );
+        setCard(editing.resume);
+        setEditing(null);
+        return;
+      }
+
       const nextAnswers = { ...answers, ...(patch as PartialAssessmentAnswers) };
 
       setCard(null);
@@ -187,33 +227,43 @@ export function Walkthrough() {
       setThinking(false);
       setCard(result.next);
     },
-    [answers, card, history, sources],
+    [answers, card, editing, history, sources],
   );
 
-  /**
-   * Go back to an answered question.
-   *
-   * Everything after it is dropped, not merely re-asked: a founder who realises at
-   * question five that they misread question two is correcting the answers that followed
-   * from it, and leaving those in place would build the plan on the version they just
-   * rejected.
-   */
-  const rewind = useCallback(
-    (id: string) => {
+  /** Reopen an answered question. Everything else is left exactly as it is. */
+  const editTurn = useCallback(
+    (index: number) => {
       if (thinking) return;
-      const index = Number.parseInt(id.replace("turn-", ""), 10);
       const target = history[index];
       if (!target) return;
       setPlan(null);
-      setHistory((h) => h.slice(0, index));
+      setEditing({ index, resume: card });
       setCard(target.turn.question);
     },
-    [history, thinking],
+    [card, history, thinking],
+  );
+
+  const editFromTimeline = useCallback(
+    (id: string) => editTurn(Number.parseInt(id.replace("turn-", ""), 10)),
+    [editTurn],
+  );
+
+  /**
+   * The rail is a map of the interview, and a map you cannot navigate from is a
+   * decoration. A step jumps to the turn that ASKED it, which is not always the turn
+   * that filled it: one sentence can fill three slots, and only one of them was asked.
+   */
+  const editFromRail = useCallback(
+    (slotId: string) => {
+      const index = history.findIndex((step) => step.stated === slotId);
+      if (index >= 0) editTurn(index);
+    },
+    [editTurn, history],
   );
 
   // Every slot filled and no card left: produce the plan.
   useEffect(() => {
-    if (card !== null || thinking || plan !== null || history.length === 0) return;
+    if (card !== null || thinking || plan !== null || editing !== null || history.length === 0) return;
     if (!SLOT_IDS.every((id) => slots[id].filled)) return;
 
     setThinking(true);
@@ -230,10 +280,11 @@ export function Walkthrough() {
       setPlan(run.output);
       setThinking(false);
     })();
-  }, [answers, card, history.length, plan, slots, thinking]);
+  }, [answers, card, editing, history.length, plan, slots, thinking]);
 
   function reset() {
     setStarted(false);
+    setEditing(null);
     setHistory([]);
     setCard(OPENING_QUESTION);
     setPlan(null);
@@ -279,8 +330,8 @@ export function Walkthrough() {
   return (
     <ConversationLayout
       status={`${understood} of ${SLOT_IDS.length} understood`}
-      rail={<WizardRail steps={steps} activeId={card?.slot ?? null} />}
-      timeline={<QuestionTimeline items={timeline} onSelect={rewind} />}
+      rail={<WizardRail steps={steps} activeId={card?.slot ?? null} onSelect={editFromRail} />}
+      timeline={<QuestionTimeline items={timeline} onSelect={editFromTimeline} />}
       dock={
         <PromptDock
           onSubmit={(text) => void answer(text)}

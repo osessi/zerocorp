@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { ArrowRightIcon, CheckIcon, PencilSimpleIcon } from "@phosphor-icons/react/dist/ssr";
 import type { QuestionCard as Card, QuestionOption } from "@zerocorp/contracts";
 import { Button } from "../button/index";
 import { cx } from "../cx";
-import { ACCENT_EDGE, ACCENT_EDGE_HOVER, ACCENT_FILL, ACCENT_RULE, ACCENT_TEXT, type AccentIndex } from "./accent";
+import { ACCENT_EDGE, ACCENT_EDGE_HOVER, ACCENT_FILL, ACCENT_TEXT, ACCENT_VAR, type AccentIndex } from "./accent";
 import { ENTER, staggerStyle } from "./motion";
 
 /**
@@ -101,21 +101,18 @@ function Heading({ card, accent, eyebrow }: { card: Card; accent: AccentIndex; e
   return (
     <div className={cx(ENTER, "flex flex-col gap-2")}>
       {eyebrow ? <p className={cx("text-overline", ACCENT_TEXT[accent])}>{eyebrow}</p> : null}
-      <div className="flex flex-col gap-3">
-        <h2 className="text-h2 text-balance">{card.question}</h2>
-        {/*
-          Drawn once, left to right, as the question arrives.
+      {/*
+        Highlighted, not underlined. A rule under a heading is punctuation; a highlighter
+        across it is someone marking the thing to deal with, which is what this is.
 
-          Full width rather than a stub. A twelve-unit dash under a two-line heading
-          reads as a bullet someone forgot to finish; a rule the width of the question
-          reads as the question being underlined, which is the thing being said: this is
-          the one you are answering now.
-        */}
-        <span
-          aria-hidden="true"
-          className={cx("zc-underline h-0.5 w-full origin-left", ACCENT_RULE[accent])}
-        />
-      </div>
+        The wipe runs left to right over 600ms after a short delay, so it arrives just
+        after the heading itself rather than with it.
+      */}
+      <h2 className="text-h2 text-balance">
+        <span className="zc-highlight" style={{ "--zc-highlight": ACCENT_VAR[accent] } as CSSProperties}>
+          {card.question}
+        </span>
+      </h2>
       {card.kind !== "confirm" && card.help ? (
         <p className="text-body-sm text-muted-foreground max-w-prose">{card.help}</p>
       ) : null}

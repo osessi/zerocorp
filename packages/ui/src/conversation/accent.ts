@@ -71,6 +71,21 @@ export const ACCENT_TINT: Record<AccentIndex, string> = {
   5: "bg-chart-5/10",
 };
 
+/**
+ * The raw custom property, for the places CSS needs the colour rather than a class.
+ *
+ * The highlighter wipes by growing a gradient, which no utility class can express, so it
+ * reads `--zc-highlight` from an inline style. A literal map, not a name built at
+ * runtime.
+ */
+export const ACCENT_VAR: Record<AccentIndex, string> = {
+  1: "var(--chart-1)",
+  2: "var(--chart-2)",
+  3: "var(--chart-3)",
+  4: "var(--chart-4)",
+  5: "var(--chart-5)",
+};
+
 /** The connector between steps. Same hue, drawn as a rule. */
 export const ACCENT_RULE: Record<AccentIndex, string> = {
   1: "bg-chart-1",

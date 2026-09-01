@@ -491,15 +491,22 @@
   }
 
   /*
-    A rule drawing itself under a heading as it arrives.
+    A highlighter running across a heading as it arrives.
 
-    It is the "this is new" signal. A question that simply replaces the last one in the
-    same position is easy to miss, especially for someone who looked away while the
-    system was thinking. The line draws once and stops; it is punctuation, not decoration.
+    It is the "this is the one you are answering" signal. A question that simply replaces
+    the last one in the same position is easy to miss, especially for someone who looked
+    away while the system was thinking.
+
+    A gradient rather than a background colour, because only a gradient can be WIPED: the
+    size grows from nothing to full and the colour appears to be drawn on. A plain
+    background can only fade, which reads as the page loading rather than as a pen moving.
+
+    box-decoration-break: clone so a two-line heading gets highlighted on both lines
+    instead of one long band wrapping around the ends.
   */
-  @keyframes zc-underline {
-    from { transform: scaleX(0); }
-    to   { transform: scaleX(1); }
+  @keyframes zc-highlight {
+    from { background-size: 0% 88%; }
+    to   { background-size: 100% 88%; }
   }
 
   /* The thinking indicator. Opacity only: nothing moves while the system is quiet. */
@@ -528,9 +535,21 @@
     animation: zc-slide-in var(--duration-modal) var(--ease-out) both;
   }
 
-  .zc-underline {
-    transform-origin: left;
-    animation: zc-underline 500ms var(--ease-out) both;
+  .zc-highlight {
+    /* 18%: dark enough to read as marked, light enough that the text over it stays at
+       full contrast. The heading must not lose legibility to its own emphasis. */
+    background-image: linear-gradient(
+      color-mix(in srgb, var(--zc-highlight) 18%, transparent),
+      color-mix(in srgb, var(--zc-highlight) 18%, transparent)
+    );
+    background-repeat: no-repeat;
+    background-position: 0 0.12em;
+    background-size: 0% 88%;
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
+    padding-inline: 0.12em;
+    margin-inline: -0.12em;
+    animation: zc-highlight 600ms var(--ease-out) 120ms both;
   }
 
   /*
