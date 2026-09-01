@@ -161,3 +161,30 @@ export const FIELD_INK: Record<string, string> = {
   Progress: "text-destructive-on-muted",
   Formation: "text-muted-foreground",
 };
+
+/**
+ * The progress thresholds, in one place because two screens draw this bar.
+ *
+ *   under 50   this is behind
+ *   under 75   this is moving
+ *   75 and up  this will land
+ *
+ * The drawer had its own bar filled with --primary at every value, so a formation at 12%
+ * and one at 94% looked equally healthy. A rule copied into two files is a rule that will
+ * disagree with itself.
+ */
+export function progressTone(value: number): "danger" | "warning" | "success" {
+  return value < 50 ? "danger" : value < 75 ? "warning" : "success";
+}
+
+export const PROGRESS_FILL: Record<"danger" | "warning" | "success", string> = {
+  danger: "bg-destructive",
+  warning: "bg-warning",
+  success: "bg-success",
+};
+
+export const PROGRESS_INK: Record<"danger" | "warning" | "success", string> = {
+  danger: "text-destructive-ink",
+  warning: "text-warning-ink",
+  success: "text-success-ink",
+};

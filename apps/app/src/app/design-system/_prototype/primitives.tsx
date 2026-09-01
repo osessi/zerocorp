@@ -9,7 +9,7 @@ import {
   RobotIcon,
 } from "@phosphor-icons/react/dist/ssr";
 import type { ReactNode } from "react";
-import type { Tone } from "./data";
+import { PROGRESS_FILL, PROGRESS_INK, progressTone, type Tone } from "./data";
 
 /**
  * Prototype primitives for the Dashboard Visual Language (DESIGN_SYSTEM.md §21).
@@ -516,27 +516,17 @@ export function Progress({ value }: { value: number }) {
     The percentage keeps its own ink, so the number and the bar agree, and the figure is
     still legible to anyone who cannot separate the three hues (§14).
   */
-  const tone = value < 50 ? "danger" : value < 75 ? "warning" : "success";
+  const tone = progressTone(value);
   return (
     <span className="flex items-center gap-3">
       <span className="bg-muted border-border h-1.5 w-full max-w-32 border" aria-hidden="true">
         <span
-          className={cx(
-            "block h-full",
-            tone === "danger" ? "bg-destructive" : tone === "warning" ? "bg-warning" : "bg-success",
-          )}
+          className={cx("block h-full", PROGRESS_FILL[tone])}
           style={{ width: `${value}%` }}
         />
       </span>
       <span
-        className={cx(
-          "text-caption font-mono",
-          tone === "danger"
-            ? "text-destructive-ink"
-            : tone === "warning"
-              ? "text-warning-ink"
-              : "text-success-ink",
-        )}
+        className={cx("text-caption font-mono", PROGRESS_INK[tone])}
       >
         {value}%
       </span>

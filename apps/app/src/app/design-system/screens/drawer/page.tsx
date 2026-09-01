@@ -7,7 +7,7 @@ import {
 } from "@phosphor-icons/react/dist/ssr";
 import { PageHeader } from "../../_prototype/shell";
 import { ActivityPanel, Avatar, Button, PanelLabel, SectionHeader, StatusBadge, cx } from "../../_prototype/primitives";
-import { ACTIVITY, BUSINESSES, FIELD_INK, FORMATION_LABEL, FORMATION_TONE, PLAN_TONE, STATE_TONE, money } from "../../_prototype/data";
+import { ACTIVITY, BUSINESSES, FIELD_INK, FORMATION_LABEL, FORMATION_TONE, PLAN_TONE, PROGRESS_FILL, PROGRESS_INK, STATE_TONE, money, progressTone } from "../../_prototype/data";
 
 /**
  * Screen 5 — RightDrawer (§21.13).
@@ -170,10 +170,18 @@ export default function DrawerScreen() {
                   <span className="text-body-sm flex items-center gap-2">
                     <SpinnerGapIcon size={16} className="text-muted-foreground" /> Formation progress
                   </span>
-                  <span className="text-body-sm font-mono">{business.progress}%</span>
+                  <span className={cx("text-body-sm font-mono", PROGRESS_INK[progressTone(business.progress)])}>
+                    {business.progress}%
+                  </span>
                 </div>
-                <span className="bg-muted h-1.5 w-full" aria-hidden="true">
-                  <span className="bg-primary block h-full" style={{ width: `${business.progress}%` }} />
+                {/* Same rule as the table's Progress column, read from one place: under
+                    50 behind, under 75 moving, 75 and up landing. This bar was --primary
+                    at every value, so 12% and 94% looked equally healthy. */}
+                <span className="bg-muted border-border h-1.5 w-full border" aria-hidden="true">
+                  <span
+                    className={cx("block h-full", PROGRESS_FILL[progressTone(business.progress)])}
+                    style={{ width: `${business.progress}%` }}
+                  />
                 </span>
                 <p className="text-caption text-muted-foreground">
                   Next: {FORMATION_LABEL[business.formation]}
