@@ -59,7 +59,17 @@ BUSINESS AUTOPILOT
 
 ### One-time setup
 
-**$997 one-time Business Launch Setup**
+Two setup paths, because the answer to *"new business or existing one?"* decides the whole
+journey (§29.3 block 1).
+
+| Path | Setup | Status |
+|---|---:|---|
+| **Business Launch Setup** — new business, formed by ZeroCorp | **$997** | current hypothesis |
+| **Business Activation Setup** — existing business, connected or imported | **~$497** | 🟠 placeholder, not yet validated |
+
+An existing company is **connected or imported, never re-formed**. It enters at
+`companies.status = active` with no formation order — a formation order records work
+ZeroCorp did, and inventing one would put a fiction in the audit trail.
 
 The setup is separate from subscription pricing.
 
@@ -406,6 +416,10 @@ The content engine should support:
 - internal links;
 - metadata.
 
+**V1 ships a recommended publication cadence of up to 5 articles/day, which the customer
+can change.** That is a publication default, not a generation limit — the distinction is
+the whole point of the paragraph below, and the two must never be collapsed. §29.3 block 8.
+
 High-volume generation is a capability, not a mandatory publication rate.
 
 The system should optimize for:
@@ -456,18 +470,26 @@ Lead system progression:
 ### V1
 
 - curated lead lists;
-- continuous background ingestion;
-- filtering — niche, country, industry, size, email available, phone where available;
+- continuous prospect discovery;
+- target definition — niche, countries, industry, company size;
+- **basic enrichment** — contact resolution on a prospect already found;
+- filtering, search and saved lists;
 - CSV export;
 - credits and limits.
 
+V1 **finds**. It does not yet contact: campaigns, sequences, CRM and automated follow-up
+are V2.
+
 ### Later
 
-- lead enrichment;
+- **advanced** enrichment — scoring, firmographic append, waterfall providers;
 - campaigns;
 - CRM;
 - pipeline;
 - automated follow-up.
+
+Basic enrichment is V1, above. The line between the two is thin and is recorded as an open
+item in §29.9.
 
 Do not build a full enterprise CRM before customers need it.
 
@@ -556,12 +578,18 @@ Today
 
 ## 20. Notifications
 
-Channels:
+Channels, and when each ships (§29.3 block 11):
 
-- in-app;
-- email;
-- Telegram;
-- desktop/browser notification where supported.
+| Channel | Version |
+|---|---|
+| in-app | V1 |
+| email digest | V1 |
+| desktop / browser where supported | V1 |
+| Telegram | **V2 / V3** |
+
+Telegram is deliberately not V1. It is the light control surface for an autonomous product
+(§29.5), and shipping it before there are agents to control gives a founder a second inbox
+rather than less work.
 
 Notification system goals:
 
@@ -816,7 +844,7 @@ customer, and the feature list is only how that is achieved.
 
 | | The customer can say | The one thing that proves it |
 |---|---|---|
-| **V1 — BUILD** | *My business exists and is operational.* | A formed company with a live site, working email, and the first list of prospects |
+| **V1 — BUILD** | *My business exists and is operational.* | A plan the founder approved, executed into a company, a live site, working email and the first list of prospects |
 | **V2 — GROW** | *My business has a repeatable customer acquisition system.* | Campaigns that run, a pipeline that moves, numbers that explain both |
 | **V3 — AUTOPILOT** | *My business operates with minimal intervention from me.* | A week of work happened and the founder only approved it |
 | **V4 — ADMINISTER** | *My business administration is organized and monitored.* | No deadline was missed, and the accountant had what they needed |
@@ -851,24 +879,103 @@ That is the destination. V1 to V5 is the order it is reached in.
 > **Start from zero. Become operational.**
 
 V1 must be **sellable and deliver a complete transformation**, not a prototype. The test
-is not "does it demo" but "would a founder pay $997 and get a company".
+is not "does it demo" but "would a founder pay and get a business".
 
-**A · Acquisition and checkout**
-landing · pricing · $997 checkout · Stripe · account and tenant creation · subscription ·
-acquisition attribution
+#### It is one workflow, not twelve products
 
-**B · Onboarding**
-voice onboarding · transcription · structured extraction · Business Brain · user
-validation · form fallback
+The thirteen blocks below are stages of a single journey. Anyone reading them as a feature
+list will build twelve disconnected tools, which is the failure §28 names.
 
-The voice flow is already specified in §10: five to six questions → transcription →
-extraction → Business Brain → validation. The form is a fallback, never the default.
+```text
+Understand → Plan → Build → Launch → Find customers
+```
 
-**C · Company**
-structure choice · state choice · personal and business information · documents ·
-identity · signature · submission · status tracking · EIN tracking
+```text
+FREE ASSESSMENT
+      ↓
+AI UNDERSTANDS THE BUSINESS
+      ↓
+RECOMMENDED PLAN  ──→  PRICING  ──→  PAYMENT
+      ↓
+DEEP ONBOARDING
+      ↓
+BUSINESS BRAIN
+      ↓
+ZEROCORP EXECUTES
+      ↓
+COMPANY ─┐ BRAND ─┐ WEBSITE ─┐ DOMAIN ─┐ EMAIL ─┐ CONTENT ─┐ SEO ─┐ LEADS ─┘
+      ↓
+COMMAND CENTER
+```
 
-The state machines are decided (D2) and live in `packages/contracts/src/formation.ts`,
+---
+
+**0 · Free Business Assessment** — *before payment*
+
+```text
+Landing → "Tell us about your business" → 3–5 questions → text, voice optional
+→ AI analysis → where you are · where you want to go · what is missing
+→ recommended ZeroCorp plan → pricing
+```
+
+Three to five questions, and **no expensive free onboarding**. The assessment exists to
+qualify and to produce a recommendation the visitor recognises as theirs — not to deliver
+the product for free. Everything costly happens after payment, in block 2.
+
+**1 · Plan and checkout**
+
+The answer to *"is this a new business or an existing one?"* decides the whole path.
+
+```text
+New business       → Business Launch Setup      $997
+Existing business  → Business Activation Setup  ~$497   🟠 TO CONFIRM
+                     then a subscription: $99 / $399 / $799
+```
+
+> 🟠 **The second setup price is a hypothesis, not a decision.** §3 already marks all
+> pricing as a hypothesis to validate against willingness-to-pay, gross margin and
+> conversion. `$497` is a placeholder for the activation path and must be **configurable,
+> never hard-coded**. Recorded as an open item.
+
+**2 · Deep onboarding** — *after payment*
+
+identity · current situation · goals · documents · existing website · brand assets · voice
+· follow-up questions **only where needed**
+
+This is where the real cost sits, and it sits behind the paywall on purpose. It produces
+the **Business Brain**, which becomes the single upstream source for everything generated
+afterwards (§11, and a ZeroCorp invariant).
+
+**3 · Business Plan** — *the heart of V1*
+
+```text
+Your business → Assessment → Recommended plan
+```
+
+The customer can **accept · edit · ask the AI to edit · add a step · remove a step ·
+change a priority**, then:
+
+```text
+Approve Plan
+```
+
+> This block is what stops ZeroCorp being a generator. The plan is the artefact the
+> customer owns, argues with and signs off — and everything ZeroCorp executes afterwards
+> traces back to a step they approved.
+
+It also carries the product's approval doctrine into V1: an agent never performs a
+privileged action without explicit permission. Here the permission is the approved plan.
+
+**4 · Company** — *only if needed*
+
+New business:
+structure choice · state · formation · documents · identity · signature · tracking · EIN ·
+deadlines
+
+Existing business:
+**connect or import the existing company** — never re-form what already exists.
+
+The state machines are decided (D2), live in `packages/contracts/src/formation.ts` and are
 documented in `DATABASE.md` §5. See §21.
 
 ```text
@@ -878,63 +985,112 @@ companies          pending → active → delinquent → dissolved
 ein_status         not_started → requested → issued
 ```
 
-**D · Brand**
-name · positioning · target · value proposition · tone · logo · colours · brand
-foundations
+> An imported company enters at `companies.status = active` with **no formation order at
+> all**. A formation order is the record of work ZeroCorp did; inventing one for a company
+> formed elsewhere would put a fiction in the audit trail.
 
-**E · Website**
-generation · approved blocks · variants · pages · responsive · preview · publication ·
-domain · basic SEO
+**5 · Brand**
 
-**F · Email**
-domain · DNS · SPF · DKIM · DMARC · mailboxes · warm-up · monitoring
+name · positioning · ICP · value proposition · tone · logo · colours · basic brand
+foundation
 
-**G · Content**
-blog · article generation · SEO · calendar · publication · content library · images
+**6 · Website**
 
-**H · Get Customers — Lite**
+generation · pages · blocks · variants · responsive · preview · editing · publication ·
+domain · DNS · basic technical SEO
 
-> **DECIDED 2026-08-31: the first acquisition brick ships in V1, not V2.**
-> A founder who finishes V1 with a company, a site and no prospects has a business that
-> exists and cannot sell. "Operational" has to include the first customer path.
+Sites are data, not code — one renderer, one block registry, never a per-customer
+application. `DESIGN_SYSTEM.md` §20 owns the block system.
 
-In V1:
+**7 · Email**
+
+domain · DNS · SPF · DKIM · DMARC · mailboxes · forwarding · warm-up · reputation
+
+**8 · Content engine**
+
+SEO research · keyword strategy · content plan · editorial calendar · article generation ·
+editing · approval · publication · images · metadata
 
 ```text
-prospect database · continuous background ingestion · search
-filters: niche · country · industry · size · email available · phone where available
-CSV export · credits and limits
+Recommended publication cadence: up to 5 articles/day, customer-adjustable
 ```
 
-Not yet in V1: campaigns · sequences · full CRM · automated follow-up. This matches §16,
-which already scoped V1 leads to curated lists, filtering and CSV export.
+> This is a **publication** default, not a generation limit, and the two must not be
+> confused. §14 already holds the doctrine: high-volume generation is a capability, not a
+> mandatory publication rate, and publication is governed by quality and SEO rules. Five a
+> day is the recommended ceiling ZeroCorp ships with; the customer moves it.
 
-**I · Dashboard**
+**9 · Get Customers — Lite**
 
-The dashboard answers one question: **What is ZeroCorp doing for me?**
+> **DECIDED: the first acquisition brick ships in V1, not V2.** A founder who finishes V1
+> with a company, a site and no prospects has a business that exists and cannot sell.
+> "Operational" has to include the first customer path.
 
-company status · website status · marketing progress · leads · content · recent activity ·
-**tasks requiring user action** · notifications
+**V1 finds. It does not yet contact.**
 
-The Command Center and daily digest principles are in §19 and §20.
+```text
+target definition · niche · countries · industry · company size
+continuous prospect discovery · basic enrichment
+email · phone where appropriate and available
+search · filtering · saved lists · CSV export
+```
 
-**J · Admin console**
+> 🟠 **Basic enrichment moved into V1**, where §29.4 previously placed all enrichment in
+> V2. "Basic" needs a line: it is contact resolution on a prospect ZeroCorp already found
+> — not scoring, not firmographic append, not waterfall providers, which stay V2. The
+> boundary is thin and is recorded as an open item.
 
-> **Required in V1, not later.** Without it, every formation, refund and support request
-> is a manual database edit. That does not scale past the first few customers and it is
-> how identity documents get mishandled.
+Not in V1: campaigns · sequences · full CRM · automated follow-up.
 
-tenants · users · formation queue · documents · provider refs · payments · plans ·
-credits · support · **controlled impersonation** · audit · errors · retries
+**10 · Dashboard / Command Center**
 
-Impersonation is controlled and audited — `CLAUDE_CODE_RULES.md` and the tenant-isolation
-tests apply to the console exactly as they apply to the product.
+Answers one question: **What is ZeroCorp doing for me?**
+
+Company · Website · Email · Content · SEO · Leads · launch progress · **tasks requiring
+attention** · activity · notifications, over a timeline:
+
+```text
+Website published
+12 prospects discovered
+3 articles published
+DNS configured
+…
+```
+
+§19 and §20 own the Command Center and digest principles.
+
+**11 · Notifications**
+
+```text
+V1        in-app · email digest · browser and desktop where relevant
+V2 / V3   Telegram
+```
+
+> Telegram is deliberately **not** V1. It is the light control surface for an autonomous
+> product (§29.5), and shipping it before there are agents to control gives a founder a
+> second inbox rather than less work.
+
+**12 · Admin console**
+
+> **Required in V1, not later.** Without it every formation, refund and support request is
+> a manual database edit — which does not scale past the first customers, and is how
+> identity documents get mishandled.
+
+customers · tenants · formation orders · documents · company status · payments ·
+subscriptions · credits · support · **secure impersonation** · audit · failed jobs ·
+retries
+
+Impersonation is scoped and audited. `CLAUDE_CODE_RULES.md` and the tenant-isolation tests
+apply to the console exactly as they apply to the product.
+
+---
 
 **What the customer buys at V1**
 
 ```text
-$997 setup + Launch subscription
-= business built + online + operational + initial customer acquisition capability
+Setup ($997 new · ~$497 existing) + subscription
+= business understood + planned + built + online + operational
++ initial customer acquisition capability
 ```
 
 ---
@@ -945,8 +1101,12 @@ $997 setup + Launch subscription
 
 Everything in V1, plus:
 
-**Lead intelligence** — enrichment · scoring · deduplication · segmentation · better
-search · dynamic lists
+**Lead intelligence** — **advanced** enrichment · scoring · deduplication · segmentation ·
+better search · dynamic lists
+
+Basic enrichment — contact resolution on a prospect already found — ships in V1 (§29.3
+block 9). What lands here is everything beyond that: scoring, firmographic append,
+waterfall providers.
 
 **Outreach** — email campaigns · sequences · follow-ups · templates · unsubscribe ·
 bounce handling · campaign analytics
@@ -1046,3 +1206,8 @@ Recorded honestly rather than left implied:
   kind. Ten lettered blocks A to J is a scope, not a plan, and the feasibility of
   "$100k ARR as the first milestone" still cannot be assessed from this repository.
 - **No per-line owner.** Solo for now, which makes it moot — until it is not.
+- **The Business Activation Setup price** (~$497, §29.3 block 1) is a placeholder. §3
+  already marks all pricing as hypothesis; this one has not even been through that.
+- **The basic-vs-advanced enrichment line** (§29.3 block 9) is thin. "Contact resolution
+  on a prospect we already found" is the current wording, and it will be argued about the
+  first time a provider bills per enrichment.

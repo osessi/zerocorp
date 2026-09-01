@@ -261,7 +261,20 @@ from `sites`.
 | `PRODUCT_SPEC.md` | No explicit V1 must-ship list |
 
 **Resolved.** `PRODUCT_SPEC.md` §29 now owns the version boundary and carries the full
-V1 to V5 roadmap. V1 is ten lettered blocks, A to J.
+V1 to V5 roadmap. V1 was expanded on 2026-08-31 from ten lettered blocks to **thirteen
+numbered ones, 0 to 12**, framed as a single workflow rather than a feature list:
+
+```text
+Understand → Plan → Build → Launch → Find customers
+```
+
+Three blocks are new and change the shape of the product, not just its scope:
+
+| New | Why it matters |
+|---|---|
+| **0 · Free Business Assessment** | 3–5 questions before payment, producing a recommendation. Deliberately cheap — the expensive onboarding moved behind the paywall |
+| **3 · Business Plan** | The heart of V1. The customer accepts, edits, or asks the AI to edit, then **approves**. Everything ZeroCorp executes traces to a step they signed off |
+| **1 · Two setup paths** | New business forms a company; **existing business connects or imports one**. The Company block becomes conditional |
 
 Two things changed in substance while writing it, and both are recorded there:
 
@@ -280,6 +293,15 @@ shared words, two different axes. A V1 customer can be on the Growth plan.
 **Still open, and deliberately not hidden.** §29 is a scope, not a plan: it carries **no
 time estimate of any kind** and no per-line owner. The feasibility of "$100k ARR as the
 first milestone" still cannot be assessed from this repository. Recorded in §29.9.
+
+Two further items were raised by the 2026-08-31 expansion, both in §29.9:
+
+- **The Business Activation Setup price** (~$497) is a placeholder. §3 marks all pricing
+  as hypothesis; this one has not been through even that. It must stay configurable.
+- **The basic-vs-advanced enrichment line.** Basic enrichment moved into V1, where §29.4
+  had placed all enrichment in V2. The current boundary — "contact resolution on a
+  prospect we already found" — is thin, and will be argued about the first time a
+  provider bills per enrichment.
 
 ---
 
