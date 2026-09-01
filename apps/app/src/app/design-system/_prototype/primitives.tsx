@@ -504,12 +504,42 @@ export function ActivityPanel({
 /* ── Progress ─────────────────────────────────────────────────────────────────
    Hairline bar plus a numeric value. Never a chunky meter.                     */
 export function Progress({ value }: { value: number }) {
+  /*
+    The bar was black at every value, so 12% and 94% looked equally fine. Progress is the
+    one number on this row where the VALUE is the meaning, and a single ink threw that
+    away.
+
+      under 50   destructive   this is behind
+      under 75   warning       this is moving
+      75 and up  success       this will land
+
+    The percentage keeps its own ink, so the number and the bar agree, and the figure is
+    still legible to anyone who cannot separate the three hues (§14).
+  */
+  const tone = value < 50 ? "danger" : value < 75 ? "warning" : "success";
   return (
     <span className="flex items-center gap-3">
-      <span className="bg-muted h-1 w-full max-w-32" aria-hidden="true">
-        <span className="bg-foreground block h-full" style={{ width: `${value}%` }} />
+      <span className="bg-muted border-border h-1.5 w-full max-w-32 border" aria-hidden="true">
+        <span
+          className={cx(
+            "block h-full",
+            tone === "danger" ? "bg-destructive" : tone === "warning" ? "bg-warning" : "bg-success",
+          )}
+          style={{ width: `${value}%` }}
+        />
       </span>
-      <span className="text-caption text-muted-foreground font-mono">{value}%</span>
+      <span
+        className={cx(
+          "text-caption font-mono",
+          tone === "danger"
+            ? "text-destructive-ink"
+            : tone === "warning"
+              ? "text-warning-ink"
+              : "text-success-ink",
+        )}
+      >
+        {value}%
+      </span>
     </span>
   );
 }

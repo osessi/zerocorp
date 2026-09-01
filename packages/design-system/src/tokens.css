@@ -124,6 +124,16 @@
   --ai: #6d28d9;
   --ai-subtle: #ede9fe;
   --ai-ink: #6d28d9;
+
+  /* Text on --muted, which is a THIRD ground and not the same problem as the other two.
+     `-ink` is specified as text on the tone's own tint; using it on --muted is off
+     contract, and in dark it fails: --info-ink measured 4.11 and --destructive-ink 4.02
+     on #262626, because the §4.2 colours are tuned against the PAGE, not against a raised
+     neutral. In light the same values pass comfortably, which is exactly how the defect
+     hid. Same shape as the modal border: a value tuned against one ground is not tuned
+     against another. */
+  --info-on-muted: #1d4ed8;
+  --destructive-on-muted: #b91c1c;
 }
 
 /* ---------------------------------------------------------------------------
@@ -188,6 +198,10 @@
   /* The ramp itself does not flip — only these two aliases do. */
   --accent-subtle: var(--teal-900);
   --accent-strong: var(--teal-200);
+
+  /* 5.95:1 and 5.47:1 on #262626, against 4.11 and 4.02 for the -ink step. */
+  --info-on-muted: #60a5fa;
+  --destructive-on-muted: #f87171;
 }
 
 /* ---------------------------------------------------------------------------
@@ -242,6 +256,8 @@
   --color-ai: var(--ai);
   --color-ai-subtle: var(--ai-subtle);
   --color-ai-ink: var(--ai-ink);
+  --color-info-on-muted: var(--info-on-muted);
+  --color-destructive-on-muted: var(--destructive-on-muted);
 }
 
 @theme {

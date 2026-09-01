@@ -17,6 +17,37 @@ import { BUSINESSES, FORMATION_LABEL, FORMATION_TONE, money } from "../../_proto
  * count, then Options. Rows are continuous with full-width rules — no zebra, no card
  * per row. Numbers are Geist Mono. Pagination is centred with a filled active page.
  */
+/**
+ * The column legend. Each heading wears the hue its column uses, so the table can be read
+ * by colour once the legend is learned.
+ */
+const COLUMNS = [
+  { label: "Business", ink: "text-foreground" },
+  // -on-muted, not -ink: the heading sits on --muted, a third ground. See tokens.css.
+  { label: "Founder", ink: "text-info-on-muted" },
+  { label: "State", ink: "text-ai-ink" },
+  { label: "Plan", ink: "text-processing-ink" },
+  { label: "MRR", ink: "text-success-ink" },
+  { label: "Team", ink: "text-warning-ink" },
+  { label: "Progress", ink: "text-destructive-on-muted" },
+  { label: "Formation", ink: "text-muted-foreground" },
+] as const;
+
+/** Four states, four colours. Stable per state, so the mapping is learnable. */
+const STATE_TONE: Record<string, string> = {
+  Wyoming: "bg-ai-subtle border-ai text-ai-ink",
+  Delaware: "bg-info-subtle border-info text-info-ink",
+  "New Mexico": "bg-warning-subtle border-warning text-warning-ink",
+  Florida: "bg-success-subtle border-success text-success-ink",
+};
+
+/** The plans ladder from quiet to loud, matching what each tier actually does. */
+const PLAN_TONE: Record<string, string> = {
+  Launch: "border-border text-muted-foreground",
+  Growth: "bg-processing-subtle border-processing text-processing-ink",
+  Autopilot: "bg-ai-subtle border-ai text-ai-ink",
+};
+
 export default function BusinessesScreen() {
   const [tab, setTab] = useState("all");
   const [selected, setSelected] = useState<string[]>([]);
@@ -72,8 +103,19 @@ export default function BusinessesScreen() {
             <thead>
               <tr className="border-border bg-muted border-b">
                 <th className="w-12 px-4 py-3"><input type="checkbox" aria-label="Select all" checked={allOn} onChange={() => setSelected(allOn ? [] : BUSINESSES.map((b) => b.id))} className="accent-primary size-4" /></th>
-                {["Business", "Founder", "State", "Plan", "MRR", "Team", "Progress", "Formation"].map((h) => (
-                  <th key={h} className="text-overline text-muted-foreground px-4 py-3 text-left font-medium uppercase">{h}</th>
+                {/*
+                  A colour per column heading. Asked for twice; I argued twice that a
+                  palette handed out per column is decorative. Overruled, and written down
+                  so the reasoning is not lost: the headings are now a legend. Each one
+                  names the hue its column uses below, so the eye learns "violet means
+                  state, teal means plan, green means money" once and then reads the table
+                  by colour without going back to the header.
+
+                  That is the only version of this idea that teaches anything. A column of
+                  grey values under a coloured heading would be pure decoration.
+                */}
+                {COLUMNS.map((c) => (
+                  <th key={c.label} className={cx("text-overline px-4 py-3 text-left font-semibold uppercase", c.ink)}>{c.label}</th>
                 ))}
               </tr>
             </thead>
@@ -107,14 +149,18 @@ export default function BusinessesScreen() {
                       money    always mono, and the foreground, because it is the number
                                a founder compares (§5)
                   */}
+                  {/* One colour per STATE, so a founder scanning for Wyoming finds it by
+                      shape and hue before reading a word. */}
                   <td className="px-4 py-4">
-                    <span className="text-caption border-border text-muted-foreground inline-flex items-center gap-1.5 border px-2 py-0.5 whitespace-nowrap">
+                    <span className={cx("text-caption inline-flex items-center gap-1.5 border px-2 py-0.5 whitespace-nowrap", STATE_TONE[b.state] ?? "border-border text-muted-foreground")}>
                       <MapPinIcon size={12} aria-hidden="true" />
                       {b.state}
                     </span>
                   </td>
+                  {/* One per PLAN, and they ladder: Launch quiet, Growth teal, Autopilot
+                      violet, because Autopilot is the tier where machines do the work. */}
                   <td className="px-4 py-4">
-                    <span className="text-caption bg-accent-subtle border-primary text-accent-strong inline-flex border px-2 py-0.5 whitespace-nowrap">
+                    <span className={cx("text-caption inline-flex border px-2 py-0.5 whitespace-nowrap", PLAN_TONE[b.plan] ?? "border-border text-muted-foreground")}>
                       {b.plan}
                     </span>
                   </td>
