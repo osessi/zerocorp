@@ -112,6 +112,7 @@ export const TASK_HISTORY: TaskItem[] = [
 
 export interface DocumentItem {
   id: string;
+  kind: DocumentKind;
   title: string;
   file: string;
   size: string;
@@ -119,13 +120,46 @@ export interface DocumentItem {
   state: "accepted" | "pending" | "owed";
 }
 
+/**
+ * A document has a KIND, and the kind decides its icon and its colour.
+ *
+ * Every row used the same grey FileText tile, so a passport, a utility bill and a
+ * certificate of formation were visually one thing. These are the five most consequential
+ * pieces of paper a founder hands over, and the eye should be able to find the passport
+ * without reading.
+ */
+export type DocumentKind = "identity" | "address" | "formation" | "agreement" | "tax";
+
 export const DOCUMENTS: DocumentItem[] = [
-  { id: "d1", title: "Passport — founder", file: "passport.pdf", size: "2.4 MB", date: "24 Aug, 2026", state: "accepted" },
-  { id: "d2", title: "Proof of address", file: "utility-bill.pdf", size: "1.1 MB", date: "26 Aug, 2026", state: "accepted" },
-  { id: "d3", title: "Articles of organization", file: "articles-wy.pdf", size: "480 KB", date: "29 Aug, 2026", state: "pending" },
-  { id: "d4", title: "Operating agreement", file: "operating-agreement.pdf", size: "820 KB", date: "29 Aug, 2026", state: "pending" },
-  { id: "d5", title: "EIN confirmation letter (CP 575)", file: "—", size: "—", date: "Awaiting IRS", state: "owed" },
+  { id: "d1", kind: "identity", title: "Passport, founder", file: "passport.pdf", size: "2.4 MB", date: "24 Aug, 2026", state: "accepted" },
+  { id: "d2", kind: "address", title: "Proof of address", file: "utility-bill.pdf", size: "1.1 MB", date: "26 Aug, 2026", state: "accepted" },
+  { id: "d3", kind: "formation", title: "Articles of organization", file: "articles-wy.pdf", size: "480 KB", date: "29 Aug, 2026", state: "pending" },
+  { id: "d4", kind: "agreement", title: "Operating agreement", file: "operating-agreement.pdf", size: "820 KB", date: "29 Aug, 2026", state: "pending" },
+  { id: "d5", kind: "tax", title: "EIN confirmation letter (CP 575)", file: "not yet issued", size: "", date: "Awaiting IRS", state: "owed" },
 ];
+
+/** Kind to tile. Violet is identity, which is also the hue the product uses for machines,
+    so identity gets it here only because nothing else on this screen competes. */
+export const DOCUMENT_TILE: Record<DocumentKind, string> = {
+  identity: "bg-ai-subtle border-ai text-ai-ink",
+  address: "bg-info-subtle border-info text-info-ink",
+  formation: "bg-processing-subtle border-processing text-processing-ink",
+  agreement: "bg-warning-subtle border-warning text-warning-ink",
+  tax: "bg-success-subtle border-success text-success-ink",
+};
+
+/**
+ * A document's state, and the tone it reads as.
+ *
+ * `pending` was --processing, the brand teal, which said "we are working" when it means
+ * "this is waiting on a human". Yellow is the honest colour for that. `owed` was warning;
+ * a document we do not have is what blocks a filing, so it is danger.
+ */
+export const DOCUMENT_STATE: Record<string, { tone: Tone; label: string }> = {
+  accepted: { tone: "success", label: "Accepted" },
+  pending: { tone: "warning", label: "In review" },
+  owed: { tone: "danger", label: "Owed" },
+};
 
 export const money = (cents: number) =>
   `$${(cents / 100).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;

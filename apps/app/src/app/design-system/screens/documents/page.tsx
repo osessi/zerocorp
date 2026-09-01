@@ -7,7 +7,23 @@ import {
 } from "@phosphor-icons/react/dist/ssr";
 import { PageHeader } from "../../_prototype/shell";
 import { Avatar, AvatarStack, Button, MetricGrid, StatusBadge, Tabs, cx } from "../../_prototype/primitives";
-import { DOCUMENTS } from "../../_prototype/data";
+import { DOCUMENTS, DOCUMENT_STATE, DOCUMENT_TILE, type DocumentKind } from "../../_prototype/data";
+import {
+  BankIcon,
+  CertificateIcon,
+  HandshakeIcon,
+  IdentificationCardIcon,
+  MapPinLineIcon,
+} from "@phosphor-icons/react/dist/ssr";
+
+/** One glyph per kind, differing in shape so the row survives greyscale. */
+const DOCUMENT_ICON: Record<DocumentKind, typeof BankIcon> = {
+  identity: IdentificationCardIcon,
+  address: MapPinLineIcon,
+  formation: CertificateIcon,
+  agreement: HandshakeIcon,
+  tax: BankIcon,
+};
 
 /**
  * Screen 4 — MetricGrid (§21.11) + segmented scope + RecordCardList (§21.12).
@@ -86,17 +102,33 @@ export default function DocumentsScreen() {
               ))}
             </div>
             <div className="flex flex-wrap items-center gap-2">
-              <Button><PlusIcon size={16} /> Add template</Button>
-              <Button><FileArrowDownIcon size={16} /> Download zip</Button>
-              <Button><FilePdfIcon size={16} /> Convert to PDF</Button>
+              {/*
+                Three identical outlined buttons said "three of the same thing". They are
+                not: one creates, one exports, one converts. Each takes the colour of what
+                it does, and the tint is the ground so the label keeps its -ink contrast.
+              */}
+              <button className="text-label bg-success-subtle border-success text-success-ink focus-visible:outline-ring inline-flex h-9 items-center gap-2 border px-3 transition-[color,background-color,border-color] duration-normal focus-visible:outline-2 focus-visible:outline-offset-2">
+                <PlusIcon size={16} /> Add template
+              </button>
+              <button className="text-label bg-ai-subtle border-ai text-ai-ink focus-visible:outline-ring inline-flex h-9 items-center gap-2 border px-3 transition-[color,background-color,border-color] duration-normal focus-visible:outline-2 focus-visible:outline-offset-2">
+                <FileArrowDownIcon size={16} /> Download zip
+              </button>
+              <button className="text-label bg-destructive-subtle border-destructive text-destructive-ink focus-visible:outline-ring inline-flex h-9 items-center gap-2 border px-3 transition-[color,background-color,border-color] duration-normal focus-visible:outline-2 focus-visible:outline-offset-2">
+                <FilePdfIcon size={16} /> Convert to PDF
+              </button>
             </div>
           </div>
 
           <div className="flex flex-col gap-4">
             {DOCUMENTS.map((d) => (
               <article key={d.id} className="border-border flex flex-wrap items-center gap-4 border p-4">
-                <span className="border-border text-muted-foreground flex size-10 shrink-0 items-center justify-center border">
-                  <FileTextIcon size={20} />
+                {/* The kind decides the icon and the tile. Every row was the same grey
+                    FileText, so a passport and a utility bill were one thing. */}
+                <span className={cx("flex size-10 shrink-0 items-center justify-center border", DOCUMENT_TILE[d.kind])}>
+                  {(() => {
+                    const Icon = DOCUMENT_ICON[d.kind];
+                    return <Icon size={20} weight="regular" />;
+                  })()}
                 </span>
                 <div className="flex min-w-0 flex-1 flex-col gap-1">
                   <h3 className="text-body truncate">{d.title}</h3>
@@ -104,14 +136,14 @@ export default function DocumentsScreen() {
                     {d.file} · {d.size} · {d.date}
                   </p>
                 </div>
-                <StatusBadge tone={d.state === "accepted" ? "success" : d.state === "pending" ? "processing" : "warning"}>
-                  {d.state === "accepted" ? "Accepted" : d.state === "pending" ? "In review" : "Owed"}
-                </StatusBadge>
+                <StatusBadge tone={DOCUMENT_STATE[d.state]!.tone}>{DOCUMENT_STATE[d.state]!.label}</StatusBadge>
                 <span className="flex shrink-0 items-center gap-1">
-                  <button aria-label={`Accept ${d.title}`} disabled={d.state === "owed"} className="hover:bg-accent focus-visible:outline-ring flex size-9 items-center justify-center transition-[color,background-color,border-color] duration-normal focus-visible:outline-2 focus-visible:-outline-offset-2 disabled:cursor-not-allowed disabled:opacity-40">
+                  {/* Accept and reject were two grey glyphs side by side, which is the one
+                      place on this screen where a mis-click costs something. */}
+                  <button aria-label={`Accept ${d.title}`} disabled={d.state === "owed"} className="bg-success-subtle border-success text-success-ink focus-visible:outline-ring flex size-9 items-center justify-center border transition-[color,background-color,border-color] duration-normal focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-40">
                     <CheckCircleIcon size={20} />
                   </button>
-                  <button aria-label={`Reject ${d.title}`} disabled={d.state === "owed"} className="hover:bg-accent focus-visible:outline-ring flex size-9 items-center justify-center transition-[color,background-color,border-color] duration-normal focus-visible:outline-2 focus-visible:-outline-offset-2 disabled:cursor-not-allowed disabled:opacity-40">
+                  <button aria-label={`Reject ${d.title}`} disabled={d.state === "owed"} className="bg-destructive-subtle border-destructive text-destructive-ink focus-visible:outline-ring flex size-9 items-center justify-center border transition-[color,background-color,border-color] duration-normal focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-40">
                     <XCircleIcon size={20} />
                   </button>
                   <button aria-label={`More actions for ${d.title}`} className="hover:bg-accent focus-visible:outline-ring flex size-9 items-center justify-center transition-[color,background-color,border-color] duration-normal focus-visible:outline-2 focus-visible:-outline-offset-2">

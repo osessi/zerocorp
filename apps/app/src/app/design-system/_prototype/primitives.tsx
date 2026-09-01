@@ -244,6 +244,15 @@ export function PanelLabel({ children }: { children: ReactNode }) {
 /* ── MetricGrid (§21.11) ──────────────────────────────────────────────────────
    Equal cells inside ONE bordered container divided by internal rules — never
    three floating cards.                                                        */
+const METRIC_WASH: Record<Tone, string> = {
+  success: "bg-success-wash",
+  warning: "bg-warning-wash",
+  danger: "bg-destructive-wash",
+  info: "bg-info-wash",
+  processing: "bg-processing-wash",
+  neutral: "",
+};
+
 const METRIC_TILE: Record<Tone, string> = {
   success: "bg-success-subtle border-success text-success-ink",
   warning: "bg-warning-subtle border-warning text-warning-ink",
@@ -272,7 +281,9 @@ export function MetricGrid({
     <div className="flex flex-col gap-3">
       <div className="border-border grid grid-cols-1 divide-y divide-(--border) border sm:grid-cols-3 sm:divide-x sm:divide-y-0">
         {items.map((m) => (
-          <div key={m.label} className="flex flex-col gap-3 p-4">
+          /* The WHOLE cell carries the tone, not just the icon tile. Three numbers on one
+             ground read as one measurement repeated; three grounds read as three facts. */
+          <div key={m.label} className={cx("flex flex-col gap-3 p-4", m.tone ? METRIC_WASH[m.tone] : "")}>
             {/*
               The label row used to be a grey icon beside grey text, three times over, so
               three different facts arrived with identical weight. The icon now sits in a
