@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import {
+  MapPinIcon,
   MagnifyingGlassIcon, FunnelIcon, RowsIcon, TableIcon, CalendarBlankIcon,
   CaretDownIcon, CaretLeftIcon, CaretRightIcon,
 } from "@phosphor-icons/react/dist/ssr";
@@ -39,8 +40,8 @@ export default function BusinessesScreen() {
         <Tabs
           items={[
             { id: "all", label: "All" },
-            { id: "forming", label: "Forming", count: 4 },
-            { id: "live", label: "Live", count: 3 },
+            { id: "forming", label: "Forming", count: 4, tone: "processing" as const },
+            { id: "live", label: "Live", count: 3, tone: "success" as const },
           ]}
           active={tab}
           onSelect={setTab}
@@ -82,7 +83,11 @@ export default function BusinessesScreen() {
                   <td className="px-4 py-4"><input type="checkbox" aria-label={`Select ${b.name}`} checked={selected.includes(b.id)} onChange={() => setSelected((s) => s.includes(b.id) ? s.filter((x) => x !== b.id) : [...s, b.id])} className="accent-primary size-4" /></td>
                   <td className="px-4 py-4">
                     <span className="flex items-center gap-3">
-                      <Avatar initials={b.owners[0]!} />
+                      {/* The avatar carries the row's formation tone. It was grey on every
+                          row, which wastes the first thing the eye lands on: filed reads
+                          amber, formed reads green, and the row becomes one object instead
+                          of a grey chip beside a coloured badge. */}
+                      <Avatar initials={b.owners[0]!} tone={FORMATION_TONE[b.formation]} />
                       <span className="text-body-sm">{b.name}</span>
                     </span>
                   </td>
@@ -92,9 +97,28 @@ export default function BusinessesScreen() {
                       <span className="text-caption text-muted-foreground">{b.email}</span>
                     </span>
                   </td>
-                  <td className="text-body-sm px-4 py-4">{b.state}</td>
-                  <td className="text-body-sm px-4 py-4">{b.plan}</td>
-                  <td className="text-body-sm px-4 py-4 font-mono">{money(b.mrrCents)}</td>
+                  {/*
+                    Columns are distinguished by what they ARE, not by a palette handed out
+                    per column. A different colour per column would be decorative, which the
+                    colour brief forbids and which teaches the reader nothing.
+
+                      state    a place, so a quiet outlined chip
+                      plan     a commercial tier, so it carries the accent
+                      money    always mono, and the foreground, because it is the number
+                               a founder compares (§5)
+                  */}
+                  <td className="px-4 py-4">
+                    <span className="text-caption border-border text-muted-foreground inline-flex items-center gap-1.5 border px-2 py-0.5 whitespace-nowrap">
+                      <MapPinIcon size={12} aria-hidden="true" />
+                      {b.state}
+                    </span>
+                  </td>
+                  <td className="px-4 py-4">
+                    <span className="text-caption bg-accent-subtle border-primary text-accent-strong inline-flex border px-2 py-0.5 whitespace-nowrap">
+                      {b.plan}
+                    </span>
+                  </td>
+                  <td className="text-body-sm text-foreground px-4 py-4 font-mono">{money(b.mrrCents)}</td>
                   <td className="px-4 py-4"><AvatarStack people={b.owners} /></td>
                   <td className="px-4 py-4"><Progress value={b.progress} /></td>
                   <td className="px-4 py-4"><StatusBadge tone={FORMATION_TONE[b.formation]}>{FORMATION_LABEL[b.formation]}</StatusBadge></td>

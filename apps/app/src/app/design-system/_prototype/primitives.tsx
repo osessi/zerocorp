@@ -1,7 +1,10 @@
 "use client";
 
 import {
+  ArrowDownRightIcon,
+  ArrowUpRightIcon,
   ArrowsClockwiseIcon,
+  MinusIcon,
   CaretRightIcon,
   RobotIcon,
 } from "@phosphor-icons/react/dist/ssr";
@@ -48,11 +51,43 @@ export function StatusBadge({ tone, children }: { tone: Tone; children: ReactNod
 }
 
 /* ── Avatar / AvatarStack ─────────────────────────────────────────────────── */
-export function Avatar({ initials, size = "md" }: { initials: string; size?: "sm" | "md" | "lg" }) {
+/**
+ * Initials, optionally carrying the tone of the row they belong to.
+ *
+ * Every avatar was the same grey. On a list where each row already has a status, that
+ * grey is a wasted signal: the eye lands on the initials first and learns nothing from
+ * them. Given a tone, the avatar repeats what the badge says, so the row reads as one
+ * object rather than as a grey chip beside a coloured one.
+ *
+ * It stays a REPEAT, never the only carrier. The badge keeps its label and its glyph, so
+ * nothing here depends on colour alone (§14).
+ */
+const AVATAR_TONE: Record<Tone, string> = {
+  success: "bg-success-subtle text-success-ink",
+  warning: "bg-warning-subtle text-warning-ink",
+  danger: "bg-destructive-subtle text-destructive-ink",
+  info: "bg-info-subtle text-info-ink",
+  processing: "bg-processing-subtle text-processing-ink",
+  neutral: "bg-secondary text-secondary-foreground",
+};
+
+export function Avatar({
+  initials,
+  size = "md",
+  tone,
+}: {
+  initials: string;
+  size?: "sm" | "md" | "lg";
+  tone?: Tone;
+}) {
   const dim = size === "sm" ? "size-6 text-caption" : size === "lg" ? "size-12 text-h4" : "size-8 text-caption";
   return (
     <span
-      className={cx(dim, "bg-secondary text-secondary-foreground inline-flex shrink-0 items-center justify-center font-medium")}
+      className={cx(
+        dim,
+        "inline-flex shrink-0 items-center justify-center font-medium",
+        tone ? AVATAR_TONE[tone] : "bg-secondary text-secondary-foreground",
+      )}
       aria-hidden="true"
     >
       {initials}
@@ -156,26 +191,84 @@ export function PanelLabel({ children }: { children: ReactNode }) {
 /* ── MetricGrid (§21.11) ──────────────────────────────────────────────────────
    Equal cells inside ONE bordered container divided by internal rules — never
    three floating cards.                                                        */
+const METRIC_TILE: Record<Tone, string> = {
+  success: "bg-success-subtle border-success text-success-ink",
+  warning: "bg-warning-subtle border-warning text-warning-ink",
+  danger: "bg-destructive-subtle border-destructive text-destructive-ink",
+  info: "bg-info-subtle border-info text-info-ink",
+  processing: "bg-processing-subtle border-processing text-processing-ink",
+  neutral: "border-border text-muted-foreground",
+};
+
 export function MetricGrid({
   items,
   link,
 }: {
-  items: Array<{ label: string; value: string; sub?: string; icon?: ReactNode }>;
+  items: Array<{
+    label: string;
+    value: string;
+    sub?: string;
+    icon?: ReactNode;
+    tone?: Tone;
+    /** A movement worth reading, e.g. "+18% vs last month". */
+    delta?: { text: string; direction: "up" | "down" | "flat" };
+  }>;
   link?: ReactNode;
 }) {
   return (
     <div className="flex flex-col gap-3">
       <div className="border-border grid grid-cols-1 divide-y divide-(--border) border sm:grid-cols-3 sm:divide-x sm:divide-y-0">
         {items.map((m) => (
-          <div key={m.label} className="flex flex-col gap-2 p-4">
+          <div key={m.label} className="flex flex-col gap-3 p-4">
+            {/*
+              The label row used to be a grey icon beside grey text, three times over, so
+              three different facts arrived with identical weight. The icon now sits in a
+              tinted tile carrying the metric's own tone: money, count and progress stop
+              looking like the same measurement.
+            */}
             <span className="text-body-sm text-muted-foreground flex items-center gap-2">
-              {m.icon}
+              {m.icon ? (
+                <span
+                  className={cx(
+                    "inline-flex size-7 shrink-0 items-center justify-center border",
+                    m.tone ? METRIC_TILE[m.tone] : "border-border text-muted-foreground",
+                  )}
+                  aria-hidden="true"
+                >
+                  {m.icon}
+                </span>
+              ) : null}
               {m.label}
             </span>
-            <span className="text-h3 font-mono">
+            <span className="text-h2 text-foreground font-mono">
               {m.value}
-              {m.sub ? <span className="text-body-sm text-muted-foreground ml-1">{m.sub}</span> : null}
+              {m.sub ? <span className="text-body-sm text-muted-foreground ml-1 font-sans">{m.sub}</span> : null}
             </span>
+            {/*
+              A number with no movement beside it is a fact with no meaning. Direction is
+              carried by the arrow as well as the colour, so it survives greyscale (§14).
+            */}
+            {m.delta ? (
+              <span
+                className={cx(
+                  "text-caption inline-flex items-center gap-1",
+                  m.delta.direction === "up"
+                    ? "text-success-ink"
+                    : m.delta.direction === "down"
+                      ? "text-destructive-ink"
+                      : "text-muted-foreground",
+                )}
+              >
+                {m.delta.direction === "up" ? (
+                  <ArrowUpRightIcon size={12} weight="bold" aria-hidden="true" />
+                ) : m.delta.direction === "down" ? (
+                  <ArrowDownRightIcon size={12} weight="bold" aria-hidden="true" />
+                ) : (
+                  <MinusIcon size={12} weight="bold" aria-hidden="true" />
+                )}
+                {m.delta.text}
+              </span>
+            ) : null}
           </div>
         ))}
       </div>
@@ -185,12 +278,30 @@ export function MetricGrid({
 }
 
 /* ── Tabs (§21.7) ─────────────────────────────────────────────────────────── */
+const TAB_COUNT_ON: Record<Tone, string> = {
+  success: "bg-success border-success text-background",
+  warning: "bg-warning border-warning text-background",
+  danger: "bg-destructive border-destructive text-background",
+  info: "bg-info border-info text-background",
+  processing: "bg-processing border-processing text-background",
+  neutral: "bg-foreground border-foreground text-background",
+};
+
+const TAB_COUNT_OFF: Record<Tone, string> = {
+  success: "bg-success-subtle border-success text-success-ink",
+  warning: "bg-warning-subtle border-warning text-warning-ink",
+  danger: "bg-destructive-subtle border-destructive text-destructive-ink",
+  info: "bg-info-subtle border-info text-info-ink",
+  processing: "bg-processing-subtle border-processing text-processing-ink",
+  neutral: "border-border text-muted-foreground",
+};
+
 export function Tabs({
   items,
   active,
   onSelect,
 }: {
-  items: Array<{ id: string; label: string; count?: number }>;
+  items: Array<{ id: string; label: string; count?: number; tone?: Tone }>;
   active: string;
   onSelect: (id: string) => void;
 }) {
@@ -212,8 +323,25 @@ export function Tabs({
             )}
           >
             {t.label}
+            {/*
+              The count carries the tone of what it counts. Four businesses forming and
+              four live were the same black chip, so the number told you a quantity and
+              nothing about what kind. An inactive tab keeps the tint but drops to the
+              muted ground, so the active tab still wins.
+            */}
             {t.count !== undefined ? (
-              <span className="bg-foreground text-background text-caption inline-flex size-5 items-center justify-center">
+              <span
+                className={cx(
+                  "text-caption inline-flex size-5 items-center justify-center border",
+                  t.tone
+                    ? on
+                      ? TAB_COUNT_ON[t.tone]
+                      : TAB_COUNT_OFF[t.tone]
+                    : on
+                      ? "bg-foreground border-foreground text-background"
+                      : "border-border text-muted-foreground",
+                )}
+              >
                 {t.count}
               </span>
             ) : null}

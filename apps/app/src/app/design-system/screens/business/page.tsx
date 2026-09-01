@@ -87,14 +87,25 @@ export default function BusinessScreen() {
               <div className="flex flex-col gap-4">
                 {TASKS.map((t) => {
                   /*
-                    A task card carries three facts, and each was being told in flat grey:
-                    is it done, is it blocked, and is it due today. The card now says all
-                    three with a token that means something.
+                    A task card carries three facts and was telling all three in flat grey:
+                    is it done, is it blocked, is it due today.
 
-                      done      success edge, muted ground, filled check
-                      blocked   destructive edge, and the badge tints to match
-                      due today warning ink on the date, because "Due Today 12:00" and
-                                "Due 3 Sep" were the same colour and are not the same fact
+                    The first attempt put a coloured bar down the left edge. Reported the
+                    same day as reading machine-generated, and the objection is fair: a
+                    left bar is the house style of every AI-built dashboard, and it decorates
+                    the container rather than saying anything about the task.
+
+                    So the state lives in the CONTENT instead, where it is read:
+
+                      done       muted ground, filled check, struck title
+                      blocked    an alert glyph and a tinted badge
+                      due today  warning ink and a clock on the date, because
+                                 "Due Today 12:00" and "Due 3 Sep" were the same colour
+                                 and are not the same fact
+
+                    The card itself only responds to the pointer: a very light ground and
+                    a dashed outline on all four sides, which reads as "this is a handle"
+                    without claiming a state it does not have.
                   */
                   const blocked = Boolean(t.priority);
                   const urgent = t.due.startsWith("Today") && !t.done;
@@ -102,10 +113,9 @@ export default function BusinessScreen() {
                   <article
                     key={t.id}
                     className={cx(
-                      "border-border flex flex-col gap-3 border border-l-2 p-4",
-                      t.done && "bg-muted border-l-success",
-                      !t.done && blocked && "border-l-destructive",
-                      !t.done && !blocked && "border-l-border",
+                      "flex flex-col gap-3 border border-dashed p-4",
+                      "transition-[color,background-color,border-color] duration-normal ease-out",
+                      t.done ? "bg-muted border-border" : "border-border hover:border-input hover:bg-accent",
                     )}
                   >
                     <div className="flex items-start justify-between gap-4">

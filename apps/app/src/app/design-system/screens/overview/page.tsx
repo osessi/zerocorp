@@ -41,9 +41,28 @@ export default function OverviewScreen() {
       <div className="mx-auto flex max-w-(--container-content) flex-col gap-8 p-8">
         <MetricGrid
           items={[
-            { label: "Monthly recurring revenue", value: money(mrr), icon: <CurrencyDollarIcon size={16} /> },
-            { label: "Active businesses", value: String(BUSINESSES.length), icon: <BuildingsIcon size={16} /> },
-            { label: "Formations in flight", value: String(inFlight.length), sub: `/${BUSINESSES.length}`, icon: <StackIcon size={16} /> },
+            {
+              label: "Monthly recurring revenue",
+              value: money(mrr),
+              icon: <CurrencyDollarIcon size={14} />,
+              tone: "success",
+              delta: { text: "18% vs last month", direction: "up" },
+            },
+            {
+              label: "Active businesses",
+              value: String(BUSINESSES.length),
+              icon: <BuildingsIcon size={14} />,
+              tone: "info",
+              delta: { text: "2 this month", direction: "up" },
+            },
+            {
+              label: "Formations in flight",
+              value: String(inFlight.length),
+              sub: `of ${BUSINESSES.length}`,
+              icon: <StackIcon size={14} />,
+              tone: "processing",
+              delta: { text: "1 needs your signature", direction: "flat" },
+            },
           ]}
           link={
             <Link href="/design-system/screens/businesses" className="text-body-sm text-foreground focus-visible:outline-ring inline-flex w-fit items-center gap-1 focus-visible:outline-2 focus-visible:outline-offset-2">
