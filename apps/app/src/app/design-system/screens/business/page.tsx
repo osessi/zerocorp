@@ -175,7 +175,16 @@ export default function BusinessScreen() {
                     className={cx(
                       "flex flex-col gap-3 border border-dashed p-4",
                       "transition-[color,background-color,border-color] duration-normal ease-out",
-                      t.done ? "bg-muted border-border" : "border-border hover:border-input hover:bg-accent",
+                      /*
+                        The whole card carries the state, not just a glyph inside it. A
+                        WASH rather than the chip tint: body text here is muted, over a far
+                        larger area, and at the chip tint it measured 4.05:1 on the red.
+                      */
+                      t.done
+                        ? "bg-success-wash border-success"
+                        : blocked
+                          ? "bg-destructive-wash border-destructive"
+                          : "border-border hover:border-input hover:bg-accent",
                     )}
                   >
                     <div className="flex items-start justify-between gap-4">

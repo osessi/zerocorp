@@ -134,6 +134,16 @@
      against another. */
   --info-on-muted: #1d4ed8;
   --destructive-on-muted: #b91c1c;
+
+  /* A WASH is for a whole card; a -subtle is for a chip. Two sizes of the same idea, and
+     the distinction is measured rather than aesthetic: at the 100-level tint, body text
+     in --muted-foreground reached only 4.05:1 on the red and 4.51:1 on the green. A chip
+     holds one short label in -ink; a card holds paragraphs in muted body text, over a far
+     larger area, so it needs a lighter ground. 4.53–4.78:1, and still ≥1.05 against the
+     page so the wash is seen. */
+  --success-wash: #f0fdf4;
+  --warning-wash: #fffbeb;
+  --destructive-wash: #fef2f2;
 }
 
 /* ---------------------------------------------------------------------------
@@ -202,6 +212,12 @@
   /* 5.95:1 and 5.47:1 on #262626, against 4.11 and 4.02 for the -ink step. */
   --info-on-muted: #60a5fa;
   --destructive-on-muted: #f87171;
+
+  /* One step darker than -subtle, for the same reason: a whole card must stay calm.
+     7.36–7.62:1 for body text, ≥1.03 against the page. */
+  --success-wash: #08160e;
+  --warning-wash: #181004;
+  --destructive-wash: #1c0909;
 }
 
 /* ---------------------------------------------------------------------------
@@ -258,6 +274,9 @@
   --color-ai-ink: var(--ai-ink);
   --color-info-on-muted: var(--info-on-muted);
   --color-destructive-on-muted: var(--destructive-on-muted);
+  --color-success-wash: var(--success-wash);
+  --color-warning-wash: var(--warning-wash);
+  --color-destructive-wash: var(--destructive-wash);
 }
 
 @theme {
