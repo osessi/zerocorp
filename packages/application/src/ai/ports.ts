@@ -25,6 +25,14 @@ export interface StructuredResponse {
   readonly model: string;
   readonly inputTokens: number;
   readonly outputTokens: number;
+  /**
+   * What the generation actually cost, in micro-dollars, when the provider reports it.
+   *
+   * Absent means the provider did not say, not that it was free. The caller falls back
+   * to a price table and records which source it used, so an unpriced run shows up as a
+   * gap rather than as 100% margin.
+   */
+  readonly costMicros?: number;
 }
 
 export interface AITextProvider {

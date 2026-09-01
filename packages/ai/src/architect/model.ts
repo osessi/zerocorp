@@ -85,7 +85,10 @@ export class ModelBusinessArchitect implements BusinessArchitect {
         continue;
       }
 
-      const cost = costMicros(response.model, response.inputTokens, response.outputTokens);
+      // The provider's own figure wins. A price table is wrong the day the model
+      // changes, and this run's real cost is not a thing to estimate when it was
+      // reported.
+      const cost = response.costMicros ?? costMicros(response.model, response.inputTokens, response.outputTokens);
       return {
         output: parsed.data,
         usage: {

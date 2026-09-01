@@ -16,10 +16,10 @@
   ],
   "references": [
     {
-      "path": "../design-system"
+      "path": "../contracts"
     },
     {
-      "path": "../contracts"
+      "path": "../design-system"
     }
   ],
   "exclude": [

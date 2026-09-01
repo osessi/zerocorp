@@ -457,6 +457,45 @@
     outline-offset: 2px;
   }
 
+  /*
+    §10 — entrance motion for the conversational assessment.
+
+    Every one of these ends at the element's NATURAL state, so under
+    prefers-reduced-motion, where the rule below collapses the duration to 0.01ms, the
+    element simply appears. Nothing is ever left hidden by a disabled animation, which
+    is the failure mode of writing `opacity: 0` as a resting style.
+
+    Distances are small on purpose. 8px reads as "this arrived"; 24px reads as "this
+    flew in", and a business interview is not a slideshow.
+  */
+  @keyframes zc-rise {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes zc-fade {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+
+  /* The thinking indicator. Opacity only: nothing moves while the system is quiet. */
+  @keyframes zc-pulse {
+    0%, 100% { opacity: 0.25; }
+    50%      { opacity: 1; }
+  }
+
+  .zc-enter {
+    animation: zc-rise var(--duration-modal) var(--ease-out) both;
+  }
+
+  .zc-enter-fade {
+    animation: zc-fade var(--duration-emphasis) var(--ease-out) both;
+  }
+
+  .zc-pulse {
+    animation: zc-pulse 1.2s var(--ease-in-out) infinite;
+  }
+
   /* §10 — motion is honoured, never imposed. */
   @media (prefers-reduced-motion: reduce) {
     *,

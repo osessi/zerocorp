@@ -20,3 +20,4 @@ export * from "./feedback/index";
 export * from "./field/index";
 export * from "./status-badge/index";
 export * from "./layout/index";
+export * from "./conversation/index";

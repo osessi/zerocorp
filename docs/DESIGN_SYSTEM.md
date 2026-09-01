@@ -2109,6 +2109,70 @@ than behind a greyed-out anchor.
 
 ---
 
+### 21.26 The conversational assessment — PROPOSED 2026-09-01
+
+Five components, built for D18 and awaiting review at
+`/design-system/assessment-preview`. That route runs the **real** deterministic
+interviewer and architect rather than fixtures: a preview built from mock data shows
+what someone hoped the experience would be.
+
+| Component | What it is |
+|---|---|
+| `ConversationLayout` | Header with slot progress, scrolling column, persistent dock. A sibling of `FocusedFlowLayout`, not a replacement: that one frames a fixed sequence, this one frames a conversation whose length is not known in advance |
+| `PromptHero` | A starting point that is a prompt rather than a button. `page` on the landing, `panel` inside the product |
+| `PromptDock` | Textarea, microphone, send. Always present, even on a choice question |
+| `QuestionCard` | Renders exactly the four shapes the contract defines |
+| `SlotProgress` · `AnsweredTurn` · `Thinking` | The supporting pieces |
+
+**Six decisions worth arguing with:**
+
+1. **No step counter.** The interview may end at turn three or turn eight, so "Step 3 of
+   7" would be a lie. What replaces it is the slot checklist, which renders the same
+   state that decides when the interview stops. The two can never disagree; a separate
+   counter eventually would.
+
+2. **The landing IS the first question.** The opening question is fixed and costs no
+   model call (D18), so making a visitor click through to answer it buys nothing. They
+   type in the hero, press send, the page becomes the conversation. One click and one
+   page transition removed, and the visitor is committed before anything is spent.
+
+3. **`PromptHero` is a product pattern, not a landing-page one.** Every "start
+   something" surface inside ZeroCorp is the same gesture. A founder learns one way to
+   begin anything, and an empty panel stops being a dead end with a button in it.
+
+4. **The dock never disappears.** "None of these" and "skip to the plan" are things a
+   person says to an interlocutor and cannot say to a form. That missing escape hatch is
+   precisely what makes a wizard feel like paperwork.
+
+5. **The send button morphs, it does not multiply.** Microphone when there is nothing to
+   send, arrow when there is. Two buttons where one will do makes the visitor choose
+   between them every time.
+
+6. **A single choice submits itself.** Asking someone to pick and then press Continue
+   adds a click carrying no information. A multiple choice keeps Continue, because
+   nothing else can know when they have finished choosing.
+
+**Motion.** Three keyframes in `tokens.css` — `zc-rise`, `zc-fade`, `zc-pulse` — all
+ending at the element's natural state, so under `prefers-reduced-motion`, where §10's
+rule collapses every duration to 0.01ms, elements simply appear. Nothing is ever left
+hidden by a disabled animation, which is what `opacity: 0` as a resting style does.
+Options stagger 40ms apart: under ~30ms the eye reads it as simultaneous, over ~60ms a
+six-item list finishes arriving after it has been read.
+
+**The thinking indicator is opacity only.** A spinner says the machine is busy. Three
+dots breathing say someone is considering what you said, which is the difference between
+waiting for software and waiting for a person.
+
+**Structure borrowed, skin refused.** The dock's arrangement is the familiar AI composer
+and the hero's is NanoCorp's. None of the styling is: radius stays 0, the icons are
+Phosphor, the type is Geist and the border is `--input`. A rounded dock in an interface
+built from right angles is noticed immediately, and not favourably.
+
+**Still open — item 20.** Plan steps carry no colour badge. Nine categories against six
+status tones, and those tones already mean something specific.
+
+---
+
 ### 21.24 `FocusedFlowLayout` — VALIDATED 2026-09-01
 
 > Numbered 21.24 rather than 21.14 on purpose: the original thirteen patterns are

@@ -20,4 +20,5 @@ export * from "./formation-request";
 export * from "./assessment";
 export * from "./plan";
 export * from "./architect";
+export * from "./interview";
 export * from "./billing";

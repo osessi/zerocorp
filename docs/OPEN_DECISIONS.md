@@ -124,6 +124,72 @@ any plan.
 
 ---
 
+## D18 — The assessment becomes an adaptive interview ✅ RESOLVED 2026-09-01
+
+The five-question form was a form. The experience becomes a guided interview where the
+system asks one question at a time and decides the next from what it already understands.
+
+**The Business Architect contract does not change.** ADR 0002 stands untouched, because
+the interview is not a replacement for the architect: it is a smarter way of filling the
+same five slots.
+
+```text
+Interviewer   slot state + last answer  →  the next question     small, per turn
+Architect     complete slots            →  analysis + plan       unchanged, once
+```
+
+The interviewer's job is bounded and testable: **fill five slots with the fewest
+questions.** Not a chatbot — slot filling with a goal. `assessmentAnswersSchema` is
+untouched, and the "Understanding you ✓✓✓○○" progress IS the slot state rather than a
+decoration.
+
+**Four decisions, 2026-09-01:**
+
+| | Decision | Why |
+|---|---|---|
+| Turn budget | **8 questions maximum** | Anti-abuse before it is ergonomics. Each turn is now a paid call, so a script answering nonsense costs eight times what it used to. Past eight the interviewer must conclude with what it has |
+| First turn | **Fixed, then adaptive** | Rendered with no model call at all. The visitor commits before we spend, the page has no first-turn latency, and a bounced visitor costs nothing. The AI has real context by turn two, which is when it can actually be adaptive |
+| Free-text dock | **Always open** | Even on a choice question. "None of these" and "skip to the plan" are things a person says to an interlocutor and cannot say to a form. Bounded by the turn cap and a polite redirect |
+| Email | **Before the analysis** | Asked immediately before the one expensive call, so every AI spend is tied to a recoverable contact and the visitors who abandon while reading are still reachable. It adds friction at the point of highest anticipation, which is the cheapest place to put it |
+
+**The cost consequence, stated plainly.** One call per assessment becomes up to nine.
+Roughly 1.6 cents becomes roughly 3 cents, and 10,000 free assessments go from about
+$160 to about $300. The money is not the problem. **The abuse surface is:** a visitor
+used to trigger one paid call and can now trigger nine. The turn cap is a control, not a
+preference.
+
+**One new type is proposed beyond the brief.** `confirm`: when the interviewer has
+INFERRED a slot rather than been told it, it asks for a one-click confirmation instead of
+re-asking. That is the difference between "it is interrogating me" and "it understood".
+
+---
+
+## D19 — OpenRouter, with the model chosen in configuration ✅ RESOLVED 2026-09-01
+
+The AI provider becomes OpenRouter. The model is an environment variable, one per agent:
+
+```text
+OPENROUTER_MODEL_INTERVIEW    called often, decides little
+OPENROUTER_MODEL_ARCHITECT    called once, decides everything
+```
+
+Two consequences that are not obvious and that the implementation must handle:
+
+1. **Structured-output support is per ENDPOINT, not per model.** The same model served by
+   two providers may support `json_schema` at one and not the other. Every request
+   therefore sends `provider.require_parameters: true`, and the app queries
+   `/api/v1/models` at boot and **refuses to start** if the configured model does not
+   advertise `structured_outputs`. Without both, ADR 0002's "reject, never repair" rule
+   collapses silently the first time the model is changed.
+2. **Prices come from the API, not from a table.** A hard-coded price table is wrong the
+   day the model changes, and a margin figure that is quietly wrong is worse than none.
+
+`AnthropicTextProvider` is kept rather than deleted. It works, it is tested, and two
+adapters behind one port is the cheapest possible proof that the port is real — which is
+the whole claim D14 makes about providers.
+
+---
+
 ## D1 — Runtime topology ✅ RESOLVED
 
 **Resolved 2026-08-30 by [ADR 0001](./adr/0001-runtime-topology.md) (Accepted).**
