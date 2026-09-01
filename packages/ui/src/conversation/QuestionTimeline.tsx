@@ -1,6 +1,6 @@
 "use client";
 
-import { CheckIcon, PencilSimpleIcon } from "@phosphor-icons/react/dist/ssr";
+import { PencilSimpleIcon } from "@phosphor-icons/react/dist/ssr";
 import type { ComponentType } from "react";
 import { cx } from "../cx";
 import { ACCENT_EDGE, ACCENT_FILL, ACCENT_RULE, ACCENT_TEXT, ACCENT_TINT, accentFor } from "./accent";
@@ -69,13 +69,9 @@ export function QuestionTimeline({
                     : "border-border text-muted-foreground bg-background",
               )}
             >
-              {/* Answered shows a check, because "done" is the more useful fact once it
-                  is done. The icon carries the identity until then. */}
-              {answered ? (
-                <CheckIcon size={12} weight="bold" />
-              ) : Icon ? (
-                <Icon size={12} weight="regular" />
-              ) : null}
+              {/* The glyph stays; only the fill changes. Five identical ticks tell a
+                  founder scanning back for one answer nothing at all. */}
+              {Icon ? <Icon size={12} weight="regular" /> : null}
             </span>
             {!last ? (
               // Two layers, like the rail: a track that is always there and a run that

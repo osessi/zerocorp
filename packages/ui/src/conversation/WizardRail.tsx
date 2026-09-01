@@ -1,4 +1,3 @@
-import { CheckIcon } from "@phosphor-icons/react/dist/ssr";
 import type { ComponentType } from "react";
 import { cx } from "../cx";
 import { ACCENT_EDGE, ACCENT_FILL, ACCENT_RULE, ACCENT_TEXT, ACCENT_TINT, accentFor } from "./accent";
@@ -123,9 +122,16 @@ export function WizardRail({
                   clickable && "group-hover/step:brightness-110",
                 )}
               >
-                {settled ? (
-                  <CheckIcon size={14} weight="bold" aria-hidden="true" />
-                ) : Icon ? (
+                {/*
+                  The step keeps its own glyph once it is done. Only the colour changes.
+
+                  Swapping it for a check erases what the step WAS at the moment the rail
+                  becomes most useful: a founder scanning back for "where did I say what
+                  I do" finds five identical ticks. Done, current and upcoming are told
+                  apart by the fill, which is a difference the glyph does not have to
+                  carry.
+                */}
+                {Icon ? (
                   <Icon size={14} weight="regular" aria-hidden="true" />
                 ) : (
                   <span className="text-caption font-mono tabular-nums" aria-hidden="true">
