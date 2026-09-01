@@ -1,5 +1,10 @@
 "use client";
 
+import {
+  ArrowsClockwiseIcon,
+  CaretRightIcon,
+  RobotIcon,
+} from "@phosphor-icons/react/dist/ssr";
 import type { ReactNode } from "react";
 import type { Tone } from "./data";
 
@@ -241,17 +246,34 @@ export function ActivityPanel({
         return (
           <li key={e.id} className="flex gap-3">
             <div className="flex flex-col items-center">
+              {/*
+                Three kinds, three MARKERS. They were two: a round avatar for a person and,
+                for both agent and system, the same grey square holding a 6px dot. Agent
+                and system differed only by a background nobody could perceive, so a feed
+                mixing people and machines read as one undifferentiated column.
+
+                  person   a circle, with initials
+                  agent    a square, --ai tint, robot glyph
+                  system   a square, --processing tint, state-change glyph
+
+                Round means a human, square means a machine. The glyph carries the rest, so
+                the distinction survives greyscale and does not rest on colour (§14).
+              */}
               {e.kind === "person" ? (
                 <Avatar initials={e.actor.slice(0, 2).toUpperCase()} size="sm" />
-              ) : (
+              ) : e.kind === "agent" ? (
                 <span
-                  className={cx(
-                    "border-border text-muted-foreground inline-flex size-6 shrink-0 items-center justify-center border",
-                    e.kind === "agent" ? "bg-accent" : "bg-background",
-                  )}
+                  className="bg-ai-subtle border-ai text-ai-ink inline-flex size-6 shrink-0 items-center justify-center border"
                   aria-hidden="true"
                 >
-                  <span className="size-1.5 bg-current" />
+                  <RobotIcon size={14} weight="regular" />
+                </span>
+              ) : (
+                <span
+                  className="bg-processing-subtle border-processing text-processing-ink inline-flex size-6 shrink-0 items-center justify-center border"
+                  aria-hidden="true"
+                >
+                  <ArrowsClockwiseIcon size={14} weight="regular" />
                 </span>
               )}
               {!last ? <span className="bg-border w-px flex-1" aria-hidden="true" /> : null}
@@ -263,16 +285,29 @@ export function ActivityPanel({
                 {e.object ? <span className="text-foreground"> {e.object}</span> : null}
               </p>
               <p className="text-caption text-muted-foreground">{e.at}</p>
+              {/* The chip belongs to whoever acted. An agent's chip is an agent's colour. */}
               {e.chip ? (
-                <span className="border-border text-caption text-muted-foreground w-fit border px-2 py-0.5">
+                <span
+                  className={cx(
+                    "text-caption w-fit border px-2 py-0.5",
+                    e.kind === "agent"
+                      ? "bg-ai-subtle border-ai text-ai-ink"
+                      : "border-border text-muted-foreground",
+                  )}
+                >
                   {e.chip}
                 </span>
               ) : null}
               {e.transition ? (
                 <span className="text-caption text-muted-foreground flex items-center gap-2">
-                  <span className="border-border border px-2 py-0.5">{e.transition[0]}</span>
-                  <span aria-hidden="true">→</span>
-                  <span className="border-processing text-processing border px-2 py-0.5">
+                  {/* The state left behind is spent: muted, struck through. The state
+                      arrived at is live: tinted. Two identical outlined chips with an
+                      arrow between them made the reader work out which was which. */}
+                  <span className="border-border text-muted-foreground border px-2 py-0.5 line-through">
+                    {e.transition[0]}
+                  </span>
+                  <CaretRightIcon size={12} aria-hidden="true" className="shrink-0" />
+                  <span className="bg-processing-subtle border-processing text-processing-ink border px-2 py-0.5">
                     {e.transition[1]}
                   </span>
                 </span>

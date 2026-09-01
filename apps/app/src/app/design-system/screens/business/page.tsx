@@ -4,6 +4,7 @@ import { useState } from "react";
 import {
   ArrowLeftIcon, EnvelopeSimpleIcon, PhoneIcon, DotsThreeIcon, PlusIcon,
   CheckCircleIcon, CircleIcon, BellIcon, BuildingsIcon, CurrencyDollarIcon,
+  ClockIcon, WarningCircleIcon,
 } from "@phosphor-icons/react/dist/ssr";
 import { PageHeader } from "../../_prototype/shell";
 import { ActivityPanel, Avatar, AvatarStack, Button, PanelLabel, SectionHeader, StatusBadge, Tabs, cx } from "../../_prototype/primitives";
@@ -30,7 +31,7 @@ export default function BusinessScreen() {
         title="Northbridge Studio LLC"
         subtitle="Wyoming · Growth · Created 12 Aug, 2026"
         people={<AvatarStack people={["AO", "TK", "OK"]} />}
-        actions={<><Button><EnvelopeSimpleIcon size={16} /> Email</Button><Button><PhoneIcon size={16} /> Call</Button><Button><DotsThreeIcon size={16} /> More</Button></>}
+        actions={<><Button variant="primary"><EnvelopeSimpleIcon size={16} /> Email</Button><Button><PhoneIcon size={16} /> Call</Button><Button><DotsThreeIcon size={16} /> More</Button></>}
       />
 
       {/*
@@ -51,7 +52,7 @@ export default function BusinessScreen() {
               <PanelLabel>Formation</PanelLabel>
               <ul className="flex flex-col gap-4">
                 {[
-                  { icon: <BuildingsIcon size={16} />, label: "Entity type", value: "LLC — single member" },
+                  { icon: <BuildingsIcon size={16} />, label: "Entity type", value: "LLC, single member" },
                   { icon: <BuildingsIcon size={16} />, label: "State", value: "Wyoming" },
                   { icon: <CurrencyDollarIcon size={16} />, label: "Plan", value: "Growth · $399/mo" },
                 ].map((m) => (
@@ -84,17 +85,52 @@ export default function BusinessScreen() {
             <section className="flex flex-col gap-4">
               <SectionHeader title="Open tasks" action={<Button variant="primary"><PlusIcon size={16} /> Create task</Button>} />
               <div className="flex flex-col gap-4">
-                {TASKS.map((t) => (
-                  <article key={t.id} className={cx("border-border flex flex-col gap-3 border p-4", t.done && "bg-muted")}>
+                {TASKS.map((t) => {
+                  /*
+                    A task card carries three facts, and each was being told in flat grey:
+                    is it done, is it blocked, and is it due today. The card now says all
+                    three with a token that means something.
+
+                      done      success edge, muted ground, filled check
+                      blocked   destructive edge, and the badge tints to match
+                      due today warning ink on the date, because "Due Today 12:00" and
+                                "Due 3 Sep" were the same colour and are not the same fact
+                  */
+                  const blocked = Boolean(t.priority);
+                  const urgent = t.due.startsWith("Today") && !t.done;
+                  return (
+                  <article
+                    key={t.id}
+                    className={cx(
+                      "border-border flex flex-col gap-3 border border-l-2 p-4",
+                      t.done && "bg-muted border-l-success",
+                      !t.done && blocked && "border-l-destructive",
+                      !t.done && !blocked && "border-l-border",
+                    )}
+                  >
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex min-w-0 items-start gap-3">
-                        {t.done ? <CheckCircleIcon size={20} weight="fill" className="text-success shrink-0" /> : <CircleIcon size={20} className="text-muted-foreground shrink-0" />}
+                        {t.done ? (
+                          <CheckCircleIcon size={20} weight="fill" className="text-success shrink-0" />
+                        ) : blocked ? (
+                          <WarningCircleIcon size={20} className="text-destructive shrink-0" />
+                        ) : (
+                          <CircleIcon size={20} className="text-muted-foreground shrink-0" />
+                        )}
                         <div className="flex min-w-0 flex-col gap-1">
                           <h3 className={cx("text-body", t.done && "text-muted-foreground line-through")}>{t.title}</h3>
                           <p className="text-body-sm text-muted-foreground">{t.detail}</p>
                         </div>
                       </div>
-                      <span className="text-caption text-muted-foreground shrink-0">Due {t.due}</span>
+                      <span
+                        className={cx(
+                          "text-caption shrink-0 inline-flex items-center gap-1.5 whitespace-nowrap",
+                          urgent ? "text-warning-ink" : "text-muted-foreground",
+                        )}
+                      >
+                        {urgent ? <ClockIcon size={14} weight="regular" aria-hidden="true" /> : null}
+                        Due {t.due}
+                      </span>
                     </div>
                     <div className="flex flex-wrap items-center justify-between gap-3">
                       <span className="text-caption text-muted-foreground flex items-center gap-2">
@@ -106,7 +142,8 @@ export default function BusinessScreen() {
                       </span>
                     </div>
                   </article>
-                ))}
+                  );
+                })}
               </div>
             </section>
 

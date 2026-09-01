@@ -159,7 +159,7 @@ export default function DrawerScreen() {
                 </article>
               </div>
 
-              <PanelLabel>Prototype — RightDrawer is PROPOSED, not approved</PanelLabel>
+              <PanelLabel>Prototype: RightDrawer is PROPOSED, not approved</PanelLabel>
             </div>
           </aside>
         </>
