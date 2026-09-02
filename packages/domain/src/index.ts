@@ -17,3 +17,4 @@ export * from "./formation";
 export * from "./architect";
 export * from "./interview";
 export * from "./generation";
+export * from "./formation/residency";

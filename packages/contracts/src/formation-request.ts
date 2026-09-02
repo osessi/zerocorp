@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { entityTypeCodeSchema, founderProfileSchema, registrationKindSchema } from "./jurisdiction";
 import { eligibilityResultSchema } from "./eligibility";
+import { countryCodeSchema } from "./country";
 import { routingDecisionSchema, providerCodeSchema } from "./provider";
 import { customerMoneySchema, costMoneySchema } from "./money";
 
@@ -160,3 +161,27 @@ export const companyRegistrationSchema = z.object({
   issuedAt: z.date().nullable().default(null),
 });
 export type CompanyRegistration = z.infer<typeof companyRegistrationSchema>;
+
+/**
+ * The formation intake, as a founder fills it.
+ *
+ * Five questions the product had never asked. Residency leads because it gates: it
+ * decides sanctions screening, which EIN path applies, which jurisdiction is recommended,
+ * and it is the primary fraud signal when it disagrees with the card and IP country.
+ *
+ * It lives in contracts, not in the app, because an app is a thin adapter and a schema in
+ * a route handler is a schema no other caller can reuse.
+ */
+export const formationIntakeSchema = z.object({
+  entityTypeCode: z.string().min(1).max(40),
+  jurisdictionCode: z.string().min(2).max(8),
+  /** Where the founder LIVES. Never inferred from where they sell. */
+  residencyCountry: countryCodeSchema,
+  proposedNames: z.array(z.string().trim().min(1).max(120)).min(1).max(3),
+  ownerCount: z.coerce.number().int().min(1).max(50),
+  /** An SSN or ITIN. Decides whether the EIN takes a day or two months. */
+  hasUsTaxId: z.boolean(),
+  wantsExternalInvestment: z.boolean(),
+  targetMarkets: z.array(countryCodeSchema).min(1).max(12),
+});
+export type FormationIntake = z.infer<typeof formationIntakeSchema>;

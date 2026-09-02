@@ -11,6 +11,7 @@ import {
   createSystemUnitOfWork,
   createUnitOfWork,
   createOnboardingRepository,
+  createFormationRepository,
 } from "@zerocorp/db";
 import {
   createAssessmentService,
@@ -29,7 +30,9 @@ import {
   type SystemUnitOfWork,
   type UnitOfWork as Uow,
   createOnboardingService,
+  createFormationRequest,
   type OnboardingService,
+  type FormationProviderRegistry,
 } from "@zerocorp/application";
 import {
   DeterministicArchitect,
@@ -289,4 +292,39 @@ export function getOnboardingService(): OnboardingService {
     extractor: buildExtractor(),
   });
   return onboarding;
+}
+
+/**
+ * The provider registry.
+ *
+ * Empty on purpose, and loud about it. §44 forbids assuming a provider has an API
+ * because its website takes a web order, and no adapter has been verified yet. Formation
+ * runs operator-assisted: a ZeroCorp operator moves the order through its states by hand
+ * and the console records each transition. When a verified adapter exists it registers
+ * here and the same state machine drives it, with no rewrite above this line.
+ *
+ * `createFormationRequest` never calls this — it checks eligibility and records the ask.
+ * Routing does, and routing is what will fail loudly the day someone tries it early.
+ */
+function providerRegistry(): FormationProviderRegistry {
+  return {
+    get(code: string) {
+      throw new Error(
+        `No verified adapter for provider "${code}". Formation is operator-assisted; move the order from the console.`,
+      );
+    },
+    all: () => [],
+  };
+}
+
+let formationRequests: ReturnType<typeof createFormationRequest> | undefined;
+export function getFormationRequestService() {
+  formationRequests ??= createFormationRequest({
+    uow: getUnitOfWork(),
+    catalog: getFormationCatalog(),
+    repository: createFormationRepository(),
+    providers: providerRegistry(),
+    clock: { now: () => new Date() },
+  });
+  return formationRequests;
 }

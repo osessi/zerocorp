@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { BuildingsIcon, FileTextIcon, QuestionIcon } from "@phosphor-icons/react/dist/ssr";
-import { ButtonLink, EmptyState, PageHeader, StatusBadge } from "@zerocorp/ui";
+import { ButtonLink, EmptyState, PageHeader, StatusBadge, StatusStamp } from "@zerocorp/ui";
+import { Intake } from "./Intake";
 import { getBlocksRepository, getFormationCatalog, getUnitOfWork } from "../../../server/container";
 import { getViewer } from "../../../server/session";
 import { Empty, Fact, FactCell, FactGrid, Panel, Row, Rows } from "../ui";
@@ -84,6 +85,16 @@ export default async function Page() {
         {view.company ? (
           <>
             <Panel title="Your entity">
+              {/* The milestone treatment. FORMED is the moment a founder screenshots and
+                  sends to somebody, and a 20px chip is not what that deserves (§21). */}
+              {view.company.status === "active" ? (
+                <div className="flex justify-end px-5 pt-5">
+                  <StatusStamp
+                    milestone="formed"
+                    {...(view.company.formationDate ? { date: String(view.company.formationDate) } : {})}
+                  />
+                </div>
+              ) : null}
               <FactGrid>
                 <FactCell><Fact label="Legal name" value={view.company.legalName} /></FactCell>
                 <FactCell><Fact label="Jurisdiction" value={view.company.jurisdictionCode.toUpperCase()} tone="text-chart-1" /></FactCell>
@@ -155,24 +166,23 @@ export default async function Page() {
             Registrations and documents are now hidden entirely until an entity exists,
             because they are not empty — they are not yet possible.
           */
-          <EmptyState
-            icon={BuildingsIcon}
-            title={view.request ? "Your company is being formed" : "You have no company yet"}
-            body={
-              view.request
-                ? "The filing is in progress. Your entity, registrations and documents all appear here the moment the authority registers it."
-                : "ZeroCorp forms it for you, or connects one you already have. Nothing is filed until you have chosen a structure and signed."
-            }
-            action={
-              view.request ? (
-                <ButtonLink href="/dashboard">See what is in progress</ButtonLink>
-              ) : (
-                <ButtonLink href="/onboarding" variant="primary">
-                  Tell us about your business
-                </ButtonLink>
-              )
-            }
-          />
+          view.request ? (
+            <EmptyState
+              icon={BuildingsIcon}
+              title="Your company is being formed"
+              body="Your entity, registrations and documents all appear here the moment the authority registers it."
+              action={<ButtonLink href="/dashboard">See what is in progress</ButtonLink>}
+            />
+          ) : (
+            /* The intake, not an empty state. There is exactly one thing to do here and
+               it is a form, so the form IS the screen rather than something an empty
+               state points at. */
+            <Panel title="Form your company">
+              <div className="p-5">
+                <Intake entities={[...entities]} targetMarkets={[]} />
+              </div>
+            </Panel>
+          )
         )}
 
         <Panel title="What ZeroCorp can form" count={entities.length}>
