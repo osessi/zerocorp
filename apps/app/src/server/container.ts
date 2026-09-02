@@ -33,6 +33,8 @@ import {
 } from "@zerocorp/application";
 import {
   DeterministicArchitect,
+  DeterministicExtractor,
+  ModelExtractor,
   DeterministicInterviewer,
   FallbackArchitect,
   FallbackInterviewer,
@@ -111,6 +113,20 @@ export async function verifyModels(): Promise<void> {
   }
 }
 
+/**
+ * The onboarding extractor: a transcript in, eight fields out.
+ *
+ * Without a key it is the deterministic one, which takes the first sentence as the
+ * description and honestly reports it heard nothing else. That is a thin answer, not a
+ * wrong one — the reveal then asks for the other seven, which is the same screen the
+ * founder would see anyway.
+ */
+function buildExtractor() {
+  const provider = openRouter(MODEL_EXTRACT);
+  return provider ? new ModelExtractor({ provider }) : new DeterministicExtractor();
+}
+
+const MODEL_EXTRACT = process.env["OPENROUTER_MODEL_EXTRACT"] ?? "anthropic/claude-sonnet-4.6";
 const MODEL_INTERVIEW = process.env["OPENROUTER_MODEL_INTERVIEW"] ?? "anthropic/claude-haiku-4.5";
 const MODEL_ARCHITECT = process.env["OPENROUTER_MODEL_ARCHITECT"] ?? "anthropic/claude-sonnet-4.6";
 
@@ -270,6 +286,7 @@ export function getOnboardingService(): OnboardingService {
   onboarding ??= createOnboardingService({
     uow: getUnitOfWork(),
     repository: createOnboardingRepository(),
+    extractor: buildExtractor(),
   });
   return onboarding;
 }

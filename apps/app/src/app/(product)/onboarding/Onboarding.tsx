@@ -10,12 +10,13 @@ import {
   type OnboardingState,
   type RevealGroup,
 } from "@zerocorp/contracts";
-import { Button, ButtonLink, PromptDock, SegmentedProgress, StatusBadge } from "@zerocorp/ui";
+import { Button, ButtonLink, ENTER, PromptDock, REVEAL_MS, SegmentedProgress, StatusBadge, cx, staggerStyle } from "@zerocorp/ui";
 import { STEP_COPY, GROUP_COPY } from "./copy";
+import { Talk } from "./Talk";
 import { finishOnboarding, saveAnswer } from "./actions";
 
 /**
- * Launch your business.
+ * Tell us about your business.
  *
  * One question on the screen at a time, with the microphone as the primary input: these
  * are questions people answer better out loud than in a textarea, and the schema has
@@ -27,7 +28,12 @@ import { finishOnboarding, saveAnswer } from "./actions";
  * away because they wanted to re-read an earlier answer.
  */
 export function Onboarding({ initial }: { initial: OnboardingState }) {
+  const router = useRouter();
   const [state, setState] = useState(initial);
+  // Voice first. A founder who has already answered something is resuming, so the
+  // recording screen would be asking them to start over.
+  const anyAnswered = ONBOARDING_STEPS.some((s) => (initial.answers[s] ?? []).length > 0);
+  const [phase, setPhase] = useState<"talk" | "form">(anyAnswered ? "form" : "talk");
   const [pending, start] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
@@ -67,6 +73,25 @@ export function Onboarding({ initial }: { initial: OnboardingState }) {
     });
   }
 
+  if (phase === "talk") {
+    return (
+      <Talk
+        onExtracted={() => {
+          // Straight to the reveal. The whole point of talking was to arrive at a form
+          // that is already full; stepping through eight questions afterwards would
+          // throw away what was just gained.
+          router.refresh();
+          setPhase("form");
+          setIndex(ONBOARDING_STEPS.length);
+        }}
+        onSkip={() => {
+          setPhase("form");
+          setIndex(0);
+        }}
+      />
+    );
+  }
+
   if (done) return <Reveal state={state} onEdit={goTo} />;
 
   const copy = STEP_COPY[step!];
@@ -76,7 +101,7 @@ export function Onboarding({ initial }: { initial: OnboardingState }) {
     <div className="mx-auto flex w-full max-w-3xl flex-col gap-8 px-5 py-10 sm:px-8">
       <header className="flex flex-col gap-4">
         <div className="flex items-center justify-between gap-4">
-          <span className="text-overline text-muted-foreground">Launch your business</span>
+          <span className="text-overline text-muted-foreground">Tell us about your business</span>
           <span className="text-caption text-muted-foreground font-mono tabular-nums">
             {index + 1} of {ONBOARDING_STEPS.length}
           </span>
@@ -183,48 +208,74 @@ function Reveal({ state, onEdit }: { state: OnboardingState; onEdit: (i: number)
   }
 
   return (
-    <div className="flex flex-col">
-      <header className="bg-surface-focal text-surface-focal-foreground border-border border-b">
-        <div className="mx-auto flex w-full max-w-4xl flex-col gap-3 px-5 py-8 sm:px-8">
-          <span className="text-overline text-surface-focal-foreground/60">Launch your business</span>
-          <h1 className="text-h1">Here is what we understood.</h1>
-          <p className="text-body-lg text-surface-focal-foreground/70 max-w-prose">
-            Everything ZeroCorp builds from here reads this. Change anything that is not right
-            — it takes one click and it is worth doing now rather than after a website exists.
+    /*
+      The reveal.
+
+      The one screen in the product allowed to be slow. Everything before it was the
+      founder doing work; this is the product showing it was listening, and a founder
+      watching their own business appear line by line is the moment the price stops
+      feeling like a gamble.
+
+      Full bleed on --surface-focal rather than a panel inside a page: this is not a
+      section of a screen, it IS the screen. The groups reveal in sequence at 90ms apart
+      — slow enough to read as arriving, fast enough that nobody waits.
+    */
+    <div className="bg-surface-focal text-surface-focal-foreground flex min-h-full flex-col">
+      <header className="border-surface-focal-foreground/15 border-b">
+        <div className="mx-auto flex w-full max-w-4xl flex-col gap-3 px-5 py-12 sm:px-8">
+          <span className="text-overline text-surface-focal-foreground/60">Tell us about your business</span>
+          <h1 className={cx("text-display-l", ENTER)}>Here is what we understood.</h1>
+          <p className={cx("text-body-lg text-surface-focal-foreground/70 max-w-prose", ENTER)} style={staggerStyle(1, 8, REVEAL_MS)}>
+            Everything ZeroCorp builds reads this. Change anything that is not right — one click,
+            and far cheaper now than after a website exists.
           </p>
         </div>
       </header>
 
-      <div className="mx-auto flex w-full max-w-4xl flex-col gap-8 px-5 py-8 sm:px-8">
-        {(Object.keys(REVEAL_GROUPS) as RevealGroup[]).map((group) => {
+      <div className="mx-auto flex w-full max-w-4xl flex-col gap-10 px-5 py-10 sm:px-8">
+        {(Object.keys(REVEAL_GROUPS) as RevealGroup[]).map((group, gi) => {
           const g = GROUP_COPY[group];
+          const filled = REVEAL_GROUPS[group].every((k) => (state.answers[k] ?? []).length > 0);
           return (
-            <section key={group} className="flex flex-col gap-3">
+            <section
+              key={group}
+              className={cx("flex flex-col gap-3", ENTER)}
+              /* 90ms apart. REVEAL_MS, not the 40ms option stagger: options are a list
+                 you are about to scan, this is the product settling one line at a time,
+                 which is what says it was worked out rather than fetched. */
+              style={staggerStyle(gi + 2, 8, REVEAL_MS)}
+            >
               <div className="flex items-center gap-3">
                 <h2 className="text-h4">{g.title}</h2>
-                <StatusBadge tone={g.tone}>Understood</StatusBadge>
+                {/* Honest per group. A group ZeroCorp did not hear says so and asks,
+                    rather than presenting an empty line as understood. */}
+                {filled ? (
+                  <StatusBadge tone={g.tone}>Understood</StatusBadge>
+                ) : (
+                  <StatusBadge tone="warning">Needs a word from you</StatusBadge>
+                )}
               </div>
 
-              <dl className="border-border border">
+              <dl className="border-surface-focal-foreground/15 bg-surface-focal-foreground/[0.03] border">
                 {REVEAL_GROUPS[group].map((key) => {
                   const values = state.answers[key] ?? [];
                   const stepIndex = ONBOARDING_STEPS.indexOf(key);
                   return (
                     <div
                       key={key}
-                      className="border-border hover:bg-accent flex flex-col gap-2 border-b px-5 py-4 last:border-b-0 sm:flex-row sm:items-start sm:gap-6"
+                      className="border-surface-focal-foreground/15 hover:bg-surface-focal-foreground/[0.06] flex flex-col gap-2 border-b px-5 py-4 transition-[background-color] duration-normal last:border-b-0 sm:flex-row sm:items-start sm:gap-6"
                     >
-                      <dt className="text-caption text-muted-foreground sm:w-48 sm:shrink-0">
+                      <dt className="text-caption text-surface-focal-foreground/55 sm:w-48 sm:shrink-0">
                         {STEP_COPY[key].title}
                       </dt>
                       <dd className="m-0 flex min-w-0 flex-1 flex-col gap-1">
                         {values.length === 0 ? (
-                          <span className="text-body-sm text-muted-foreground italic">Not answered</span>
+                          <span className="text-warning text-body-sm">Tell us this one</span>
                         ) : isListStep(key) ? (
                           <ul className="flex flex-col gap-1">
                             {values.map((v) => (
                               <li key={v} className="text-body-sm flex items-start gap-2">
-                                <CheckIcon size={14} className="text-success mt-1 shrink-0" aria-hidden="true" />
+                                <CheckIcon size={14} className="text-primary-emphasis mt-1 shrink-0" aria-hidden="true" />
                                 {v}
                               </li>
                             ))}
@@ -250,8 +301,8 @@ function Reveal({ state, onEdit }: { state: OnboardingState; onEdit: (i: number)
           </p>
         ) : null}
 
-        <div className="border-border flex flex-wrap items-center justify-between gap-4 border-t pt-6">
-          <p className="text-body-sm text-muted-foreground max-w-prose">
+        <div className="border-surface-focal-foreground/15 flex flex-wrap items-center justify-between gap-4 border-t pt-8 pb-4">
+          <p className="text-body-sm text-surface-focal-foreground/70 max-w-prose">
             Confirming starts the build. ZeroCorp writes your brand, your site and your first
             articles from exactly what is above.
           </p>

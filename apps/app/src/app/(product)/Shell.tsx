@@ -32,8 +32,9 @@ const GROUPS: NavGroup[] = [
     label: "Build",
     items: [
       { label: "Overview", href: "/dashboard", icon: ChartBarIcon },
-      // First in the journey, because nothing else generates well until it is done.
-      { label: "Launch your business", href: "/onboarding", icon: SparkleIcon },
+      // Renamed from "Launch your business", which collided with the dashboard's plan
+      // list. The plan is what ZeroCorp is BUILDING; this is what it needs to KNOW.
+      { label: "Tell us about your business", href: "/onboarding", icon: SparkleIcon },
       { label: "Company", href: "/company", icon: BuildingsIcon },
       { label: "Brand", href: "/brand", icon: PaletteIcon },
     ],

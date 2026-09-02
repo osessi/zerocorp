@@ -1,6 +1,8 @@
 import {
   ONBOARDING_STEPS,
   isListStep,
+  onboardingTranscriptSchema,
+  type OnboardingExtraction,
   onboardingAnswerSchema,
   splitList,
   type OnboardingAnswer,
@@ -17,8 +19,15 @@ export interface OnboardingRepository<TTx = unknown> {
   complete(tx: TTx, ctx: TenantContext): Promise<void>;
 }
 
+/** Transcript in, eight fields out. Implemented by a model or by a deterministic stub. */
+export interface OnboardingExtractor {
+  extract(transcript: string): Promise<OnboardingExtraction & { costMicros: number; model: string }>;
+}
+
 export interface OnboardingService {
   state(ctx: TenantContext): Promise<OnboardingState>;
+  /** The voice path: talk once, and the form comes back full. */
+  fromTranscript(ctx: TenantContext, input: unknown): Promise<{ state: OnboardingState; heard: OnboardingStepKey[] }>;
   answer(ctx: TenantContext, input: unknown): Promise<OnboardingState>;
   finish(ctx: TenantContext): Promise<OnboardingState>;
 }
@@ -34,11 +43,41 @@ export interface OnboardingService {
 export function createOnboardingService(deps: {
   uow: UnitOfWork;
   repository: OnboardingRepository;
+  extractor: OnboardingExtractor;
 }): OnboardingService {
-  const { uow, repository } = deps;
+  const { uow, repository, extractor } = deps;
 
   return {
     state: (ctx) => uow.withTenant(ctx, (tx) => repository.read(tx, ctx)),
+
+    /**
+     * The voice path.
+     *
+     * A founder describes their business out loud once, and the eight fields come back
+     * filled. Only fields the extractor reports as HEARD are written: a model that
+     * guessed an industry from the description produced a plausible sentence the founder
+     * would half-agree with and ship, which is worse than an empty field they have to
+     * fill. The reveal then asks for whatever was not heard.
+     */
+    async fromTranscript(ctx, input) {
+      const { transcript } = onboardingTranscriptSchema.parse(input);
+      const extraction = await extractor.extract(transcript);
+
+      return uow.withTenant(ctx, async (tx) => {
+        for (const step of extraction.heard) {
+          const values = isListStep(step)
+            ? (step === "target_keywords" ? extraction.target_keywords : extraction.unique_selling_points)
+            : [extraction[step as Exclude<OnboardingStepKey, "target_keywords" | "unique_selling_points">]].filter(
+                (v): v is string => typeof v === "string" && v.length > 0,
+              );
+          if (values.length === 0) continue;
+          // The transcript is stored once, with the first field written from it, as
+          // provenance for every answer that came out of the same recording.
+          await repository.saveAnswer(tx, ctx, step, values, transcript);
+        }
+        return { state: await repository.read(tx, ctx), heard: extraction.heard };
+      });
+    },
 
     async answer(ctx, input) {
       const parsed: OnboardingAnswer = onboardingAnswerSchema.parse(input);

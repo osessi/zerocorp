@@ -20,3 +20,4 @@ export type { ModelPrice } from "./pricing";
 export { DeterministicInterviewer, extractDeterministically, openingCard } from "./interview/deterministic";
 export { ModelInterviewer, FallbackInterviewer, enforceLimits } from "./interview/model";
 export { INTERVIEW_SYSTEM_PROMPT, buildInterviewMessage } from "./interview/prompt";
+export * from "./onboarding/index";

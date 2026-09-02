@@ -81,3 +81,35 @@ export function splitList(text: string): string[] {
     .filter(Boolean)
     .slice(0, 12);
 }
+
+/**
+ * What an agent pulls out of a founder talking for two minutes.
+ *
+ * Every field is optional, because a founder describing their business out loud will
+ * cover four of these richly and never mention the other four. A schema that demanded
+ * all eight would force the model to invent the ones it did not hear, and an invented
+ * positioning line is worse than an empty one: the founder would have to notice it was
+ * wrong before deleting it, and people do not delete text that sounds plausible.
+ *
+ * `heard` is what the extraction is grounded in. A field the founder never said is a
+ * field the reveal shows as empty and asks for, not one it fills confidently.
+ */
+export const onboardingExtractionSchema = z.object({
+  business_name: z.string().trim().min(1).max(200).nullable(),
+  description: z.string().trim().min(1).max(600).nullable(),
+  industry: z.string().trim().min(1).max(120).nullable(),
+  icp_description: z.string().trim().min(1).max(600).nullable(),
+  positioning: z.string().trim().min(1).max(600).nullable(),
+  unique_selling_points: z.array(z.string().trim().min(1).max(200)).max(8),
+  target_keywords: z.array(z.string().trim().min(1).max(120)).max(12),
+  tone_of_voice: z.string().trim().min(1).max(400).nullable(),
+  /** Which of the eight the founder actually spoke to. Never inferred from a filled field. */
+  heard: z.array(z.enum(ONBOARDING_STEPS)).max(8),
+});
+
+export type OnboardingExtraction = z.infer<typeof onboardingExtractionSchema>;
+
+/** The transcript on its way in. Long, because two minutes of speech is ~350 words. */
+export const onboardingTranscriptSchema = z.object({
+  transcript: z.string().trim().min(20, "Say a little more and we can work with it").max(20_000),
+});

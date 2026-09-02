@@ -3,10 +3,10 @@ import { getOnboardingService } from "../../../server/container";
 import { getViewer } from "../../../server/session";
 import { Onboarding } from "./Onboarding";
 
-export const metadata = { title: "Launch your business — ZeroCorp" };
+export const metadata = { title: "Tell us about your business — ZeroCorp" };
 
 /**
- * Launch your business — the deep onboarding.
+ * Tell us about your business — the deep onboarding.
  *
  * The assessment decided WHAT to build. This decides how it sounds, who it is for and
  * why anyone would choose it. Everything the product generates afterwards reads what is

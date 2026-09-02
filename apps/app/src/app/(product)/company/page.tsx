@@ -168,7 +168,7 @@ export default async function Page() {
                 <ButtonLink href="/dashboard">See what is in progress</ButtonLink>
               ) : (
                 <ButtonLink href="/onboarding" variant="primary">
-                  Finish Launch your business
+                  Tell us about your business
                 </ButtonLink>
               )
             }

@@ -19,6 +19,21 @@ export async function saveAnswer(input: unknown): Promise<OnboardingState> {
   return state;
 }
 
+/**
+ * The voice path: one recording, eight fields back.
+ *
+ * The extraction can take a few seconds against a real model. That is acceptable here
+ * and nowhere else in the product — this is the one screen a founder expects to wait on,
+ * because they can see it is reading what they just said.
+ */
+export async function extractFromTranscript(transcript: string) {
+  const viewer = await getViewer();
+  if (!viewer) throw new Error("Not found");
+  const result = await getOnboardingService().fromTranscript(viewer.ctx, { transcript });
+  revalidatePath("/onboarding");
+  return result;
+}
+
 export async function finishOnboarding(): Promise<OnboardingState> {
   const viewer = await getViewer();
   if (!viewer) throw new Error("Not found");
