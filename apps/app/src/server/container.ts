@@ -10,6 +10,7 @@ import {
   createIdentityRepository,
   createSystemUnitOfWork,
   createUnitOfWork,
+  createOnboardingRepository,
 } from "@zerocorp/db";
 import {
   createAssessmentService,
@@ -27,6 +28,8 @@ import {
   type InterviewService as Interview,
   type SystemUnitOfWork,
   type UnitOfWork as Uow,
+  createOnboardingService,
+  type OnboardingService,
 } from "@zerocorp/application";
 import {
   DeterministicArchitect,
@@ -260,4 +263,13 @@ export function getBuildService(): Build {
     clock: { now: () => new Date() },
   });
   return build;
+}
+
+let onboarding: OnboardingService | undefined;
+export function getOnboardingService(): OnboardingService {
+  onboarding ??= createOnboardingService({
+    uow: getUnitOfWork(),
+    repository: createOnboardingRepository(),
+  });
+  return onboarding;
 }

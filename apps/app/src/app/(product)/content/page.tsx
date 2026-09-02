@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { ArticleIcon, MagnifyingGlassIcon } from "@phosphor-icons/react/dist/ssr";
-import { PageHeader, StatusBadge } from "@zerocorp/ui";
+import { ButtonLink, PageHeader, StatusBadge, StatusDot } from "@zerocorp/ui";
 import { getBlocksRepository, getUnitOfWork } from "../../../server/container";
 import { getViewer } from "../../../server/session";
 import { BuildButton } from "../BuildButton";
@@ -58,7 +58,13 @@ export default async function Page() {
                   <span className="text-caption text-chart-4 w-20 shrink-0 text-right font-mono tabular-nums">
                     {keyword.difficulty ?? "—"}
                   </span>
-                  <StatusBadge tone={keyword.status === "targeting" ? "success" : "neutral"}>{keyword.status}</StatusBadge>
+                  {/* A dot, not a badge. Ten identical `targeting` chips stacked is ten
+                      boxes competing with the data they annotate — the motivating case
+                      StatusDot was built for (§21). Muted, because when every row carries
+                      the same status the status is not the news; the keyword is. */}
+                  <StatusDot tone={keyword.status === "targeting" ? "success" : "neutral"} muted>
+                    {keyword.status}
+                  </StatusDot>
                 </Row>
               ))}
             </Rows>
@@ -73,16 +79,35 @@ export default async function Page() {
             />
           ) : (
             <Rows>
-              {view.posts.map((post) => (
-                <Row key={post.id}>
-                  <ArticleIcon size={18} className="text-muted-foreground shrink-0" aria-hidden="true" />
-                  <span className="text-body-sm min-w-0 flex-1 font-medium">{post.title}</span>
-                  <span className="text-caption text-muted-foreground font-mono tabular-nums">
-                    {(post.publishedAt ?? post.scheduledFor)?.toISOString().slice(0, 10) ?? "—"}
-                  </span>
-                  <StatusBadge tone={POST_TONE[post.status] ?? "neutral"}>{post.status.replace(/_/g, " ")}</StatusBadge>
-                </Row>
-              ))}
+              {/*
+                Three states, three weights. Published articles are history and recede;
+                a draft is the thing that needs a person and carries the action; a
+                scheduled one sits between the two. Twenty rows of identical weight is
+                what made this read as a table rather than a queue.
+              */}
+              {view.posts.map((post) => {
+                const published = post.status === "published";
+                const needsYou = post.status === "draft";
+                return (
+                  <Row key={post.id} muted={published}>
+                    <ArticleIcon
+                      size={18}
+                      className={published ? "text-muted-foreground shrink-0" : "text-chart-1 shrink-0"}
+                      aria-hidden="true"
+                    />
+                    <span
+                      className={published ? "text-body-sm text-muted-foreground min-w-0 flex-1" : "text-body-sm min-w-0 flex-1 font-medium"}
+                    >
+                      {post.title}
+                    </span>
+                    <span className="text-caption text-muted-foreground font-mono tabular-nums">
+                      {(post.publishedAt ?? post.scheduledFor)?.toISOString().slice(0, 10) ?? "—"}
+                    </span>
+                    <StatusBadge tone={POST_TONE[post.status] ?? "neutral"}>{post.status.replace(/_/g, " ")}</StatusBadge>
+                    {needsYou ? <ButtonLink href="/content">Review</ButtonLink> : null}
+                  </Row>
+                );
+              })}
             </Rows>
           )}
         </Panel>

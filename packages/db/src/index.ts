@@ -26,3 +26,4 @@ export type { Tx } from "./types";
 /** Integration suites only. See lifecycle.ts for why it is not re-exported directly. */
 export { closeAllConnections } from "./lifecycle";
 export { seedPopulatedTenant, findTenantIdForUser } from "./seed/populated";
+export { createOnboardingRepository } from "./onboarding/repository";

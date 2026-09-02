@@ -29,6 +29,10 @@ export const businessProfiles = tenantTable("business_profiles", {
   brandColors: jsonb("brand_colors"),
   logoUrl: text("logo_url"),
   voiceTranscript: text("voice_transcript"),
+  /** Set when the founder finishes onboarding. Completion is a fact, not an inference. */
+  onboardingCompletedAt: timestamp("onboarding_completed_at", { withTimezone: true }),
+  /** Which steps the FOUNDER answered, as opposed to what the assessment seeded. */
+  onboardingAnswered: jsonb("onboarding_answered").notNull().default([]),
   /** The pre-payment assessment this profile was seeded from. Provenance, not a foreign key. */
   sourceAssessmentId: uuid("source_assessment_id"),
   /** The legal entity, once one exists. Null for a business with no company yet. */

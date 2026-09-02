@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { ListBulletsIcon, WarningIcon } from "@phosphor-icons/react/dist/ssr";
-import { Alert, PageHeader, StatusBadge } from "@zerocorp/ui";
+import { Alert, Avatar, ButtonLink, PageHeader, StatusBadge, StatusDot, initialsOf } from "@zerocorp/ui";
 import { getBlocksRepository, getUnitOfWork } from "../../../server/container";
 import { getViewer } from "../../../server/session";
 import { BuildButton } from "../BuildButton";
@@ -15,6 +15,21 @@ export const metadata = { title: "Customers — ZeroCorp" };
  * V1 FINDS. It does not contact. No campaigns, no sequences, no automated follow-up:
  * those are V2, and shipping them early is how a prospecting tool becomes a spam tool.
  */
+/**
+ * A lead's stage, in the one status vocabulary (§17).
+ *
+ * `replied` is success because it is the outcome the whole block exists to produce;
+ * `qualified` is info because it is a fact about the record rather than a step forward;
+ * discovery and enrichment are the machine working, which is `processing`.
+ */
+const LEAD_TONE: Record<string, "success" | "info" | "processing" | "neutral"> = {
+  replied: "success",
+  qualified: "info",
+  contacted: "processing",
+  enriched: "processing",
+  discovered: "neutral",
+};
+
 export default async function Page() {
   const viewer = await getViewer();
   if (!viewer) redirect("/signin");
@@ -24,6 +39,7 @@ export default async function Page() {
   );
 
   const withoutBasis = view.recent.filter((l) => l.consentBasis === null).length;
+  const replied = view.recent.filter((l) => l.status === "replied").length;
 
   return (
     <>
@@ -51,7 +67,13 @@ export default async function Page() {
             <FactCell><Fact label="Prospects" value={`${view.total}`} tone="font-mono tabular-nums text-chart-1" /></FactCell>
             <FactCell><Fact label="Lists" value={`${view.lists.length}`} tone="font-mono tabular-nums text-chart-2" /></FactCell>
             <FactCell><Fact label="Contactable" value={`${view.recent.filter((l) => l.consentBasis !== null).length}`} tone="font-mono tabular-nums text-chart-3" /></FactCell>
-            <FactCell><Fact label="Outreach" value="V2" tone="text-muted-foreground" /></FactCell>
+            <FactCell>
+              <Fact
+                label="Replied"
+                value={`${replied}`}
+                tone={replied > 0 ? "font-mono tabular-nums text-success-ink" : "font-mono tabular-nums text-muted-foreground"}
+              />
+            </FactCell>
           </FactGrid>
         </Panel>
 
@@ -83,27 +105,39 @@ export default async function Page() {
             />
           ) : (
             <Rows>
-              {view.recent.map((lead) => (
-                <Row key={lead.id} muted={lead.consentBasis === null}>
-                  <span className="text-body-sm w-56 shrink-0 font-medium">{lead.companyName}</span>
-                  <span className="text-body-sm text-muted-foreground w-48 shrink-0 truncate font-mono">
-                    {lead.domain ?? "—"}
-                  </span>
-                  <span className="text-caption text-muted-foreground w-12 shrink-0 font-mono">
-                    {lead.country ?? "—"}
-                  </span>
-                  <span className="text-caption text-muted-foreground min-w-0 flex-1 truncate">
-                    {lead.industry ?? "—"}
-                  </span>
-                  {lead.consentBasis === null ? (
-                    <StatusBadge tone="warning">
-                      <WarningIcon size={12} weight="fill" aria-hidden="true" /> No basis
-                    </StatusBadge>
-                  ) : (
-                    <StatusBadge tone="neutral">{lead.status}</StatusBadge>
-                  )}
-                </Row>
-              ))}
+              {view.recent.map((lead) => {
+                const tone = LEAD_TONE[lead.status] ?? "neutral";
+                // A reply is the only row on this screen that needs a person today.
+                const answered = lead.status === "replied";
+                return (
+                  <Row key={lead.id} muted={lead.consentBasis === null}>
+                    {/* Faces, or the nearest thing a company has to one. §4.5: a product
+                        with no faces reads flat regardless of the palette. */}
+                    <Avatar initials={initialsOf(lead.companyName)} name={lead.companyName} size="sm" tone={tone} />
+                    <span className="text-body-sm w-52 shrink-0 truncate font-medium">{lead.companyName}</span>
+                    <span className="text-body-sm text-muted-foreground w-44 shrink-0 truncate font-mono">
+                      {lead.domain ?? "—"}
+                    </span>
+                    <span className="text-caption text-muted-foreground w-12 shrink-0 font-mono">
+                      {lead.country ?? "—"}
+                    </span>
+                    <span className="text-caption text-muted-foreground min-w-0 flex-1 truncate">
+                      {lead.industry ?? "—"}
+                    </span>
+                    {lead.consentBasis === null ? (
+                      <StatusBadge tone="warning">
+                        <WarningIcon size={12} weight="fill" aria-hidden="true" /> No basis
+                      </StatusBadge>
+                    ) : (
+                      /* The status was `neutral` on every row, so fifteen leads at five
+                         different stages arrived looking identical. The stage IS the
+                         information on this screen. */
+                      <StatusDot tone={tone}>{lead.status}</StatusDot>
+                    )}
+                    {answered ? <ButtonLink href="/leads">Open</ButtonLink> : null}
+                  </Row>
+                );
+              })}
             </Rows>
           )}
         </Panel>

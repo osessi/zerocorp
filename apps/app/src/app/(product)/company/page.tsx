@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { BuildingsIcon, FileTextIcon, QuestionIcon } from "@phosphor-icons/react/dist/ssr";
-import { PageHeader, StatusBadge } from "@zerocorp/ui";
+import { ButtonLink, EmptyState, PageHeader, StatusBadge } from "@zerocorp/ui";
 import { getBlocksRepository, getFormationCatalog, getUnitOfWork } from "../../../server/container";
 import { getViewer } from "../../../server/session";
 import { Empty, Fact, FactCell, FactGrid, Panel, Row, Rows } from "../ui";
@@ -82,74 +82,98 @@ export default async function Page() {
         ) : null}
 
         {view.company ? (
-          <Panel title="Your entity">
-            <FactGrid>
-              <FactCell><Fact label="Legal name" value={view.company.legalName} /></FactCell>
-              <FactCell><Fact label="Jurisdiction" value={view.company.jurisdictionCode.toUpperCase()} tone="text-chart-1" /></FactCell>
-              <FactCell><Fact label="Status" value={view.company.status} /></FactCell>
-              <FactCell>
-                <Fact
-                  label="Origin"
-                  value={view.company.origin === "imported" ? "Imported" : "Formed by ZeroCorp"}
+          <>
+            <Panel title="Your entity">
+              <FactGrid>
+                <FactCell><Fact label="Legal name" value={view.company.legalName} /></FactCell>
+                <FactCell><Fact label="Jurisdiction" value={view.company.jurisdictionCode.toUpperCase()} tone="text-chart-1" /></FactCell>
+                <FactCell><Fact label="Status" value={view.company.status} /></FactCell>
+                <FactCell>
+                  <Fact
+                    label="Origin"
+                    value={view.company.origin === "imported" ? "Imported" : "Formed by ZeroCorp"}
+                  />
+                </FactCell>
+              </FactGrid>
+            </Panel>
+
+            {/* Registrations and documents exist only once an entity does. Rendering them
+                as two more empty panels before that was three empty states stacked, which
+                reads as a broken product rather than an early one. */}
+            <Panel title="Registrations" count={view.registrations.length}>
+              {view.registrations.length === 0 ? (
+                <Empty
+                  title="Nothing requested yet"
+                  body="A tax ID follows the entity rather than arriving with it: separate filing, separate authority, separate clock."
                 />
-              </FactCell>
-            </FactGrid>
-          </Panel>
+              ) : (
+                <Rows>
+                  {view.registrations.map((r) => (
+                    <Row key={`${r.kind}-${r.authority}`}>
+                      <span className="text-body-sm w-32 shrink-0">{REGISTRATION_LABEL[r.kind] ?? r.kind}</span>
+                      <span className="text-body-sm text-muted-foreground w-32 shrink-0">{r.authority}</span>
+                      <span className="text-body-sm min-w-0 flex-1 font-mono">{r.identifier ?? "—"}</span>
+                      <StatusBadge tone={r.status === "issued" ? "success" : r.status === "rejected" ? "danger" : "processing"}>
+                        {r.status.replace(/_/g, " ")}
+                      </StatusBadge>
+                    </Row>
+                  ))}
+                </Rows>
+              )}
+            </Panel>
+
+            <Panel title="Documents" count={view.documents.length}>
+              {view.documents.length === 0 ? (
+                <Empty
+                  title="No documents yet"
+                  body="Certificates land here as the filing progresses. Anything you upload goes to private storage with short-lived links."
+                />
+              ) : (
+                <Rows>
+                  {view.documents.map((d) => (
+                    <Row key={d.id}>
+                      <FileTextIcon size={18} className="text-chart-3 shrink-0" aria-hidden="true" />
+                      <span className="text-body-sm min-w-0 flex-1">{d.type.replace(/_/g, " ")}</span>
+                      <span className="text-caption text-muted-foreground font-mono tabular-nums">
+                        {d.issuedAt ? d.issuedAt.toISOString().slice(0, 10) : "—"}
+                      </span>
+                    </Row>
+                  ))}
+                </Rows>
+              )}
+            </Panel>
+          </>
         ) : (
-          <Panel title="Your entity">
-            <Empty
-              title="No company yet"
-              body={
-                view.request
-                  ? "Your formation request is in progress. This fills in the moment the authority registers the entity."
-                  : "ZeroCorp can form a company for you, or connect one you already have. Nothing is filed until you have chosen a structure and signed."
-              }
-            />
-          </Panel>
+          /*
+            ONE empty state, not four.
+            
+            There was no company, so "Your entity", "Registrations" and "Documents" each
+            rendered their own empty panel and the catalog sat under them as a fourth
+            block. Four empty states stacked is what a broken product looks like; a
+            founder cannot tell which one is the thing they are supposed to act on.
+            
+            Registrations and documents are now hidden entirely until an entity exists,
+            because they are not empty — they are not yet possible.
+          */
+          <EmptyState
+            icon={BuildingsIcon}
+            title={view.request ? "Your company is being formed" : "You have no company yet"}
+            body={
+              view.request
+                ? "The filing is in progress. Your entity, registrations and documents all appear here the moment the authority registers it."
+                : "ZeroCorp forms it for you, or connects one you already have. Nothing is filed until you have chosen a structure and signed."
+            }
+            action={
+              view.request ? (
+                <ButtonLink href="/dashboard">See what is in progress</ButtonLink>
+              ) : (
+                <ButtonLink href="/onboarding" variant="primary">
+                  Finish Launch your business
+                </ButtonLink>
+              )
+            }
+          />
         )}
-
-        <Panel title="Registrations" count={view.registrations.length}>
-          {view.registrations.length === 0 ? (
-            <Empty
-              title="Nothing requested yet"
-              body="A tax ID follows the entity rather than arriving with it: it is a separate filing, with a separate authority, on a separate clock. You will see it here as soon as it is asked for."
-            />
-          ) : (
-            <Rows>
-              {view.registrations.map((r) => (
-                <Row key={`${r.kind}-${r.authority}`}>
-                  <span className="text-body-sm w-32 shrink-0">{REGISTRATION_LABEL[r.kind] ?? r.kind}</span>
-                  <span className="text-body-sm text-muted-foreground w-32 shrink-0">{r.authority}</span>
-                  <span className="text-body-sm min-w-0 flex-1 font-mono">{r.identifier ?? "—"}</span>
-                  <StatusBadge tone={r.status === "issued" ? "success" : r.status === "rejected" ? "danger" : "processing"}>
-                    {r.status.replace(/_/g, " ")}
-                  </StatusBadge>
-                </Row>
-              ))}
-            </Rows>
-          )}
-        </Panel>
-
-        <Panel title="Documents" count={view.documents.length}>
-          {view.documents.length === 0 ? (
-            <Empty
-              title="No documents yet"
-              body="Certificates and governing documents land here as the filing progresses. Anything you upload goes to private storage with short-lived links, never to a public URL."
-            />
-          ) : (
-            <Rows>
-              {view.documents.map((d) => (
-                <Row key={d.id}>
-                  <FileTextIcon size={18} className="text-chart-3 shrink-0" aria-hidden="true" />
-                  <span className="text-body-sm min-w-0 flex-1">{d.type.replace(/_/g, " ")}</span>
-                  <span className="text-caption text-muted-foreground font-mono tabular-nums">
-                    {d.issuedAt ? d.issuedAt.toISOString().slice(0, 10) : "—"}
-                  </span>
-                </Row>
-              ))}
-            </Rows>
-          )}
-        </Panel>
 
         <Panel title="What ZeroCorp can form" count={entities.length}>
           <Rows>

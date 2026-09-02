@@ -13,6 +13,7 @@ import {
   GearIcon,
   LifebuoyIcon,
   PaletteIcon,
+  SparkleIcon,
   SignOutIcon,
   UsersThreeIcon,
 } from "@phosphor-icons/react/dist/ssr";
@@ -31,6 +32,8 @@ const GROUPS: NavGroup[] = [
     label: "Build",
     items: [
       { label: "Overview", href: "/dashboard", icon: ChartBarIcon },
+      // First in the journey, because nothing else generates well until it is done.
+      { label: "Launch your business", href: "/onboarding", icon: SparkleIcon },
       { label: "Company", href: "/company", icon: BuildingsIcon },
       { label: "Brand", href: "/brand", icon: PaletteIcon },
     ],

@@ -20,3 +20,4 @@ export * from "./assessment";
 export * from "./identity";
 export * from "./dashboard";
 export * from "./blocks";
+export * from "./onboarding/index";
