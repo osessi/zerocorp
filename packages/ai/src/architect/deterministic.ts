@@ -277,7 +277,10 @@ export class DeterministicArchitect implements BusinessArchitect {
         whatIsMissing: gaps,
       },
       plan: {
-        title: clamp(`ZeroCorp plan for ${firstSentence(input.answers.business_description)}`, MAX_LINE),
+        // Not "ZeroCorp plan for <their whole first sentence>". That title becomes the
+        // page heading right underneath the business name, and reading the same sentence
+        // twice in a row makes the screen look like a template that failed to fill in.
+        title: recommendation === "form_new" ? "Your launch plan" : "Your activation plan",
         summary: clamp(
           `${steps.filter((s) => s.included).length} steps, from ` +
             `${entity ? "forming your company" : "your existing setup"} to a first list of prospects.`,

@@ -34,6 +34,7 @@ const DAY_MS = 86_400_000;
 
 export interface Viewer {
   readonly ctx: TenantContext;
+  readonly email: string;
   readonly memberships: readonly { tenantId: string; tenantName: string; role: string }[];
 }
 
@@ -119,7 +120,7 @@ export async function getViewer(): Promise<Viewer | null> {
       accessMode: "read-write",
       requestedTenantId: active,
     });
-    return { ctx, memberships: found.memberships };
+    return { ctx, email: found.session.email, memberships: found.memberships };
   } catch (cause) {
     if (cause instanceof NoAccessError) return null;
     throw cause;

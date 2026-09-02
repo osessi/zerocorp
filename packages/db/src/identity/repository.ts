@@ -86,11 +86,13 @@ export function createIdentityRepository(): IdentityRepository<Tx> {
       const rows = await tx
         .select({
           userId: sessions.userId,
+          email: users.email,
           activeTenantId: sessions.activeTenantId,
           expiresAt: sessions.expiresAt,
           lastSeenAt: sessions.lastSeenAt,
         })
         .from(sessions)
+        .innerJoin(users, eq(sessions.userId, users.id))
         .where(eq(sessions.tokenHash, tokenHash))
         .limit(1);
       return rows[0] ?? null;

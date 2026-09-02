@@ -3,7 +3,9 @@ import { EnvelopeSimpleIcon } from "@phosphor-icons/react/dist/ssr";
 import { PageHeader, StatusBadge, cx } from "@zerocorp/ui";
 import { getBlocksRepository, getUnitOfWork } from "../../../server/container";
 import { getViewer } from "../../../server/session";
+import { dnsRecordsFor } from "@zerocorp/domain";
 import { Empty, Fact, FactCell, FactGrid, Panel, Row, Rows } from "../ui";
+import { SetUpEmail } from "./SetUpEmail";
 
 export const metadata = { title: "Email — ZeroCorp" };
 
@@ -54,12 +56,28 @@ export default async function Page() {
               </FactCell>
             </FactGrid>
           ) : (
-            <Empty
-              title="No sending domain yet"
-              body="Sending from a new domain without SPF, DKIM and DMARC puts you in spam, and a reputation is far harder to repair than to build. All three are set up before a single message goes out."
-            />
+            <SetUpEmail />
           )}
         </Panel>
+
+        {view.domain ? (
+          <Panel title="Add these to your DNS" count={dnsRecordsFor(view.domain.hostname).length}>
+            <Rows>
+              {dnsRecordsFor(view.domain.hostname).map((record) => (
+                <Row key={`${record.kind}-${record.host}`}>
+                  <span className="text-caption text-chart-3 w-16 shrink-0 font-mono">{record.kind}</span>
+                  <span className="text-body-sm w-64 shrink-0 truncate font-mono">{record.host}</span>
+                  <span className="text-caption text-muted-foreground min-w-0 flex-1 truncate font-mono">
+                    {record.value}
+                  </span>
+                  <StatusBadge tone={record.value === "ISSUED_BY_PROVIDER" ? "warning" : "neutral"}>
+                    {record.value === "ISSUED_BY_PROVIDER" ? "Awaiting key" : record.purpose.toUpperCase()}
+                  </StatusBadge>
+                </Row>
+              ))}
+            </Rows>
+          </Panel>
+        ) : null}
 
         <Panel title="Warm-up">
           {view.domain && view.domain.warmupStatus !== "not_started" ? (

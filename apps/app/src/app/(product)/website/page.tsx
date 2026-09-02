@@ -3,6 +3,8 @@ import { BrowserIcon } from "@phosphor-icons/react/dist/ssr";
 import { PageHeader, StatusBadge } from "@zerocorp/ui";
 import { getBlocksRepository, getUnitOfWork } from "../../../server/container";
 import { getViewer } from "../../../server/session";
+import { BuildButton } from "../BuildButton";
+import { buildWebsite } from "../build-actions";
 import { Empty, Fact, FactCell, FactGrid, Panel, Row, Rows } from "../ui";
 
 export const metadata = { title: "Website — ZeroCorp" };
@@ -31,6 +33,7 @@ export default async function Page() {
             {view.site?.status === "published" ? "Live" : view.site ? "Draft" : "Not started"}
           </StatusBadge>
         }
+        actions={<BuildButton action={buildWebsite} label="Build my website" busyLabel="Building" />}
       />
 
       <div className="flex flex-col gap-10 px-5 py-8 sm:px-8">

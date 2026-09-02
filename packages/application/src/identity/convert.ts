@@ -103,6 +103,7 @@ export function createConversionService<TTx>(deps: ConvertDeps<TTx>) {
             plan: null,
             assessmentId: assessment.id,
             businessName: "",
+            description: null,
           };
         }
 
@@ -137,7 +138,17 @@ export function createConversionService<TTx>(deps: ConvertDeps<TTx>) {
         await deps.assessments.setContactEmail(tx, assessment.id, email);
         await deps.assessments.setConvertedTenant(tx, assessment.id, tenantId);
 
-        return { tenantId, userId, alreadyConverted: false as const, plan, assessmentId: assessment.id, businessName };
+        return {
+          tenantId, userId, alreadyConverted: false as const, plan,
+          assessmentId: assessment.id, businessName,
+          // The founder's OWN sentence, not the plan's summary.
+          //
+          // The Business Brain is the upstream source for everything generated
+          // afterwards, so what goes in it has to be what they said. Storing the plan
+          // summary here made the brand generator read "8 steps, from forming your
+          // company" as a description of the business and build a positioning out of it.
+          description: (assessment.answers as { business_description?: string }).business_description ?? null,
+        };
       });
 
       if (created.alreadyConverted) {
@@ -159,7 +170,7 @@ export function createConversionService<TTx>(deps: ConvertDeps<TTx>) {
       const businessPlanId = await deps.uow.withTenant(ctx, async (tx) => {
         await deps.conversion.createBusinessProfile(tx, ctx, {
           businessName: created.businessName,
-          description: plan.proposal.summary,
+          description: created.description,
           sourceAssessmentId: created.assessmentId,
         });
 

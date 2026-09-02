@@ -2,6 +2,7 @@ import "server-only";
 import {
   createAssessmentRepository,
   createBlocksRepository,
+  createBlocksWriteRepository,
   createConversionRepository,
   createDashboardRepository,
   createSettingsRepository,
@@ -12,11 +13,13 @@ import {
 } from "@zerocorp/db";
 import {
   createAssessmentService,
+  createBuildService,
   createConversionService,
   createInterviewService,
   type AssessmentService as Service,
   type ConversionService as Conversion,
   type BlocksRepository,
+  type BuildService as Build,
   type DashboardRepository,
   type FormationCatalog,
   type SettingsRepository,
@@ -246,4 +249,15 @@ let settings: SettingsRepository | undefined;
 export function getSettingsRepository(): SettingsRepository {
   settings ??= createSettingsRepository();
   return settings;
+}
+
+let build: Build | undefined;
+export function getBuildService(): Build {
+  build ??= createBuildService({
+    uow: getUnitOfWork(),
+    repository: createBlocksWriteRepository(),
+    reads: createBlocksRepository(),
+    clock: { now: () => new Date() },
+  });
+  return build;
 }

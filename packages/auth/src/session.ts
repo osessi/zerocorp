@@ -20,6 +20,7 @@ export const SESSION_REFRESH_DAYS = 7;
 
 export interface SessionRecord {
   readonly userId: string;
+  readonly email?: string;
   readonly activeTenantId: string | null;
   readonly expiresAt: Date;
   readonly lastSeenAt: Date;

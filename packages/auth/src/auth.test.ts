@@ -56,7 +56,7 @@ describe("passwords", () => {
   });
 });
 
-const SESSION = { userId: USER, activeTenantId: TENANT_A, expiresAt: new Date("2026-10-01T00:00:00Z"), lastSeenAt: NOW };
+const SESSION = { userId: USER, email: "founder@example.com", activeTenantId: TENANT_A, expiresAt: new Date("2026-10-01T00:00:00Z"), lastSeenAt: NOW };
 const MEMBERSHIPS = [{ tenantId: TENANT_A, role: "owner" as const, status: "active" }];
 
 describe("tenant context", () => {

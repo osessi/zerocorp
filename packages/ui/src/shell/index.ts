@@ -1,1 +1,1 @@
-export { DashboardShell, PageHeader, type DashboardShellProps, type NavItem, type Glyph } from "./DashboardShell";
+export { DashboardShell, PageHeader, type DashboardShellProps, type NavItem, type NavGroup, type Glyph } from "./DashboardShell";

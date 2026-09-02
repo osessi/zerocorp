@@ -19,5 +19,16 @@ export default async function ProductLayout({ children }: { children: ReactNode 
     getDashboardRepository().overview(tx, viewer.ctx),
   );
 
-  return <Shell businessName={overview?.businessName ?? "Your business"}>{children}</Shell>;
+  // The badge on Overview is the count of steps waiting on the founder. It belongs in
+  // the rail because it is the one number that should reach them without opening a page.
+  const needsYou = overview?.steps.filter((s) => s.included && s.status === "blocked").length ?? 0;
+  return (
+    <Shell
+      businessName={overview?.businessName ?? "Your business"}
+      email={viewer.email}
+      needsYou={needsYou}
+    >
+      {children}
+    </Shell>
+  );
 }

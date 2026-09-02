@@ -2,6 +2,8 @@ import { redirect } from "next/navigation";
 import { PageHeader, StatusBadge, cx } from "@zerocorp/ui";
 import { getBlocksRepository, getUnitOfWork } from "../../../server/container";
 import { getViewer } from "../../../server/session";
+import { BuildButton } from "../BuildButton";
+import { buildBrand } from "../build-actions";
 import { Empty, Fact, FactCell, FactGrid, Panel } from "../ui";
 
 export const metadata = { title: "Brand — ZeroCorp" };
@@ -24,6 +26,7 @@ export default async function Page() {
             {view?.identity ? "Drafted" : "Not started"}
           </StatusBadge>
         }
+        actions={<BuildButton action={buildBrand} label="Build my brand" busyLabel="Building" />}
       />
 
       <div className="flex flex-col gap-10 px-5 py-8 sm:px-8">

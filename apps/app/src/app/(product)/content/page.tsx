@@ -3,6 +3,8 @@ import { ArticleIcon, MagnifyingGlassIcon } from "@phosphor-icons/react/dist/ssr
 import { PageHeader, StatusBadge } from "@zerocorp/ui";
 import { getBlocksRepository, getUnitOfWork } from "../../../server/container";
 import { getViewer } from "../../../server/session";
+import { BuildButton } from "../BuildButton";
+import { buildContentPlan } from "../build-actions";
 import { Empty, Panel, Row, Rows } from "../ui";
 
 export const metadata = { title: "Content — ZeroCorp" };
@@ -34,6 +36,7 @@ export default async function Page() {
             {published} published
           </span>
         }
+        actions={<BuildButton action={buildContentPlan} label="Build my content plan" busyLabel="Planning" />}
       />
 
       <div className="flex flex-col gap-10 px-5 py-8 sm:px-8">

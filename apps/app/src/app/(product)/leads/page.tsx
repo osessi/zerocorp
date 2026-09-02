@@ -3,6 +3,8 @@ import { ListBulletsIcon, WarningIcon } from "@phosphor-icons/react/dist/ssr";
 import { Alert, PageHeader, StatusBadge } from "@zerocorp/ui";
 import { getBlocksRepository, getUnitOfWork } from "../../../server/container";
 import { getViewer } from "../../../server/session";
+import { BuildButton } from "../BuildButton";
+import { defineTarget } from "../build-actions";
 import { Empty, Fact, FactCell, FactGrid, Panel, Row, Rows } from "../ui";
 
 export const metadata = { title: "Customers — ZeroCorp" };
@@ -33,6 +35,7 @@ export default async function Page() {
             {view.total} found
           </span>
         }
+        actions={<BuildButton action={defineTarget} label="Define my target" busyLabel="Defining" />}
       />
 
       <div className="flex flex-col gap-10 px-5 py-8 sm:px-8">

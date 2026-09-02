@@ -212,7 +212,7 @@ describe("an approved assessment becomes a tenant", () => {
     );
 
     const ctx = buildTenantContext({
-      session: { userId: result.userId, activeTenantId: result.tenantId, expiresAt: new Date(Date.now() + 86_400_000), lastSeenAt: new Date() },
+      session: { userId: result.userId, email: "dash@example.com", activeTenantId: result.tenantId, expiresAt: new Date(Date.now() + 86_400_000), lastSeenAt: new Date() },
       memberships,
       requestId: "test",
       accessMode: "read-write",
