@@ -12,7 +12,11 @@ import { withTenant } from "../tenant";
  * product. A seed that bypassed tenant context would be seeding a system the product does
  * not have.
  */
-export async function seedPopulatedTenant(databaseUrl: string, tenantId: string): Promise<void> {
+export async function seedPopulatedTenant(
+  databaseUrl: string,
+  tenantId: string,
+  operatorUserId?: string,
+): Promise<void> {
   // Parsed, not cast. The ids are branded, and a seed that casts past the brand is a
   // seed that can write a malformed tenant id the product would have rejected.
   const ctx = tenantContextSchema.parse({
@@ -134,6 +138,34 @@ const KEYWORDS: [string, string, number, number][] = [
   ];
   await tx.execute(sql.raw(`delete from activity_events where tenant_id = '${tenantId}'`));
 
+  // A formation in flight, so Company and the operator queue show a real filing rather
+  // than an empty state. Written through the same tables the intake writes to.
+  const et = (await tx.execute(sql`
+    select id from entity_types where code = 'us_llc' and jurisdiction_code = 'us-wy' limit 1`)) as unknown as { id: string }[];
+  if (et[0]) {
+    await tx.execute(sql.raw(`delete from formation_orders where tenant_id = '${tenantId}'`));
+    await tx.execute(sql.raw(`delete from formation_requests where tenant_id = '${tenantId}'`));
+    const req = (await tx.execute(sql`
+      insert into formation_requests
+        (tenant_id, entity_type_id, jurisdiction_code, proposed_names, founder_profile, status, eligibility)
+      values (${tenantId}, ${et[0].id}, 'us-wy',
+              ${JSON.stringify(["Northwind Studio LLC", "Northwind Design LLC"])}::jsonb,
+              ${JSON.stringify({ residencyCountry: "NG", targetMarkets: ["US", "GB"], hasUsTaxId: false, ownerCount: 1, wantsExternalInvestment: false })}::jsonb,
+              'routed', '[]'::jsonb)
+      returning id`)) as unknown as { id: string }[];
+
+    const order = (await tx.execute(sql`
+      insert into formation_orders (tenant_id, request_id, provider_code, status, created_at)
+      values (${tenantId}, ${req[0]!.id}, 'manual_operator', 'operator_review', ${ago(6)})
+      returning id`)) as unknown as { id: string }[];
+
+    await tx.execute(sql`
+      insert into formation_rfis (tenant_id, order_id, question, status)
+      values (${tenantId}, ${order[0]!.id},
+              'We need a photo page of your passport to verify your identity with the registered agent.',
+              'open')`);
+  }
+
   for (const [i, [type, title, severity, agent, days]] of FEED.entries()) {
     await tx.execute(sql`
       insert into notifications (tenant_id, type, title, body, severity, channel, created_at)
@@ -154,6 +186,21 @@ const KEYWORDS: [string, string, number, number][] = [
   }
   });
 
+
+
+  // The demo account becomes a ZeroCorp OPERATOR, so /operator is reachable locally.
+  //
+  // A platform grant, not a tenant role. `memberships.role` says what someone may do
+  // inside one business; this says they work for ZeroCorp and may see every filing.
+  if (operatorUserId) {
+    const { withSystem } = await import("../system");
+    await withSystem(databaseUrl, "seed", (tx) =>
+      tx.execute(sql`
+        insert into platform_operators (user_id, role)
+        values (${operatorUserId}, 'admin')
+        on conflict do nothing`),
+    );
+  }
 }
 
 /** The tenant a user belongs to. Used by the seed, which has a user and needs a tenant. */

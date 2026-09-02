@@ -51,7 +51,7 @@ if (!tenantId) {
   process.exit(1);
 }
 
-await seedPopulatedTenant(url, tenantId);
+await seedPopulatedTenant(url, tenantId, user.id);
 
 console.log(`
   Demo tenant populated.

@@ -14,7 +14,9 @@ import {
   createOnboardingRepository,
   createFormationRepository,
   createPaymentLedger,
+  createOperatorRepository,
   type PaymentLedger,
+  type OperatorRepository,
 } from "@zerocorp/db";
 import {
   createAssessmentService,
@@ -363,4 +365,10 @@ let ledger: PaymentLedger | undefined;
 export function getPaymentLedger(): PaymentLedger {
   ledger ??= createPaymentLedger(databaseUrl());
   return ledger;
+}
+
+let operators: OperatorRepository | undefined;
+export function getOperatorRepository(): OperatorRepository {
+  operators ??= createOperatorRepository(databaseUrl());
+  return operators;
 }
