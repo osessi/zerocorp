@@ -670,8 +670,45 @@ The last row is worth recording as a success. The audit found that exactly `--in
 `--destructive` fail on dark `--muted`, and those are exactly the two hues §4.6 gave an
 `-on-muted` variant. The escape hatch was built for precisely the right pair.
 
-> Light mode is clean. Dark mode is where measurement had not been repeated, which is the
-> predictable result of a system whose values were tuned in light and mirrored into dark.
+> Dark mode is where measurement had not been repeated, which is the predictable result of
+> a system whose values were tuned in light and mirrored into dark.
+
+#### The audit was broken, and said light mode was clean — 2026-09-02
+
+The run above reported *"17 failures, all in dark mode"* and the conclusion *"light mode is
+clean"*. **Light mode had never been measured.** The script split `tokens.css` into a light
+half and a dark half on this line:
+
+```js
+const darkIdx = src.search(/\.dark\s*,|\[data-theme=.dark.\]|@media \(prefers-color-scheme: dark\)|\.dark\s*\{/);
+```
+
+The first alternative, `\.dark\s*,`, matched **line 12** of `tokens.css`:
+
+```css
+@custom-variant dark (&:where(.dark, .dark *));
+```
+
+So `darkIdx` was 504 out of 26,349. The "light" slice was the file header, the light map
+parsed **zero tokens**, and every light check found its token missing. The checker then did
+this:
+
+```js
+if (!has(fg) || !has(bg)) return;   // a missing token reports a PASS
+```
+
+Two independent defects, and either alone would have been survivable. Together they turned
+an entire theme into a silent skip that reported success.
+
+Fixed: the split anchors on `/^\.dark\s*\{/m`, throws if it finds nothing, and a missing
+token is now collected and printed rather than skipped. Re-run against the same tree:
+**44 failures, 37 of them in light.**
+
+> The rule this produced is `CLAUDE_CODE_RULES.md` §32b. It is the third instance of the
+> same shape in eight days, which is why it is a rule and not a note.
+
+Recorded here rather than only in the rules file because the next person to write a token
+check will be reading this section, not that one.
 
 ---
 

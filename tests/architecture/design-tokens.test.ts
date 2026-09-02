@@ -15,12 +15,21 @@ const ROOT = process.cwd();
  * The token layer itself (packages/design-system/src/tokens.css) is the one file allowed
  * to hold raw values — it is where they are decided.
  */
+/**
+ * Walks a directory for source files.
+ *
+ * `nonEmpty` is not optional politeness. The first version of the class-name rule below
+ * called this with no argument, the throw was swallowed here, and it iterated ZERO files
+ * and passed. A helper that returns [] on a missing directory is fine; a caller that never
+ * checks is not. CLAUDE_CODE_RULES.md §32b.
+ */
 function sourceFiles(dir: string, out: string[] = []): string[] {
   let entries: string[];
   try {
     entries = readdirSync(join(ROOT, dir));
-  } catch {
-    return out;
+  } catch (cause) {
+    // Silence here is what made three separate checks pass without running.
+    throw new Error(`sourceFiles(${JSON.stringify(dir)}) could not be read`, { cause });
   }
   for (const entry of entries) {
     const rel = join(dir, entry);
@@ -232,7 +241,9 @@ describe("module resolution — the bundler has to agree with the compiler", () 
    */
   it("uses no file extension on a relative import", () => {
     const offenders: string[] = [];
-    for (const file of [...sourceFiles("packages"), ...sourceFiles("apps")]) {
+    const scanned = [...sourceFiles("packages"), ...sourceFiles("apps")];
+    expect(scanned.length).toBeGreaterThan(100);
+    for (const file of scanned) {
       const hits = code(file).match(/from\s+"\.\.?\/[^"]*\.(js|ts|tsx|mjs|cjs)"/g);
       if (hits) offenders.push(`${relative(ROOT, file)} → ${hits.join(", ")}`);
     }
@@ -297,13 +308,17 @@ describe("design tokens — the two systems stay separate", () => {
   it("site-renderer never imports the ZeroCorp product component library", () => {
     // DESIGN_SYSTEM.md §15/§16: a customer website theme must never alter the ZeroCorp
     // product UI, and the product UI must never leak into customer sites.
-    for (const file of sourceFiles("packages/site-renderer/src")) {
+    const rendererFiles = sourceFiles("packages/site-renderer/src");
+    expect(rendererFiles.length).toBeGreaterThan(0);
+    for (const file of rendererFiles) {
       expect(code(file)).not.toMatch(/@zerocorp\/ui/);
     }
   });
 
   it("ui never imports the customer website renderer", () => {
-    for (const file of sourceFiles("packages/ui/src")) {
+    const uiFiles = sourceFiles("packages/ui/src");
+    expect(uiFiles.length).toBeGreaterThan(20);
+    for (const file of uiFiles) {
       expect(code(file)).not.toMatch(/@zerocorp\/site-renderer/);
     }
   });

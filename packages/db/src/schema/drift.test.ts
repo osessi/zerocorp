@@ -46,6 +46,13 @@ function declaredTables() {
       out.set(config.name, config);
     }
   }
+  // The `catch { continue }` above cannot tell "not a table" from "the schema modules
+  // changed shape", so an empty map would make every drift test below iterate nothing and
+  // pass. This is the check that caught business_profiles.company_id; it is worth
+  // knowing it is still running. §32b.
+  if (out.size < 20) {
+    throw new Error(`declaredTables() found only ${out.size} tables — the schema modules are not being read`);
+  }
   return out;
 }
 

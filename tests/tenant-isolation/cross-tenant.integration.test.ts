@@ -238,6 +238,18 @@ describe("apps/sites cannot write, structurally", () => {
 
 /* ── Append-only ──────────────────────────────────────────────────────────── */
 
+// describe.each([]) registers zero tests and reports a pass. The append-only guarantee is
+// enforced by the database and verified only here, so an empty table would silently retire
+// it. §32b.
+describe("the append-only table list is populated", () => {
+  it("has tables in it, or every check below registered nothing", () => {
+    expect(APPEND_ONLY_TABLES.length).toBeGreaterThan(0);
+    // Not everything can be append-only, or the general isolation checks at lines above
+    // skip every table and also pass.
+    expect(APPEND_ONLY_TABLES.length).toBeLessThan(TABLE_NAMES.length);
+  });
+});
+
 describe.each(APPEND_ONLY_TABLES)("%s is append-only, enforced by the database", (name) => {
   it("refuses an UPDATE", async () => {
     // The credit balance is SUM(delta) and is never stored. That only holds if the

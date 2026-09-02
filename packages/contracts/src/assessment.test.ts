@@ -34,6 +34,13 @@ const MACHINES = [
   },
 ];
 
+// An empty table makes describe.each register zero tests and report a pass. §32b.
+describe("MACHINES is populated", () => {
+  it("has machines to check", () => {
+    expect(MACHINES.length).toBeGreaterThan(0);
+  });
+});
+
 describe.each(MACHINES)("$name — structural soundness", (m) => {
   it("gives every state a transition list", () => {
     for (const s of m.states) expect(m.transitions[s]).toBeDefined();

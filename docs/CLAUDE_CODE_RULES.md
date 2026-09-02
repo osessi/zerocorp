@@ -697,6 +697,51 @@ affected feature tests
 
 ---
 
+## 32b. A check that cannot fail is a defect
+
+> **A check that cannot report a failure is worse than no check, because it produces
+> confidence. Every verification must fail loudly when it cannot run: a missing token, a
+> zero-length input set, an unparsed file, an empty iteration. Any check that can pass
+> without executing is a defect.**
+
+Written because the same mistake was made three times in this repository, by the same
+author, in eight days.
+
+| When | The check | How it passed without running |
+|---|---|---|
+| 2026-09-01 | The CI rule forbidding runtime-built Tailwind class names | `sourceFiles()` was called with no argument, threw, the throw was swallowed, and it iterated **zero files** |
+| 2026-09-01 | `MAX_INTERVIEW_TURNS` imported from a package that did not export it | `undefined` made `guard < undefined + 2` NaN-false, so **the loop never ran** and four tests asserted against an interview that never happened |
+| 2026-09-02 | The token contrast audit | It split `tokens.css` on the first match for "dark" and hit `@custom-variant dark (&:where(.dark, .dark *))` on line 12, so the light map parsed **zero tokens** and every light-mode check was skipped in silence |
+
+Each reported success. Each was believed. The third produced the sentence *"light mode is
+clean"* in a written report, about a theme that had never been measured.
+
+**The shape is always the same: an input set that is empty, a loop that therefore does
+nothing, and no assertion that the set had anything in it.**
+
+### What this requires
+
+```text
+Every glob, directory walk or file scan    assert the result is non-empty
+Every describe.each / it.each              assert the table is non-empty
+Every parse that splits or extracts        assert it found what it expected
+Every catch that returns a default         log or throw, never return in silence
+Every skip guard (if (x) return)           assert that not everything was skipped
+```
+
+A helper that returns `[]` on a missing directory is fine. A caller that never checks is
+not. **The assertion belongs at the call site, because that is where the expectation lives.**
+
+### The smell
+
+If you can rename a directory, delete a token or empty an array and the suite still
+passes, the check is decorative. Try it. It takes ten seconds, and it is the only way to
+know a check works: a green test tells you nothing about whether it ran.
+
+> **A green suite is evidence only if you know what would turn it red.**
+
+---
+
 ## 33. Pre-Change and Post-Change Checkpoints
 
 For meaningful changes:
