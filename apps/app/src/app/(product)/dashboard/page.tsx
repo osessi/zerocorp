@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import {
   ArticleIcon,
+  CheckIcon,
   BrowserIcon,
   BuildingsIcon,
   EnvelopeSimpleIcon,
@@ -15,7 +16,6 @@ import {
   ActivityPanel,
   CockpitHeader,
   EmptyState,
-  MetricGrid,
   SectionHeader,
   StatusBadge,
   StatusStamp,
@@ -48,11 +48,23 @@ const CATEGORY_ICON: Record<string, typeof BuildingsIcon> = {
   operations: GearIcon,
 };
 
-const STATUS: Record<string, { label: string; tone: "success" | "processing" | "neutral" | "warning" }> = {
-  done: { label: "Done", tone: "success" },
-  in_progress: { label: "In progress", tone: "processing" },
-  blocked: { label: "Needs you", tone: "warning" },
-  pending: { label: "Not started", tone: "neutral" },
+/** Where a step is actually done. A row the founder cannot act on is a dead row. */
+const CATEGORY_HREF: Record<string, string> = {
+  company: "/company",
+  brand: "/brand",
+  website: "/website",
+  domain: "/website",
+  email: "/email",
+  content: "/content",
+  seo: "/content",
+  leads: "/leads",
+  operations: "/settings",
+};
+
+const ACTION_LABEL: Record<string, string> = {
+  blocked: "Continue",
+  in_progress: "Open",
+  pending: "Start",
 };
 
 /**
@@ -67,28 +79,99 @@ function progressTone(percent: number): { bar: string; text: string } {
   return { bar: "bg-destructive", text: "text-destructive-ink" };
 }
 
-function StepRow({ step }: { step: PlanStepRow }) {
+/**
+ * The leading status indicator.
+ *
+ * Trailing badges on all eight rows were the reason the list read as one grey block: an
+ * identical chip at the identical x-position eight times over is a column of noise, not a
+ * status. A leading marker puts the state where the eye starts and lets the three states
+ * differ in SHAPE, not only in colour (§14):
+ *
+ *   done     a filled disc with a check   history
+ *   current  a filled ring                you are here
+ *   pending  an empty outline             not yet
+ *
+ * A circle, deliberately. §7 says radius 0 is for rectangles and that a circle is a
+ * component decision, which this is: it is a bullet in a sequence, not a container.
+ */
+function StepMarker({ state }: { state: "done" | "current" | "pending" }) {
+  if (state === "done") {
+    return (
+      <span className="bg-success text-background flex size-5 shrink-0 items-center justify-center rounded-full">
+        <CheckIcon size={12} weight="bold" aria-hidden="true" />
+      </span>
+    );
+  }
+  if (state === "current") {
+    return (
+      <span className="border-primary bg-background flex size-5 shrink-0 items-center justify-center rounded-full border-2">
+        <span className="bg-primary size-2 rounded-full" />
+      </span>
+    );
+  }
+  return <span className="border-input size-5 shrink-0 rounded-full border" />;
+}
+
+/**
+ * One row of the plan, with the state actually visible.
+ *
+ * Before this every row had identical weight whether it was done, running, blocked or
+ * untouched, which is why eight rows read as a table rather than as a sequence. Three
+ * treatments now:
+ *
+ *   anchor    --surface-sunken, full-weight title, icon tile, action button
+ *   pending   unfilled, normal title
+ *   done      recedes: muted title, no tile, no action. It is history.
+ */
+function StepRow({ step, anchor }: { step: PlanStepRow; anchor: boolean }) {
   const Icon = CATEGORY_ICON[step.category] ?? GearIcon;
-  const status = STATUS[step.status] ?? STATUS.pending!;
+  const done = step.status === "done";
+  const state = done ? "done" : anchor ? "current" : "pending";
+  const href = CATEGORY_HREF[step.category] ?? "/company";
 
   return (
     <li
       className={cx(
-        "border-border hover:bg-accent flex items-start gap-4 border-b px-5 py-4 last:border-b-0",
+        "border-border flex items-center gap-4 border-b px-5 py-4 last:border-b-0",
         "transition-[background-color] duration-normal ease-out",
+        anchor ? "bg-surface-sunken" : "hover:bg-accent",
         !step.included && "opacity-55",
       )}
     >
-      <span className="border-border text-muted-foreground flex size-9 shrink-0 items-center justify-center border">
-        <Icon size={18} weight="regular" aria-hidden="true" />
+      <StepMarker state={state} />
+
+      {/* The icon tile is a rank, not decoration: it appears on the row you are meant to
+          look at and disappears on the ones you are not. */}
+      {!done ? (
+        <span
+          className={cx(
+            "flex size-9 shrink-0 items-center justify-center border",
+            anchor ? "border-primary text-primary" : "border-border text-muted-foreground",
+          )}
+        >
+          <Icon size={18} weight="regular" aria-hidden="true" />
+        </span>
+      ) : null}
+
+      <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+        <span
+          className={cx(
+            "text-body-sm",
+            done ? "text-muted-foreground" : anchor ? "text-h4" : "font-medium",
+            !step.included && "line-through",
+          )}
+        >
+          {step.title}
+        </span>
+        {/* A finished step does not need its promise explained again. */}
+        {!done ? <span className="text-body-sm text-muted-foreground">{step.outcome}</span> : null}
       </span>
-      <span className="flex min-w-0 flex-1 flex-col gap-1">
-        <span className={cx("text-body-sm font-medium", !step.included && "line-through")}>{step.title}</span>
-        <span className="text-body-sm text-muted-foreground">{step.outcome}</span>
-      </span>
-      <StatusBadge tone={step.included ? status.tone : "neutral"}>
-        {step.included ? status.label : "Excluded"}
-      </StatusBadge>
+
+      {step.included && !done ? (
+        <ButtonLink href={href} variant={anchor ? "primary" : "secondary"}>
+          {ACTION_LABEL[step.status] ?? "Open"}
+        </ButtonLink>
+      ) : null}
     </li>
   );
 }
@@ -119,6 +202,11 @@ export default async function Page() {
   const blockedStep = included.find((s) => s.status === "blocked");
   const runningIndex = included.findIndex((s) => s.status === "in_progress");
   const needsYou = included.filter((s) => s.status === "blocked").length;
+  const anchorId =
+    blockedStep?.id ??
+    included.find((s) => s.status === "in_progress")?.id ??
+    included.find((s) => s.status === "pending")?.id ??
+    null;
 
   /**
    * The feed names its actor.
@@ -147,37 +235,39 @@ export default async function Page() {
     <>
       {/* The one focal region on the page. Everything below it sits on --background. */}
       <CockpitHeader
-        /* The company name, not the business description. `businessName` holds the
+        /* The company name, not the business description: `businessName` holds the
            founder's own sentence about what they do, which the command bar already
-           shows — printing it twice on one screen made the focal block read as an echo. */
-        greeting={overview.companyName ?? "Your business"}
+           shows, and printing it twice made the block read as an echo. */
+        eyebrow={overview.companyName ?? "Your business"}
         headline={
           needsYou === 0
-            ? `ZeroCorp is building your business. Nothing needs you right now.`
+            ? "ZeroCorp is building your business. Nothing needs you right now."
             : `${needsYou} steps are waiting on you`
         }
         blocked={blockedStep ? { label: blockedStep.title } : undefined}
         total={included.length}
         completed={done}
         current={runningIndex >= 0 ? runningIndex : undefined}
-        actions={
+        /* The figures live IN the block now. They were a separate tinted row below it,
+           which read as conditional formatting and left the block with an empty half. */
+        metrics={[
+          { label: "Launch progress", value: `${percent}%` },
+          { label: "Steps done", value: `${done}`, sub: `of ${included.length}` },
+          { label: "Needs you", value: `${needsYou}` },
+        ]}
+        status={
           overview.companyStatus === "active" && overview.companyName ? (
-            <StatusStamp milestone="formed" date={overview.companyName} />
+            <StatusStamp milestone="formed" />
           ) : (
-            <StatusBadge tone="processing">{overview.companyName ?? "Company forming"}</StatusBadge>
+            <StatusBadge tone="processing">Company forming</StatusBadge>
           )
         }
       />
 
-      <div className="mx-auto flex max-w-(--container-content) flex-col gap-8 px-5 py-8 sm:px-8">
-        <MetricGrid
-          items={[
-            { label: "Launch progress", value: `${percent}%`, tone: percent >= 75 ? "success" : percent >= 50 ? "warning" : "danger" },
-            { label: "Steps done", value: `${done}`, sub: `of ${included.length}`, tone: "info" },
-            { label: "Needs you", value: `${needsYou}`, tone: needsYou > 0 ? "warning" : "neutral" },
-          ]}
-        />
-
+      {/* `w-full` is load-bearing. The shell centres its children, so the focal header —
+          which is w-full — filled 1184px while this div shrink-wrapped to 958, putting the
+          two left edges 113px apart. Same container, same padding, same edge. */}
+      <div className="mx-auto flex w-full max-w-(--container-content) flex-col gap-8 px-5 py-8 sm:px-8">
         <section className="flex flex-col gap-4">
           <SectionHeader
             title="What ZeroCorp is building"
@@ -185,8 +275,11 @@ export default async function Page() {
             countTone="processing"
           />
           <ul className="border-border border">
+            {/* Exactly one anchor: the blocked step if there is one, otherwise the step
+                in flight, otherwise the first thing not yet started. A list with two
+                "you are here" markers has none. */}
             {overview.steps.map((step) => (
-              <StepRow key={step.id} step={step} />
+              <StepRow key={step.id} step={step} anchor={step.id === anchorId} />
             ))}
           </ul>
         </section>

@@ -6,77 +6,97 @@ import { SegmentedProgress } from "./SegmentedProgress";
 /**
  * CockpitHeader — the focal block at the top of Overview.
  *
- * The dashboard answers ONE question: what is ZeroCorp doing for me. Until now it opened
- * with a title and a subtitle on the same white as everything below it, so the answer had
- * no more weight than the list under it. This is the one region on the screen that sits on
- * `--surface-focal`, and everything below stays on `--background`. That contrast is the
- * whole point: it is what makes a page have a top.
+ * The dashboard answers ONE question: what is ZeroCorp doing for me. This is the one
+ * region on the screen that sits on `--surface-focal`; everything below stays on
+ * `--background`. That contrast is what gives the page a top.
  *
- * The anatomy changed during review. The brief opened with a greeting; the screen already
- * knows which step is blocked, and "Waiting on you: connect your domain" is a better answer
- * to "what is ZeroCorp doing for me" than "Good morning". So the blocked step is the
- * headline when there is one, the status line is the headline when there is not, and the
- * greeting is demoted to a small line above.
+ * Two things changed after looking at it rendered:
+ *
+ * 1. **The metrics moved IN.** They were a separate tinted row below, which read as
+ *    spreadsheet conditional formatting and left the block as a 200px slab with an empty
+ *    right half. A block that states the situation and then makes you look elsewhere for
+ *    the numbers is not a cockpit. Inside, the hierarchy comes from the SURFACE, so the
+ *    figures need no washes and no per-metric tints.
+ * 2. **The blocked step became the headline.** "Waiting on you: connect your domain"
+ *    answers the question better than a greeting does.
+ *
+ * On §4.6's "a quantity is never black": that rule exists because a metric in
+ * `--foreground` carried exactly the weight of the heading beside it on a white page. In
+ * here there is one headline and one surface, and the measurement decides the rest —
+ * every `-ink` value fails on this ground (2.33 to 2.76 against 4.5) because they are
+ * tuned for light tints. So the figures take `--surface-focal-foreground` and the labels
+ * take it at 60%, which measures 6.26:1. `--muted-foreground` is NOT usable here: 3.40:1.
  *
  * One per screen. It is the focal block, and two focal blocks is no focal block.
  */
 export function CockpitHeader({
-  greeting,
+  eyebrow,
   headline,
   blocked,
   total,
   completed,
   current,
-  actions,
+  metrics,
+  status,
 }: {
-  /** Demoted to an overline. It is courtesy, not information. */
-  greeting: string;
-  /** The status line, used when nothing is blocked. */
+  /** Small line above the headline. Courtesy, not information. */
+  eyebrow: string;
+  /** The status sentence, used when nothing is blocked. */
   headline: string;
   /** The step waiting on the founder. Takes over the headline when present. */
-  blocked?: { label: string; href?: string } | undefined;
+  blocked?: { label: string } | undefined;
   total: number;
   completed: number;
   current?: number | undefined;
-  actions?: ReactNode;
+  /** Three at most. Four figures on one line stop being scannable. */
+  metrics: { label: string; value: string; sub?: string }[];
+  /** Aligns with the headline, not floating in a corner. */
+  status?: ReactNode;
 }) {
   return (
     <header className="bg-surface-focal text-surface-focal-foreground border-border w-full border-b">
-      <div className="mx-auto flex max-w-(--container-content) flex-col gap-5 px-8 py-7">
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div className="flex min-w-0 flex-col gap-2">
-            <span className="text-overline text-surface-focal-foreground/60">{greeting}</span>
+      {/* Same container and padding as the content below, so the left edge is one edge. */}
+      <div className="mx-auto flex max-w-(--container-content) flex-col gap-4 px-5 py-6 sm:px-8">
+        <span className="text-overline text-surface-focal-foreground/60">{eyebrow}</span>
 
-            {blocked ? (
-              /* Warning tone, but on a dark ground the §4.3 colour is not legible, so the
-                 icon carries the hue and the text stays at full contrast. Colour is never
-                 the only carrier here either: the word "Waiting on you" says it. */
-              <p className="text-h3 flex items-start gap-2.5">
-                <WarningIcon size={22} className="text-warning mt-0.5 shrink-0" weight="fill" />
-                <span>
-                  <span className="text-warning">Waiting on you:</span> {blocked.label}
-                </span>
-              </p>
-            ) : (
-              <p className="text-h3">{headline}</p>
-            )}
-          </div>
-
-          {actions ? <div className="flex shrink-0 items-center gap-2">{actions}</div> : null}
+        <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
+          {blocked ? (
+            <p className="text-h3 flex min-w-0 items-start gap-2.5">
+              <WarningIcon size={22} className="text-warning mt-0.5 shrink-0" weight="fill" />
+              <span>
+                <span className="text-warning">Waiting on you:</span> {blocked.label}
+              </span>
+            </p>
+          ) : (
+            <p className="text-h3 min-w-0">{headline}</p>
+          )}
+          {status ? <div className="flex shrink-0 items-center gap-2">{status}</div> : null}
         </div>
 
-        <div className="flex flex-col gap-2">
-          <SegmentedProgress
-            total={total}
-            completed={completed}
-            {...(current !== undefined ? { current } : {})}
-            label={`${completed} of ${total} steps complete`}
-            onFocal
-          />
-          <p className={cx("text-caption text-surface-focal-foreground/60 font-mono")}>
-            {completed} of {total} steps complete
-          </p>
-        </div>
+        <SegmentedProgress
+          total={total}
+          completed={completed}
+          {...(current !== undefined ? { current } : {})}
+          label={`${completed} of ${total} steps complete`}
+          onFocal
+        />
+
+        {/* The figures, on one line. No washes: the surface already separates them from
+            everything else on the page, and tinting three cells inside a dark block is
+            three more grounds to measure for nothing. */}
+        <dl className="flex flex-wrap items-baseline gap-x-10 gap-y-3">
+          {metrics.map((m) => (
+            <div key={m.label} className="flex flex-col gap-0.5">
+              <dd className={cx("text-h3 font-mono tabular-nums")}>
+                {m.value}
+                {m.sub ? (
+                  <span className="text-body-sm text-surface-focal-foreground/60 ml-1.5 font-sans">{m.sub}</span>
+                ) : null}
+              </dd>
+              <dt className="text-caption text-surface-focal-foreground/60">{m.label}</dt>
+            </div>
+          ))}
+        </dl>
       </div>
     </header>
   );
