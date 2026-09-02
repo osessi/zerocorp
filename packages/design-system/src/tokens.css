@@ -30,17 +30,17 @@
      since 2026-08-31 and nothing had needed it until CockpitHeader. */
   --primary-emphasis: #2dd4bf;
 
-  --secondary: #f4f2ee;
+  --secondary: #f3f3f3;
   --secondary-foreground: #18181b;
 
-  --muted: #f6f5f3;
+  --muted: #f5f5f5;
   /* Warmed with the neutral ramp, 2026-09-02. Measured on every ground it can sit on,
      per the §4.4 every-ground rule: 5.25:1 on --surface, 4.82:1 on --muted, 4.70:1 on
      --secondary, 4.53:1 on --accent, 4.61:1 on --surface-sunken. The predecessor #707070
      was itself a fix for #737373, which failed at 4.35:1 on --muted. */
   --muted-foreground: #6e6c66;
 
-  --accent: #f0eee9;
+  --accent: #efefef;
   --accent-foreground: #18181b;
 
   --surface: #ffffff;
@@ -49,15 +49,15 @@
      #FCFCFB was measured and rejected: it bought 1.03 separation from --surface while
      pushing success-, warning- and processing-subtle to 1.07–1.10, under the §4.5
      perceptibility floor of 1.10. Three perceptible levels instead. §4.1, 2026-09-02. */
-  --surface-sunken: #f2f0ec; /* 1.14 vs the page — wells, table headers, empty states */
+  --surface-sunken: #f0f0f0; /* 1.14 vs the page — wells, table headers, empty states */
   --surface-focal: #14181b; /* 17.85 vs the page — the focal block */
   --surface-focal-foreground: #f4f3f0; /* 16.09:1 on --surface-focal */
 
   /* --border is decorative: dividers, card edges, table rules.
      --input identifies a form control and must clear WCAG 1.4.11 (3:1).
      They are NOT interchangeable. */
-  --border: #e6e4e0;
-  --border-hover: #d4d1cb;
+  --border: #e5e5e5;
+  --border-hover: #d3d3d3;
   /* #949494 was recorded at 3.03:1 on WHITE and never measured on a raised surface. It
      sat at 2.78:1 on --muted: every control in a muted well was below SC 1.4.11 from the
      day the token was written. #847F75 is measured on all four: 3.98 --surface,

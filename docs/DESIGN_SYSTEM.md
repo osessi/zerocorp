@@ -130,18 +130,18 @@ They share the token *architecture*, never the token *values*. See §15 and §16
 | Token | Value | Use |
 |---|---|---|
 | `--background` | `#FFFFFF` | Page ground |
-| `--surface-sunken` | `#F2F0EC` | Wells, table headers, empty states — 1.14 vs the page |
+| `--surface-sunken` | `#F0F0F0` | Wells, table headers, empty states — 1.14 vs the page |
 | `--surface-focal` | `#14181B` | The focal block — 17.85 vs the page |
 | `--surface-focal-foreground` | `#F4F3F0` | Text on the focal block — 16.09:1 |
 | `--foreground` | `#14181B` | Primary text |
 | `--primary` | `#00786F` | Primary actions, active state, brand |
 | `--primary-foreground` | `#F0FDFA` | Text and icons on `--primary` |
-| `--secondary` | `#F4F2EE` | Secondary surfaces and buttons |
+| `--secondary` | `#F3F3F3` | Secondary surfaces and buttons |
 | `--secondary-foreground` | `#18181B` | Text on `--secondary` |
-| `--muted` | `#F6F5F3` | Low-emphasis surfaces |
+| `--muted` | `#F5F5F5` | Low-emphasis surfaces |
 | `--muted-foreground` | `#6E6C66` | Low-emphasis text, help, placeholders — see §4.4 |
-| `--accent` | `#F0EEE9` | Hover surfaces, selected rows |
-| `--border` | `#E6E4E0` | Dividers, card edges |
+| `--accent` | `#EFEFEF` | Hover surfaces, selected rows |
+| `--border` | `#E5E5E5` | Dividers, card edges |
 | `--input` | `#847F75` | Form control borders — see §4.4 |
 | `--ring` | `#00786F` | Focus ring |
 | `--destructive` | `#DC2626` | Destructive actions, errors |
@@ -184,9 +184,63 @@ to read. They now separate:
 ```
 
 Three distinct grounds instead of one repeated twice. A hovered row on a muted surface now
-moves. Neutrals were warmed at the same time: the accent is teal and cool, so a warm
-neutral beside it reads as considered rather than clinical. The document had no position on
-neutral temperature before this.
+moves.
+
+#### Warm neutrals — MEASURED AND REJECTED 2026-09-02
+
+The three grounds above were warmed at the same time they were separated, on the reasoning
+that the accent is teal and cool, so a warm neutral beside it reads as considered rather
+than clinical. It was proposed as an aesthetic direction and never verified visually.
+
+It was then verified. The dashboard was rendered twice, once warm and once with neutral
+greys at **matched luminance**, so hue was the only variable, and the two images were
+compared pixel by pixel:
+
+```text
+pixels differing at all      134,802 / 1,440,000   9.4%
+maximum channel difference   6 / 255
+mean channel difference      0.47 / 255
+```
+
+Six out of 255, at maximum, anywhere on the screen. Stacked directly adjacent with a
+marker between them, the two are not reliably distinguishable. Reverted to neutral at the
+same luminance, so every separation the change bought is kept and only the hue is gone.
+
+> **Recorded as measured and rejected, not merely reverted.** The intuition is a reasonable
+> one and someone will have it again. It is wrong on this palette, and the number above is
+> why.
+
+Three tokens stayed warm: `--input` `#847F75`, `--muted-foreground` `#6E6C66` and
+`--foreground` `#14181B`.
+
+> **Those three are exactly the ones whose value was derived by measurement rather than
+> chosen aesthetically. The aesthetic choices were the ones that did not survive
+> measurement.**
+
+#### What the revert did NOT fix
+
+Reverting was expected to return 26 light-mode tint failures "for free". It returned
+**one**: the audit went from 44 failures to 43.
+
+The other 25 predate the change. Measured against the **original** `#F5F5F5` neutrals,
+before any of this:
+
+```text
+                on --muted   on --secondary   on --accent
+success-subtle     1.01 ✗        1.00 ✗          1.01 ✗
+warning-subtle     1.02 ✗        1.01 ✗          1.02 ✗
+processing-subtle  1.03 ✗        1.03 ✗          1.03 ✗
+ai-subtle          1.09 ✗        1.08 ✗          1.09 ✗
+info-subtle        1.12 ✓        1.11 ✓          1.12 ✓
+destructive-subtle 1.12 ✓        1.11 ✓          1.12 ✓
+```
+
+**Twelve of eighteen combinations were already failing when §4.5 shipped on 2026-08-31.**
+The light tints were tuned against white and never measured on a raised neutral: the same
+one-ground-over miss as `--input` (§4.4) and the dark tints, now found a fourth time. The
+warm neutrals were blamed for a defect they did not cause and only slightly worsened.
+
+See the scoping table in §4.5.
 
 ### 4.5 Semantic surfaces and the teal ramp — VALIDATED 2026-08-31
 
@@ -283,8 +337,56 @@ fill is decoration that happens to wash out. Nothing becomes unreadable, because
 **perceptibility** floor and this section already says a tint carries no meaning on its own
 (§14 and `CLAUDE_CODE_RULES.md` §25 require the icon and the label regardless).
 
-Light mode has no equivalent problem: its neutral ramp spans 1.16 where dark spans 1.31,
-and every light tint clears the floor on every light ground.
+#### Light has the same problem, older — 2026-09-02
+
+The sentence that stood here said *"light mode has no equivalent problem, and every light
+tint clears the floor on every light ground."* That was written from an audit that had
+never measured light mode (§4.4). Light has the same problem and has had it longer:
+
+```text
+                on page/--surface   on --muted / --secondary / --accent / --surface-sunken
+success-subtle       1.10                1.01 – 1.05  ✗
+warning-subtle       1.11                1.02 – 1.04  ✗
+processing-subtle    1.13                1.01 – 1.03  ✗
+ai-subtle            1.19                1.03 – 1.07  ✗
+info-subtle          1.22                1.06 – 1.10  ✗ mostly
+destructive-subtle   1.22                1.06 – 1.10  ✗ mostly
+```
+
+Present since §4.5 shipped. Same cause as `--input`: tuned against one ground, used on
+another.
+
+#### The scoping table — every ground, both themes
+
+No token changes. Where a tint is imperceptible, the element is carried by its **border,
+its icon and its label**, all three of which it already has (§14, `CLAUDE_CODE_RULES.md`
+§25). 1.10 is a perceptibility floor, not an accessibility one — a tint carries no meaning
+on its own.
+
+| Element | Valid on | NOT valid on | What carries it there instead |
+|---|---|---|---|
+| light `--{tone}-subtle` | the page · `--surface` | `--muted` · `--secondary` · `--accent` · `--surface-sunken` | border + icon + label |
+| dark `--{tone}-subtle` | the page · `--muted` · `--secondary` · `--accent` | `--surface` | border + icon + label |
+| `--{tone}-ink` | its own tint · its own wash | **inside `--surface-focal`** (2.33–2.76) | `--surface-focal-foreground` |
+| `--muted-foreground` | every neutral ground | **inside `--surface-focal`** (3.40) | `--surface-focal-foreground` at 60%, 6.26:1 |
+| §4.3 status colour **as text** | the page · `--surface` | `--surface-sunken` (4.24–4.41) · `--muted` (4.43 for destructive) | the `-ink` step, 5.68–6.74 on those grounds |
+
+Three notes on that table.
+
+**The two themes are complementary, not parallel.** A light tint fails on a raised neutral
+and survives on `--surface`; a dark tint does the opposite, because dark `--surface`
+`#141414` sits inside the tints' own luminance band while light `--surface` is pure white.
+There is no single sentence covering both, and writing one would be wrong.
+
+**The focal block is a ground, not a container.** Every value in the system is tuned
+against the page or against a tint. `--surface-focal` is neither, so nothing except
+`--surface-focal-foreground` may be assumed safe inside it. That is why `CockpitHeader`
+uses no `-ink` values and no `--muted-foreground`.
+
+**Status as text has a fix that already exists.** Unlike the tint rows, this one is not
+scoped but redirected: `-ink` measures 5.68–6.74 on `--surface-sunken`, so any status
+rendered as text on a raised neutral takes `-ink` rather than the §4.3 colour. §4.3 is
+tuned as text on white and says so.
 
 #### The teal ramp
 

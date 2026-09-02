@@ -740,6 +740,48 @@ know a check works: a green test tells you nothing about whether it ran.
 
 > **A green suite is evidence only if you know what would turn it red.**
 
+### Every new check ships with a demonstration that it can fail
+
+A rule about checks that cannot fail needs a check that it can fail. So:
+
+> **Any new verification ships with a demonstration that it fails when its input is
+> missing, and the demonstration is recorded alongside it.**
+
+Break the input, run it, paste what came out. It takes ten seconds and it is the only
+evidence that distinguishes a working check from a decorative one. For the guard added to
+`sourceFiles()`:
+
+```text
+$ sed -i '' 's|packages/ui/src|packages/ui/src-RENAMED|' tests/architecture/design-tokens.test.ts
+$ pnpm vitest run tests/architecture/design-tokens.test.ts
+
+  before   14 tests passed          ← the bug: a renamed directory was invisible
+  after    Error: sourceFiles("packages/ui/src-RENAMED") could not be read
+```
+
+The demonstration goes in the commit message or in a comment at the check. A check whose
+failure has never been observed is a check nobody has tested.
+
+### Sweep when you find one
+
+The audit bug was one reported instance. Applying this rule to the rest of the codebase
+returned **four more**, all of the same shape, all written by the same author:
+
+```text
+sourceFiles()          swallowed a missing directory; 3 of 6 call sites unguarded
+declaredTables()       no non-empty guard, and its `catch { continue }` cannot tell
+                       "not a table" from "the schema modules moved". An empty map
+                       would have made the drift test a silent no-op
+describe.each × 4      APPEND_ONLY_TABLES and MACHINES × 2 could register ZERO tests
+                       and report a pass
+```
+
+> **One reported instance returned four more. That ratio is the argument for sweeping
+> rather than fixing what was reported.**
+
+A bug of this shape is a habit, not an accident. Whoever wrote one wrote others, and the
+place to look is everywhere the same person wrote a check.
+
 ---
 
 ## 33. Pre-Change and Post-Change Checkpoints
