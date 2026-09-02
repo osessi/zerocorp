@@ -183,10 +183,50 @@ export const AXIS = {
 
 export const GRID_STROKE = "var(--chart-grid)";
 
-export function EmptyChart({ message }: { message: string }) {
+/**
+ * The empty state. A chart with no data is a PLACE, not a failure.
+ *
+ * Moved off the dashed outline 2026-09-02. A dashed box is the browser's vocabulary for
+ * "this did not load"; a sunken well says the region exists and is waiting. Same reasoning
+ * as `EmptyState` in @zerocorp/ui, and the two should keep agreeing.
+ */
+export function EmptyChart({ message, action }: { message: string; action?: ReactNode }) {
   return (
-    <div className={cx("border-border bg-muted flex h-56 items-center justify-center border border-dashed")}>
+    <div className={cx("border-border bg-surface-sunken flex h-56 flex-col items-center justify-center gap-3 border")}>
       <span className="text-body-sm text-muted-foreground">{message}</span>
+      {action}
+    </div>
+  );
+}
+
+/**
+ * The loading state — the axes and the grid, without the series.
+ *
+ * A spinner in a chart region tells you nothing about what is arriving. Rendering the
+ * frame the data will land in means the layout does not jump when it does, and the reader
+ * already knows the shape of what they are waiting for.
+ *
+ * Three bars, not a shimmer: `--muted` blocks at the heights a bar chart would occupy.
+ * A shimmering gradient is decoration, and §8 keeps gradients out of UI surfaces.
+ *
+ * `aria-busy` rather than a live region: a chart loading is not news a screen reader
+ * should interrupt for, but a reader landing on it must not be told the region is empty.
+ */
+export function LoadingChart({ label = "Loading chart" }: { label?: string }) {
+  return (
+    <div
+      aria-busy="true"
+      aria-label={label}
+      role="img"
+      className={cx("border-border bg-surface-sunken flex h-56 items-end gap-3 border p-6")}
+    >
+      {[0.45, 0.75, 0.3, 0.6, 0.85, 0.5].map((h, i) => (
+        <span
+          key={i}
+          className="bg-muted-foreground/15 motion-safe:animate-pulse w-full"
+          style={{ height: `${h * 100}%` }}
+        />
+      ))}
     </div>
   );
 }

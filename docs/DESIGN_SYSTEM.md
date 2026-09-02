@@ -130,16 +130,19 @@ They share the token *architecture*, never the token *values*. See §15 and §16
 | Token | Value | Use |
 |---|---|---|
 | `--background` | `#FFFFFF` | Page ground |
-| `--foreground` | `#0A0A0A` | Primary text |
+| `--surface-sunken` | `#F2F0EC` | Wells, table headers, empty states — 1.14 vs the page |
+| `--surface-focal` | `#14181B` | The focal block — 17.85 vs the page |
+| `--surface-focal-foreground` | `#F4F3F0` | Text on the focal block — 16.09:1 |
+| `--foreground` | `#14181B` | Primary text |
 | `--primary` | `#00786F` | Primary actions, active state, brand |
 | `--primary-foreground` | `#F0FDFA` | Text and icons on `--primary` |
-| `--secondary` | `#F4F4F5` | Secondary surfaces and buttons |
+| `--secondary` | `#F4F2EE` | Secondary surfaces and buttons |
 | `--secondary-foreground` | `#18181B` | Text on `--secondary` |
-| `--muted` | `#F5F5F5` | Low-emphasis surfaces |
-| `--muted-foreground` | `#707070` | Low-emphasis text, help, placeholders — see §4.4 |
-| `--accent` | `#F5F5F5` | Hover surfaces, selected rows |
-| `--border` | `#E5E5E5` | Dividers, card edges |
-| `--input` | `#949494` | Form control borders — see §4.4 |
+| `--muted` | `#F6F5F3` | Low-emphasis surfaces |
+| `--muted-foreground` | `#6E6C66` | Low-emphasis text, help, placeholders — see §4.4 |
+| `--accent` | `#F0EEE9` | Hover surfaces, selected rows |
+| `--border` | `#E6E4E0` | Dividers, card edges |
+| `--input` | `#847F75` | Form control borders — see §4.4 |
 | `--ring` | `#00786F` | Focus ring |
 | `--destructive` | `#DC2626` | Destructive actions, errors |
 | `--success` | `#15803D` | Completed, healthy, verified |
@@ -168,9 +171,22 @@ border carries the boundary, the fill carries the state.
 `--destructive-hover` *does* flip, because `--destructive-foreground` flips with it: dark
 ink on light red, so the fill lightens to raise contrast. 6.47:1 light, 7.16:1 dark.
 
-> **Note — `--muted` and `--accent` are the same value (`#F5F5F5`).** That is workable but
-> means the two roles are visually indistinguishable. If a hover state ever needs to read
-> against a muted surface, `--accent` must diverge. Recorded, not changed.
+#### `--muted` and `--accent` — RESOLVED 2026-09-02
+
+They were both `#F5F5F5`, and the note here recorded it as *"workable but visually
+indistinguishable... recorded, not changed"*. A hover state on a muted surface had no way
+to read. They now separate:
+
+```text
+--muted            #F6F5F3    low-emphasis surface
+--surface-sunken   #F2F0EC    a well, one step deeper
+--accent           #F0EEE9    hover, one step deeper again
+```
+
+Three distinct grounds instead of one repeated twice. A hovered row on a muted surface now
+moves. Neutrals were warmed at the same time: the accent is teal and cool, so a warm
+neutral beside it reads as considered rather than clinical. The document had no position on
+neutral temperature before this.
 
 ### 4.5 Semantic surfaces and the teal ramp — VALIDATED 2026-08-31
 
@@ -219,6 +235,56 @@ not an accessibility one, because a tint carries no meaning on its own. `--ai-su
 
 `neutral` gets no tint. It is the absence of a status, and a sixth tint for "nothing yet"
 would give it more presence than the five that mean something.
+
+#### Where a dark tint is valid, and the proof that it cannot be valid everywhere — 2026-09-02
+
+The dark tints were measured against the **page** and never against a **card**. The same
+one-ground-over miss as `--input` (§4.4), found in the same audit. Two independent
+instances of one class of error is the argument for the every-ground rule.
+
+```text
+                on page #0a0a0a   on --muted #262626   on --surface #141414
+success-subtle       1.15                1.14                 1.07  ✗
+warning-subtle       1.13                1.14                 1.05  ✗
+info-subtle          1.14                1.14                 1.06  ✗
+destructive-subtle   1.10                1.14                 1.02  ✗
+ai-subtle            1.18                1.11                 1.10  ✗
+processing-subtle    1.19                1.14                 1.11
+```
+
+**Raising the tints was tried, and made it worse: 17 failures became 24.** Raising a tint
+moves the ground its own ink sits on. The constraint set has no solution:
+
+```text
+a dark tint must clear 1.10 against #0a0a0a, #141414 and #262626
+
+  darker than all three   →  luminance ≤ -0.0018     below pure black. impossible
+  lighter than all three  →  luminance ≥  0.0263     ≈ #2f2f2f grey
+        and on that tint  →  --info-ink        3.74  ✗
+                             --destructive-ink 3.66  ✗
+```
+
+Moving `--surface` instead of the tints fails the same way: across `#1a1a1a` to `#242424`
+the worst tint never clears 1.10. Six tints, the page, `--surface`, `--surface-elevated`
+and `--muted` compete for roughly 1.3x of luminance, and no assignment satisfies every
+pairwise floor.
+
+> **This is arithmetic, not tuning. Do not retry it by picking different hexes.**
+
+So the constraint is **scoped, not solved**:
+
+```text
+dark --{tone}-subtle is valid on   the page · --muted · --secondary · --accent
+                     is NOT on     --surface
+```
+
+On `--surface` in dark, a chip is carried by its **border, its icon and its label**, and the
+fill is decoration that happens to wash out. Nothing becomes unreadable, because 1.10 is a
+**perceptibility** floor and this section already says a tint carries no meaning on its own
+(§14 and `CLAUDE_CODE_RULES.md` §25 require the icon and the label regardless).
+
+Light mode has no equivalent problem: its neutral ramp spans 1.16 where dark spans 1.31,
+and every light tint clears the floor on every light ground.
 
 #### The teal ramp
 
@@ -416,7 +482,7 @@ Numbers are Geist Mono. A tooltip exists to be compared against another tooltip 
 | Token | Value | Status |
 |---|---|---|
 | `--border` | `#262626` | **VALIDATED** |
-| `--ring` | `#00786F` | **VALIDATED** |
+| `--ring` | `#14B8A6` | **VALIDATED 2026-09-02** — flips with the theme, see below |
 | `--background` | `#0A0A0A` | **PROPOSED** — mirrors the light `--foreground` |
 | `--foreground` | `#FAFAFA` | **PROPOSED** |
 | `--surface` | `#141414` | **PROPOSED** — cards |
@@ -426,8 +492,8 @@ Numbers are Geist Mono. A tooltip exists to be compared against another tooltip 
 | `--muted` | `#262626` | **PROPOSED** |
 | `--muted-foreground` | `#A3A3A3` | **PROPOSED** |
 | `--accent` | `#262626` | **PROPOSED** |
-| `--input` | `#6B6B6B` | **PROPOSED** — 3.72:1. `#2E2E2E` reached only 1.46:1 |
-| `--input-hover` | `#8F8F8F` | **PROPOSED** — 6.12:1. In dark, hover *lightens* |
+| `--input` | `#7A7A7A` | **VALIDATED 2026-09-02** — 3.53:1 on `#262626`. `#6B6B6B` was 2.84 there |
+| `--input-hover` | `#9A9A9A` | **VALIDATED 2026-09-02** — 4.94:1 on `#262626`. In dark, hover *lightens* |
 | `--primary` | `#00786F` | **PROPOSED** — unchanged; see the contrast finding below |
 | `--primary-foreground` | `#F0FDFA` | **PROPOSED** — unchanged |
 | `--primary-emphasis` | `#2DD4BF` | **PROPOSED** — teal **text**, links and icons on dark only |
@@ -440,6 +506,27 @@ Numbers are Geist Mono. A tooltip exists to be compared against another tooltip 
 Every light-mode status colour lands between 3.69:1 and 4.10:1 on `#0A0A0A` — enough for a
 filled badge (a UI component needs 3:1) but **not for status text or an icon on the page
 ground**. The lighter set above is required wherever status is rendered as text on dark.
+
+#### Why `--ring` flips with the theme and `--primary` does not — 2026-09-02
+
+`--ring` was `#00786F` in both themes, matching `--primary`. Measured on dark `--muted`,
+`--secondary` and `--accent` — all `#262626` — it reached **2.82:1**, under the 3:1 floor
+of WCAG 2.1 SC 1.4.11. The focus indicator is the one token where a contrast failure is not
+cosmetic: it is the only thing telling a keyboard user where they are.
+
+The two tokens look interchangeable and are not:
+
+| | Kind | What governs it |
+|---|---|---|
+| `--primary` | **identity** | It must not shift. A brand that changes hue on a theme toggle is not a brand |
+| `--ring` | **functional indicator** | A hard accessibility floor on every ground it can land on |
+
+When identity and the floor conflict, the floor wins. `#14B8A6` is **7.95:1** on the page
+and **6.08:1** on `#262626`, and it is recognisably the same teal at a luminance that works
+on dark — not a second accent.
+
+> Recorded because the next person to read the two tokens side by side will ask why one
+> flips and the other does not.
 
 ### 4.3 Semantic status colors — VALIDATED
 
@@ -479,9 +566,11 @@ Computed against WCAG 2.1. Recorded so nobody re-derives them.
 | `#15803D` success | **5.02:1** | AA text ✓ |
 | `#B45309` warning | **5.02:1** | AA text ✓ |
 | `#DC2626` destructive | **4.83:1** | AA text ✓ |
-| `#737373` muted-foreground | **4.74:1** | AA text ✓ (narrow margin) |
-| `#949494` input border | **3.03:1** | non-text contrast ✓ |
-| `#E5E5E5` border | **1.26:1** | dividers and card edges ✓ · never a control boundary |
+| `#6E6C66` muted-foreground | **5.25:1** | AA text ✓ · and on every other ground, below |
+| `#847F75` input border | **3.98:1** | non-text contrast ✓ · and on every other ground, below |
+| `#E6E4E0` border | **1.27:1** | dividers and card edges ✓ · never a control boundary |
+| `#14181B` on `#F2F0EC` surface-sunken | **16.39:1** | AA text ✓ |
+| `#F4F3F0` on `#14181B` surface-focal | **16.09:1** | AA text ✓ |
 
 #### Dark mode — on `#0A0A0A`
 
@@ -533,6 +622,56 @@ The Switch had hit this exact number and worked around it locally by using `--fo
 `#959595` was measured at **2.995:1** and rejected: 0.005 below the threshold is a
 reported failure that no human can see, and one hex step fixes it at zero visual cost.
 Recorded so the near-miss is not reintroduced later.
+
+#### The every-ground rule — ADDED 2026-09-02
+
+`--input` was recorded above as *"3.03:1 on white"* and measured against nothing else. On
+`--muted` `#F5F5F5` it sat at **2.78:1**. Every form control inside a muted well — filter
+bars, table toolbars, inline editors, any field on a hover row — had been below WCAG 2.1
+SC 1.4.11 from the day the token was written, and the recorded number said it passed.
+
+The subsection directly above caught this exact class of bug for `--muted-foreground`, one
+ground over, and did not generalise. That is the whole lesson.
+
+> **Every token measured for contrast is measured against every ground it can sit on, not
+> only the page. A value tuned against one ground is not tuned against another.**
+
+`--input` is now `#847F75`, measured on all five neutral grounds:
+
+| Ground | Ratio |
+|---|---:|
+| `--surface` `#FFFFFF` | **3.98:1** ✓ |
+| `--muted` `#F6F5F3` | **3.65:1** ✓ |
+| `--secondary` `#F4F2EE` | **3.56:1** ✓ |
+| `--surface-sunken` `#F2F0EC` | **3.50:1** ✓ |
+| `--accent` `#F0EEE9` | **3.43:1** ✓ |
+
+`#8B887F` also cleared every ground but reached only **3.06:1** on `--accent`. Rejected for
+the same reason `#959595` was rejected above: a margin of 0.06 is a reported pass that the
+next token change silently turns into a failure.
+
+#### The audit that rule produced — 2026-09-02
+
+The rule was written, then applied to the whole token set: every text token against every
+neutral ground, every tint and every wash; every `-ink` on its own tint, its own wash,
+`--muted` and `--surface-sunken`; every status colour as text; every chart series as a
+graphical object; tint perceptibility on all six grounds a chip can land on; and the focal
+block, which is a new ground. Both themes. **17 failures, all of them in dark mode.**
+
+| Group | Failures | Status |
+|---|---:|---|
+| `--input` on dark `--muted`/`--secondary`/`--accent` | 3 | **open** — the same bug as light, in the other theme |
+| Dark `-subtle` tints on `--surface` `#141414` | 5 | **open** — tuned against the page, used on a card |
+| `--ring` on dark raised neutrals | 3 | **open** — 2.82:1, under SC 1.4.11 |
+| Inks inside the dark focal block | 2 | **fixed same day** — the token was new, so it was mine to fix |
+| `-ink` and status text on dark `--muted` | 4 | **already solved** — §4.6's `-on-muted` tokens |
+
+The last row is worth recording as a success. The audit found that exactly `--info` and
+`--destructive` fail on dark `--muted`, and those are exactly the two hues §4.6 gave an
+`-on-muted` variant. The escape hatch was built for precisely the right pair.
+
+> Light mode is clean. Dark mode is where measurement had not been repeated, which is the
+> predictable result of a system whose values were tuned in light and mirrored into dark.
 
 ---
 
@@ -596,18 +735,45 @@ Always through tokens. Never invented per screen. `className="mt-[17px]"` is a d
 ## 7. Radius — VALIDATED
 
 ```text
---radius-none   0px      DEFAULT — everything, unless justified
---radius-xs     2px      exception
---radius-sm     4px      exception
+--radius-none   0px      cards, tables, panels, containers, dialogs
+--radius-sm     4px      badges, buttons, inputs, pills, chips
 ```
 
-**0px is the default and the signature.** 2px and 4px exist only where a control genuinely
-needs to read as rounded — a pill-shaped status badge, an avatar, a circular icon button.
+> **Radius is structural, not decorative. Containers are 0px; interactive elements are 4px.
+> Mixing radii within one tier is a defect.**
+
+**0px remains the signature.** It is what a ZeroCorp surface looks like, and no card, table,
+panel or dialog ever softens. 4px belongs to the things a hand acts on, and it exists
+because sharp corners on a tinted chip read as harsh rather than precise.
 
 There is no `md`, `lg`, `pill` or `full` radius token. If something needs to be a circle,
 it is a circle (`border-radius: 50%`) and that is a component decision, not a scale value.
 
-Mixing radii inside one screen is a defect.
+#### `--radius-xs` (2px) — DELETED 2026-09-02
+
+A third value under a two-tier rule is drift waiting to happen: it has no stated home, so
+the next person picks it by feel. Deleted rather than assigned.
+
+#### The base layer that defeated the exception — FIXED 2026-09-02
+
+`tokens.css` carried this in `@layer base`:
+
+```css
+* { border-radius: var(--radius-none); }
+```
+
+A universal selector, so the documented 2-4px exception could not win without an override
+on every component. The measurable consequence: **`rounded-xs` and `rounded-sm` were used
+zero times across the entire codebase.** Both tiers of the scale were unreachable, and the
+rule looked obeyed because nothing could break it.
+
+What remains is a normalisation of the controls Safari and iOS round on their own:
+
+```css
+button, input, select, textarea { border-radius: var(--radius-none); }
+```
+
+Radius above 0 is now a component decision, which is what §7 always said it was.
 
 ---
 
@@ -1711,10 +1877,24 @@ column and panel proportions · the rhythm of sections · where actions live.
 
 | The reference does | ZeroCorp does | Why |
 |---|---|---|
-| Rounded search pill, ~6px buttons, ~8px cards | `--radius-none` everywhere | Radius 0 is our signature (§7). This is the single most visible divergence — do not import the rounding |
-| Soft-tinted pastel status badges (lavender, mint, butter, rose) | The five validated status colours (§4.3) | We have no subtle/tint scale. Inventing one is forbidden — see §21.18 |
+| Rounded search pill, ~6px buttons, ~8px cards | 0px containers, 4px interactive elements (§7) | Radius 0 on every card, table and panel is our signature. Controls get 4px and nothing else does |
 | Its wordmark, product names, loan-domain copy | ZeroCorp identity and copy | Never copied |
 | Coloured square action buttons (blue Mail, green Call) | Neutral controls, teal reserved for primary | One accent (§2) |
+
+> **Withdrawn 2026-09-02 — the pastel-tint refusal.** This table used to refuse the
+> reference's soft-tinted status badges on the grounds that *"we have no subtle/tint
+> scale; inventing one is forbidden"*. That was written from the screenshots on
+> 2026-08-31, **hours before §4.5 landed the tint scale the same day**, and was never
+> updated. It then stood for two days as an argument against a system that already
+> existed, and a later brief cited it to request tints that had already shipped.
+>
+> ZeroCorp has four steps per hue (§4.5, §4.6) and `StatusBadge` is **tinted by default**
+> (§21.20). What the reference does with pastels, we do with `--{tone}-subtle` and
+> `--{tone}-ink`, measured. See §4.5.
+>
+> The lesson is not about tints. **A refusal is dated. When the thing it refuses gets
+> built, the refusal has to be retired in the same pass, or it becomes a rule that
+> argues against the product.**
 
 Everything below is marked **VALIDATED** (already our system, confirmed by the
 reference), **PROPOSED** (clearly observable, needs your decision) or **TO VALIDATE**
@@ -2470,13 +2650,17 @@ a ZeroCorp composition
 they are*. It never settles what they look like — that is §4 to §14, and it is already
 decided.
 
-Three refusals worth repeating, because they are the easiest to import by accident:
+Two refusals worth repeating, because they are the easiest to import by accident:
 
-1. **No rounding.** The reference rounds almost everything. We do not.
-2. **No pastel status tints.** We have five status colours (§4.3) and no subtle scale.
-   Creating one is a token decision, not a screen decision — raise it, do not invent it.
-3. **No colour on utility controls.** The reference paints Mail blue and Call green. Teal
+1. **No rounding on containers.** The reference rounds almost everything. Cards, tables,
+   panels and dialogs stay at 0px. Controls get 4px and nothing else does (§7).
+2. **No colour on utility controls.** The reference paints Mail blue and Call green. Teal
    is our only accent and it marks the primary action, nothing else.
+
+> A third refusal stood here until 2026-09-02: *"no pastel status tints — we have five
+> status colours and no subtle scale."* It was written hours before §4.5 shipped the tint
+> scale and was never retired. Use `--{tone}-subtle` and `--{tone}-ink` (§4.5, §4.6).
+> `StatusBadge` is already tinted by default.
 
 ---
 

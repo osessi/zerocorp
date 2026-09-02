@@ -18,34 +18,52 @@
    --------------------------------------------------------------------------- */
 :root {
   --background: #ffffff;
-  --foreground: #0a0a0a;
+  --foreground: #14181b;
 
   --primary: #00786f;
   --primary-foreground: #f0fdfa;
+  /* Teal at a luminance that survives a DARK ground, and therefore theme-stable: the
+     focal block is dark in both themes, so a value that flipped would be wrong in one of
+     them. --primary itself reaches only 3.33 on --surface-focal, below the 4.5 a label
+     needs and barely over the 3.0 a graphical object needs. This measures 9.59 on the
+     light focal block and 9.20 on the dark one. Shipped 2026-09-02; §4.2 had it PROPOSED
+     since 2026-08-31 and nothing had needed it until CockpitHeader. */
+  --primary-emphasis: #2dd4bf;
 
-  --secondary: #f4f4f5;
+  --secondary: #f4f2ee;
   --secondary-foreground: #18181b;
 
-  --muted: #f5f5f5;
-  /* #737373 measured 4.35:1 on --muted and --accent — both #F5F5F5 — and failed the
-     4.5:1 floor everywhere muted text sat on a muted surface: table headers, hover rows,
-     the Switch's OFF word. #707070 gives 4.54:1 there and 4.95:1 on the page. The dark
-     value is unchanged; it was already 6.0:1 on --muted. Decided 2026-08-31, §4.1. */
-  --muted-foreground: #707070;
+  --muted: #f6f5f3;
+  /* Warmed with the neutral ramp, 2026-09-02. Measured on every ground it can sit on,
+     per the §4.4 every-ground rule: 5.25:1 on --surface, 4.82:1 on --muted, 4.70:1 on
+     --secondary, 4.53:1 on --accent, 4.61:1 on --surface-sunken. The predecessor #707070
+     was itself a fix for #737373, which failed at 4.35:1 on --muted. */
+  --muted-foreground: #6e6c66;
 
-  --accent: #f5f5f5;
+  --accent: #f0eee9;
   --accent-foreground: #18181b;
 
   --surface: #ffffff;
   --surface-elevated: #ffffff;
+  /* Hierarchy goes DOWN and DARK, never by tinting the page. Darkening --background to
+     #FCFCFB was measured and rejected: it bought 1.03 separation from --surface while
+     pushing success-, warning- and processing-subtle to 1.07–1.10, under the §4.5
+     perceptibility floor of 1.10. Three perceptible levels instead. §4.1, 2026-09-02. */
+  --surface-sunken: #f2f0ec; /* 1.14 vs the page — wells, table headers, empty states */
+  --surface-focal: #14181b; /* 17.85 vs the page — the focal block */
+  --surface-focal-foreground: #f4f3f0; /* 16.09:1 on --surface-focal */
 
   /* --border is decorative: dividers, card edges, table rules.
      --input identifies a form control and must clear WCAG 1.4.11 (3:1).
      They are NOT interchangeable. */
-  --border: #e5e5e5;
-  --border-hover: #d4d4d4;
-  --input: #949494; /* 3.03:1 on white */
-  --input-hover: #737373; /* 4.74:1 — hover must darken a control, never lighten it */
+  --border: #e6e4e0;
+  --border-hover: #d4d1cb;
+  /* #949494 was recorded at 3.03:1 on WHITE and never measured on a raised surface. It
+     sat at 2.78:1 on --muted: every control in a muted well was below SC 1.4.11 from the
+     day the token was written. #847F75 is measured on all four: 3.98 --surface,
+     3.65 --muted, 3.56 --secondary, 3.43 --accent, 3.50 --surface-sunken. §4.4. */
+  --input: #847f75;
+  --input-hover: #6e6c66; /* 5.25:1 — hover must darken a control, never lighten it */
   --ring: #00786f;
 
   /* Status — one system for the whole product. §4.3, VALIDATED. */
@@ -194,13 +212,31 @@
 
   --surface: #141414;
   --surface-elevated: #1c1c1c;
+  /* --surface-focal does NOT invert. A focal block stays focal in both themes, so in dark
+     it rises off the page rather than dropping below it, and leans on its border. */
+  --surface-sunken: #080808;
+  /* #1c2126 was the first value and failed its own new ground: --destructive-ink landed
+     at 4.31 and --info-ink at 4.41, both under 4.5. Darkened until the worst ink clears.
+     Caught by the §4.4 every-ground audit on the day the token was added. */
+  --surface-focal: #181c20; /* 1.16 vs the dark page; worst ink 4.55:1 */
+  --surface-focal-foreground: #f4f3f0; /* 15.44:1 on --surface-focal */
 
   --border: #262626;
   /* A control boundary must clear 3:1 in EVERY theme. #2e2e2e reached only 1.46:1 on
      #0a0a0a — the same failure as #e5e5e5 on white. In dark, hover LIGHTENS the border:
      contrast against a dark ground grows as the border gets lighter. */
-  --input: #6b6b6b; /* 3.72:1 */
-  --input-hover: #8f8f8f; /* 6.12:1 */
+  /* #6b6b6b was recorded at 3.72:1 on the PAGE and sat at 2.84:1 on --muted/--secondary/
+     --accent, all #262626. The same one-ground-over miss as light --input. #7a7a7a is
+     measured on every ground: 4.61 page, 4.29 --surface, 3.53 on #262626. #757575 reached
+     only 3.28 there and was rejected as a near-miss. §4.4, 2026-09-02. */
+  --input: #7a7a7a;
+  --input-hover: #9a9a9a; /* hover LIGHTENS in dark; 4.94:1 on #262626 */
+  /* --ring FLIPS with the theme and --primary does not, deliberately. --primary is
+     identity: a brand that changes hue on a theme toggle is not a brand. --ring is a
+     functional indicator with a hard 3:1 floor on every ground it can land on, and
+     #00786f reached only 2.82 on #262626. When identity and the floor conflict the floor
+     wins. #14b8a6 is the same teal at a luminance that works on dark. §4.2. */
+  --ring: #14b8a6; /* 7.95 page, 6.08 on #262626 */
 
   /* Light-mode status colours reach only 3.69–4.10:1 on #0A0A0A: enough for a filled
      badge, not for status text. These lighter values are required on dark. */
@@ -218,6 +254,12 @@
      Each is measured ≥1.1 against #0A0A0A, which is a perceptibility floor rather than an
      accessibility one: a tint carries no meaning on its own, so it only has to be seen.
      --ai-subtle was #1A1030 and measured 1.09; #211640 gives 1.18. */
+  /* These six clear the 1.10 perceptibility floor on the page #0a0a0a AND on --muted,
+     --secondary and --accent #262626. They do NOT clear it on --surface #141414 (1.02-1.10),
+     which sits inside their own luminance band. Raising them was tried on 2026-09-02 and
+     made it worse: 17 failures became 24, because a tint light enough to read on #262626
+     drops --info-ink to 3.74 and --destructive-ink to 3.66 on its own tint. That is
+     arithmetic, not tuning — see §4.5. The open constraint is scoped, not solved. */
   --success-subtle: #0c1f14;
   --warning-subtle: #241703;
   --info-subtle: #0d1a33;
@@ -279,6 +321,10 @@
   --color-accent-foreground: var(--accent-foreground);
   --color-surface: var(--surface);
   --color-surface-elevated: var(--surface-elevated);
+  --color-primary-emphasis: var(--primary-emphasis);
+  --color-surface-sunken: var(--surface-sunken);
+  --color-surface-focal: var(--surface-focal);
+  --color-surface-focal-foreground: var(--surface-focal-foreground);
   --color-border: var(--border);
   --color-border-hover: var(--border-hover);
   --color-input: var(--input);
@@ -400,9 +446,15 @@
   /* -------------------------------------------------------------------------
      Radius — §7, VALIDATED. 0px is the signature. There is no md/lg/pill/full.
      ------------------------------------------------------------------------- */
-  --radius-none: 0px;
-  --radius-xs: 2px;
-  --radius-sm: 4px;
+  /* Two tiers, §7. --radius-xs (2px) was deleted 2026-09-02: unused, unassigned under a
+     two-tier rule, and therefore drift waiting to happen. */
+  /* The one intentionally imperfect value in the system. A rubber stamp applied by a
+     person is never square, and StatusStamp is the only component allowed to use it.
+     A token so the angle is one decision, not a value tuned per screen. */
+  --stamp-rotation: -4deg;
+
+  --radius-none: 0px; /* cards, tables, panels, containers, dialogs */
+  --radius-sm: 4px; /* badges, buttons, inputs, pills, chips */
 
   /* -------------------------------------------------------------------------
      Elevation — §8, VALIDATED. Two levels. Hierarchy comes from borders,
@@ -439,7 +491,14 @@
    Base layer. Radius 0 is the default for every element — §7.
    --------------------------------------------------------------------------- */
 @layer base {
-  * {
+  /* Radius is set per component, never globally. A universal selector here defeated the
+     documented 2–4px exception outright: rounded-xs and rounded-sm were used ZERO times
+     across the codebase because neither could win against it. What remains is a
+     normalisation of the controls Safari and iOS round on their own. §7, 2026-09-02. */
+  button,
+  input,
+  select,
+  textarea {
     border-radius: var(--radius-none);
   }
 

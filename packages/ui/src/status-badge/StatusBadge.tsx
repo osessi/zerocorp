@@ -68,6 +68,7 @@ const OUTLINE: Record<StatusTone, string> = {
   danger: "bg-destructive-subtle text-destructive-ink border-destructive",
   info: "bg-info-subtle text-info-ink border-info",
   neutral: "bg-muted text-muted-foreground border-muted-foreground",
+  ai: "bg-ai-subtle text-ai-ink border-ai",
 };
 
 /**
@@ -88,6 +89,7 @@ const SOLID: Record<StatusTone, string> = {
   danger: "bg-destructive border-destructive text-background",
   info: "bg-info border-info text-background",
   neutral: "bg-muted-foreground border-muted-foreground text-background",
+  ai: "bg-ai border-ai text-background",
 };
 
 /**

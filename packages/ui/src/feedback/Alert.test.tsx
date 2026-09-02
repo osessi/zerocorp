@@ -6,7 +6,7 @@ import { TONE_GLYPH, type StatusTone } from "../tone";
 
 afterEach(cleanup);
 
-const TONES: StatusTone[] = ["success", "processing", "warning", "danger", "info", "neutral"];
+const TONES: StatusTone[] = ["success", "processing", "warning", "danger", "info", "neutral", "ai"];
 
 describe("Alert — the role follows the tone", () => {
   it("interrupts for danger and warning", () => {

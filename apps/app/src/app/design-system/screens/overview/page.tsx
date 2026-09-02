@@ -3,7 +3,13 @@
 import Link from "next/link";
 import { ArrowRightIcon, BuildingsIcon, CurrencyDollarIcon, FileTextIcon, StackIcon } from "@phosphor-icons/react/dist/ssr";
 import { PageHeader } from "../../_prototype/shell";
-import { ActivityPanel, Button, MetricGrid, SectionHeader, StatusBadge, Avatar } from "../../_prototype/primitives";
+import { Button, StatusBadge } from "../../_prototype/primitives";
+// The three patterns were promoted to @zerocorp/ui on 2026-09-02. Both call sites read
+// the package now: the prototype and the live Overview cannot be allowed to drift, which
+// is what two copies of MetricGrid guaranteed.
+import { ActivityPanel, Avatar, MetricGrid, SectionHeader } from "@zerocorp/ui";
+import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { AREA_FILL_BOTTOM, AREA_FILL_TOP, AXIS, CURVE, ChartFrame, ChartTooltip, GRID_STROKE, seriesColor } from "../../charts/chart";
 import { FORMATION_ORDER_TERMINAL } from "@zerocorp/contracts";
 import { ACTIVITY, BUSINESSES, FORMATION_LABEL, FORMATION_TONE, money } from "../../_prototype/data";
 
@@ -12,10 +18,17 @@ import { ACTIVITY, BUSINESSES, FORMATION_LABEL, FORMATION_TONE, money } from "..
  *
  * Composes: PageHeader · MetricGrid · SectionHeader · ActivityPanel · a compact list.
  *
- * The chart region is a deliberate placeholder. Chart tokens — series colours, axes,
- * grid, empty and loading states — are open item 14 (§21.14). Building a chart from a
- * screenshot taken at an angle would be guessing.
+ * The chart is real. It was a placeholder citing "open item 14" until 2026-09-02, which
+ * §4.7 had already closed on 2026-09-01 — series colours, grid, axis, gradient and curve
+ * are all decided and measured. A comment claiming a resolved item is still open is the
+ * same class of staleness as the §21.0 tint refusal, found in the same sweep.
  */
+/** Six months of recurring revenue, in cents. Prototype data, same shape as the real query. */
+const REVENUE = [
+  { m: "Apr", mrr: 182_00 }, { m: "May", mrr: 241_00 }, { m: "Jun", mrr: 268_00 },
+  { m: "Jul", mrr: 331_00 }, { m: "Aug", mrr: 389_00 }, { m: "Sep", mrr: 472_00 },
+];
+
 export default function OverviewScreen() {
   const mrr = BUSINESSES.reduce((s, b) => s + b.mrrCents, 0);
   // "In flight" is "not in a terminal state", read from the contract rather than from a
@@ -74,16 +87,40 @@ export default function OverviewScreen() {
           }
         />
 
-        {/* Chart placeholder — see the note above and §21.14 */}
-        <section className="flex flex-col gap-4">
-          <SectionHeader title="Revenue" subtitle="Recurring revenue by plan" action={<Button>See all</Button>} />
-          <div className="border-border bg-muted flex h-56 flex-col items-center justify-center gap-2 border border-dashed">
-            <p className="text-body-sm text-muted-foreground">Chart region</p>
-            <p className="text-caption text-muted-foreground">
-              Chart tokens are open item 14 — not derivable from the reference
-            </p>
-          </div>
-        </section>
+        <ChartFrame
+          title="Revenue"
+          subtitle="Recurring revenue, last 6 months"
+          series={[{ key: "mrr", label: "Recurring revenue", slot: 1, pattern: "solid" }]}
+          footer="Setup fees are excluded. Recurring only."
+        >
+          <ResponsiveContainer width="100%" height={240}>
+            <AreaChart data={REVENUE} margin={{ left: 4, right: 4, top: 4 }}>
+              <defs>
+                <linearGradient id="fill-mrr" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor={seriesColor(1)} stopOpacity={AREA_FILL_TOP} />
+                  <stop offset="100%" stopColor={seriesColor(1)} stopOpacity={AREA_FILL_BOTTOM} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid vertical={false} stroke={GRID_STROKE} />
+              <XAxis dataKey="m" {...AXIS} axisLine={false} tickLine={false} tickMargin={8} />
+              <YAxis {...AXIS} axisLine={false} tickLine={false} width={52} tickFormatter={(v: number) => `$${Math.round(v / 100)}`} />
+              <Tooltip
+                cursor={{ stroke: GRID_STROKE }}
+                content={({ active, payload, label }) =>
+                  active && payload?.length ? (
+                    <ChartTooltip
+                      label={String(label)}
+                      rows={[{ key: "mrr", name: "Recurring revenue", value: money(Number(payload[0]!.value)), slot: 1, pattern: "solid" }]}
+                    />
+                  ) : null
+                }
+              />
+              {/* Solid stroke: a single series has nothing to be confused with, and §4.7
+                  is explicit that the dash is for overlapping LINES, not for every chart. */}
+              <Area dataKey="mrr" type={CURVE} stroke={seriesColor(1)} strokeWidth={2} fill="url(#fill-mrr)" />
+            </AreaChart>
+          </ResponsiveContainer>
+        </ChartFrame>
 
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_20rem]">
           <section className="flex flex-col gap-4">

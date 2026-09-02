@@ -3,6 +3,7 @@ import {
   CircleNotchIcon,
   InfoIcon,
   MinusCircleIcon,
+  SparkleIcon,
   WarningIcon,
   XCircleIcon,
 } from "@phosphor-icons/react/dist/ssr";
@@ -23,7 +24,20 @@ export type StatusTone =
   | "warning"
   | "danger"
   | "info"
-  | "neutral";
+  | "neutral"
+  | "ai";
+
+/**
+ * `ai` joined the union 2026-09-02, closing open item 21.
+ *
+ * `--ai` had been a token since §4.5 and the dashboard prototype used it, but this file
+ * carried six tones and `ai` was not one, so any product screen wanting it had to invent
+ * a second tone vocabulary beside this one. That is the exact failure this module exists
+ * to prevent.
+ *
+ * It is NOT assertive. An agent finishing a draft is not an error, and `role="alert"`
+ * makes a screen reader abandon what it is saying.
+ */
 
 /**
  * One glyph per tone, differing in SHAPE and not only in colour.
@@ -43,6 +57,7 @@ export const TONE_GLYPH = {
   danger: XCircleIcon,
   info: InfoIcon,
   neutral: MinusCircleIcon,
+  ai: SparkleIcon,
 } as const satisfies Record<StatusTone, unknown>;
 
 /**
@@ -63,6 +78,7 @@ export const TONE_INK: Record<StatusTone, string> = {
   danger: "text-destructive-ink",
   info: "text-info-ink",
   neutral: "text-muted-foreground",
+  ai: "text-ai-ink",
 };
 
 /**
@@ -86,14 +102,18 @@ export const TONE_SURFACE: Record<StatusTone, string> = {
   danger: "bg-destructive-subtle",
   info: "bg-info-subtle",
   neutral: "bg-muted",
+  ai: "bg-ai-subtle",
 };
 
 /**
  * Tone as a left edge — a 2px rule, never a tinted fill.
  *
- * There is no tint scale in the system (§24) and inventing one here would put a sixth
- * unvalidated colour family into the product. A rule also keeps the surface readable:
- * a tinted panel changes the background every piece of text inside it sits on.
+ * A rule keeps the surface readable: a tinted panel changes the background every piece of
+ * text inside it sits on, which is why `-wash` exists as a separate, card-safe step (§4.6).
+ *
+ * The original comment here said "there is no tint scale in the system", written before
+ * §4.5 shipped one on 2026-08-31. Corrected 2026-09-02 in the same sweep that retired the
+ * matching stale refusals in §21.0 and §21.18.
  */
 export const TONE_EDGE: Record<StatusTone, string> = {
   success: "border-l-success",
@@ -102,6 +122,7 @@ export const TONE_EDGE: Record<StatusTone, string> = {
   danger: "border-l-destructive",
   info: "border-l-info",
   neutral: "border-l-muted-foreground",
+  ai: "border-l-ai",
 };
 
 /**

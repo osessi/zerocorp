@@ -17,7 +17,7 @@ import { StatusBadge, type StatusTone, type StatusEmphasis } from "@zerocorp/ui"
 
 const cx = (...p: Array<string | false | undefined>) => p.filter(Boolean).join(" ");
 
-const TONES: StatusTone[] = ["success", "processing", "warning", "danger", "info", "neutral"];
+const TONES: StatusTone[] = ["success", "processing", "warning", "danger", "info", "neutral", "ai"];
 
 /** The same six statuses in French — the longest is 44% longer than its English original. */
 const TONE_LABEL_FR: Record<StatusTone, string> = {
@@ -27,6 +27,7 @@ const TONE_LABEL_FR: Record<StatusTone, string> = {
   danger: "Rejetée",
   info: "EIN enregistré",
   neutral: "Brouillon",
+  ai: "Rédigé par l'agent",
 };
 
 const TONE_LABEL: Record<StatusTone, string> = {
@@ -36,6 +37,7 @@ const TONE_LABEL: Record<StatusTone, string> = {
   danger: "Rejected",
   info: "EIN on file",
   neutral: "Draft",
+  ai: "Drafted by an agent",
 };
 
 const EMPHASES: { key: StatusEmphasis; name: string; note: string }[] = [

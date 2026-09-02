@@ -3,8 +3,6 @@ import {
   ArticleIcon,
   BrowserIcon,
   BuildingsIcon,
-  CheckIcon,
-  ClockIcon,
   EnvelopeSimpleIcon,
   GearIcon,
   GlobeHemisphereWestIcon,
@@ -12,7 +10,19 @@ import {
   PaletteIcon,
   UsersThreeIcon,
 } from "@phosphor-icons/react/dist/ssr";
-import { PageHeader, StatusBadge, cx } from "@zerocorp/ui";
+import {
+  AGENTS,
+  ActivityPanel,
+  CockpitHeader,
+  EmptyState,
+  MetricGrid,
+  SectionHeader,
+  StatusBadge,
+  StatusStamp,
+  cx,
+  type AgentKey,
+} from "@zerocorp/ui";
+import { ButtonLink } from "@zerocorp/ui";
 import type { PlanStepRow } from "@zerocorp/application";
 import { getDashboardRepository, getUnitOfWork } from "../../../server/container";
 import { getViewer } from "../../../server/session";
@@ -57,16 +67,6 @@ function progressTone(percent: number): { bar: string; text: string } {
   return { bar: "bg-destructive", text: "text-destructive-ink" };
 }
 
-function Metric({ label, value, tone }: { label: string; value: string; tone?: string }) {
-  return (
-    <div className="bg-background flex flex-col gap-1 p-5">
-      <span className="text-overline text-muted-foreground">{label}</span>
-      {/* A quantity is never black. The rule the whole dashboard follows. */}
-      <span className={cx("text-h2 font-mono tabular-nums", tone ?? "text-chart-1")}>{value}</span>
-    </div>
-  );
-}
-
 function StepRow({ step }: { step: PlanStepRow }) {
   const Icon = CATEGORY_ICON[step.category] ?? GearIcon;
   const status = STATUS[step.status] ?? STATUS.pending!;
@@ -103,14 +103,12 @@ export default async function Page() {
 
   if (!overview) {
     return (
-      <>
-        <PageHeader title="Overview" subtitle="Nothing here yet" />
-        <div className="px-5 py-8 sm:px-8">
-          <p className="text-body-sm text-muted-foreground">
-            Your business is being set up. This page fills in as ZeroCorp works.
-          </p>
-        </div>
-      </>
+      <EmptyState
+        title="Your business is being set up"
+        body="This page fills in as ZeroCorp works. Nothing is required from you yet."
+        action={<ButtonLink href="/company">See what is in progress</ButtonLink>}
+        className="m-8"
+      />
     );
   }
 
@@ -118,49 +116,74 @@ export default async function Page() {
   const done = included.filter((s) => s.status === "done").length;
   const percent = included.length === 0 ? 0 : Math.round((done / included.length) * 100);
   const tone = progressTone(percent);
+  const blockedStep = included.find((s) => s.status === "blocked");
+  const runningIndex = included.findIndex((s) => s.status === "in_progress");
   const needsYou = included.filter((s) => s.status === "blocked").length;
+
+  /**
+   * The feed names its actor.
+   *
+   * The seed writes `{ agent, title }` into the payload and the renderer reads it, so a
+   * row says `ZeroCorp Writer published "…"` rather than `content published`. Rows without
+   * a payload fall back to the event type, because a system event genuinely has no agent.
+   */
+  const events = overview.activity.map((event) => {
+    const agent = event.payload["agent"] as AgentKey | undefined;
+    const title = event.payload["title"] as string | undefined;
+    const known = agent && agent in AGENTS ? AGENTS[agent] : null;
+    return {
+      id: event.id,
+      actor: known ? known.name : "ZeroCorp",
+      action: title ?? event.eventType.replace(/\./g, " "),
+      at: event.createdAt.toISOString().slice(0, 10),
+      kind: (event.actorType === "agent" ? "agent" : event.actorType === "user" ? "person" : "system") as
+        | "person"
+        | "agent"
+        | "system",
+    };
+  });
 
   return (
     <>
-      <PageHeader
-        title={overview.businessName}
-        subtitle={overview.planTitle ?? "Your ZeroCorp plan"}
-        meta={
-          overview.companyStatus ? (
-            <StatusBadge tone={overview.companyStatus === "active" ? "success" : "processing"}>
-              {overview.companyName ?? "Company"}
-            </StatusBadge>
+      {/* The one focal region on the page. Everything below it sits on --background. */}
+      <CockpitHeader
+        /* The company name, not the business description. `businessName` holds the
+           founder's own sentence about what they do, which the command bar already
+           shows — printing it twice on one screen made the focal block read as an echo. */
+        greeting={overview.companyName ?? "Your business"}
+        headline={
+          needsYou === 0
+            ? `ZeroCorp is building your business. Nothing needs you right now.`
+            : `${needsYou} steps are waiting on you`
+        }
+        blocked={blockedStep ? { label: blockedStep.title } : undefined}
+        total={included.length}
+        completed={done}
+        current={runningIndex >= 0 ? runningIndex : undefined}
+        actions={
+          overview.companyStatus === "active" && overview.companyName ? (
+            <StatusStamp milestone="formed" date={overview.companyName} />
           ) : (
-            <StatusBadge tone="neutral">No company yet</StatusBadge>
+            <StatusBadge tone="processing">{overview.companyName ?? "Company forming"}</StatusBadge>
           )
         }
       />
 
-      <div className="flex flex-col gap-8 px-5 py-8 sm:px-8">
-        <section className="flex flex-col gap-4">
-          <div className="border-border bg-border grid grid-cols-2 gap-px border lg:grid-cols-4">
-            <Metric label="Launch progress" value={`${percent}%`} tone={tone.text} />
-            <Metric label="Steps done" value={`${done} / ${included.length}`} tone="text-chart-3" />
-            <Metric
-              label="Needs you"
-              value={`${needsYou}`}
-              tone={needsYou > 0 ? "text-warning-ink" : "text-muted-foreground"}
-            />
-            <Metric label="Plan" value={overview.subscriptionPlan ?? "—"} tone="text-chart-5" />
-          </div>
-
-          <div className="bg-muted h-1.5 w-full" role="progressbar" aria-valuenow={percent} aria-valuemin={0} aria-valuemax={100}>
-            <div className={cx("h-full transition-[width] duration-modal ease-out", tone.bar)} style={{ width: `${percent}%` }} />
-          </div>
-        </section>
+      <div className="mx-auto flex max-w-(--container-content) flex-col gap-8 px-5 py-8 sm:px-8">
+        <MetricGrid
+          items={[
+            { label: "Launch progress", value: `${percent}%`, tone: percent >= 75 ? "success" : percent >= 50 ? "warning" : "danger" },
+            { label: "Steps done", value: `${done}`, sub: `of ${included.length}`, tone: "info" },
+            { label: "Needs you", value: `${needsYou}`, tone: needsYou > 0 ? "warning" : "neutral" },
+          ]}
+        />
 
         <section className="flex flex-col gap-4">
-          <div className="flex items-baseline justify-between gap-4">
-            <h2 className="text-h3">What ZeroCorp is building</h2>
-            <span className="text-body-sm text-muted-foreground font-mono tabular-nums">
-              {included.length} steps
-            </span>
-          </div>
+          <SectionHeader
+            title="What ZeroCorp is building"
+            count={included.length}
+            countTone="processing"
+          />
           <ul className="border-border border">
             {overview.steps.map((step) => (
               <StepRow key={step.id} step={step} />
@@ -168,26 +191,32 @@ export default async function Page() {
           </ul>
         </section>
 
-        <section className="flex flex-col gap-4">
-          <h2 className="text-h3">Recent activity</h2>
-          {overview.activity.length === 0 ? (
-            <p className="text-body-sm text-muted-foreground">Nothing has happened yet.</p>
-          ) : (
-            <ul className="border-border flex flex-col border">
-              {overview.activity.map((event) => (
-                <li key={event.id} className="border-border flex items-center gap-4 border-b px-5 py-3 last:border-b-0">
-                  <span className="text-chart-1 flex size-7 shrink-0 items-center justify-center">
-                    {event.eventType === "tenant.created" ? <CheckIcon size={16} /> : <ClockIcon size={16} />}
-                  </span>
-                  <span className="text-body-sm flex-1 truncate">{event.eventType.replace(/\./g, " ")}</span>
-                  <time className="text-caption text-muted-foreground font-mono tabular-nums">
-                    {event.createdAt.toISOString().slice(0, 10)}
-                  </time>
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_20rem]">
+          <section className="flex flex-col gap-4">
+            <SectionHeader title="Recent activity" count={events.length} countTone="ai" />
+            {events.length === 0 ? (
+              <EmptyState
+                title="Nothing has happened yet"
+                body="As soon as ZeroCorp starts working, every action shows up here with the agent that took it."
+                action={<ButtonLink href="/company">Start your company</ButtonLink>}
+              />
+            ) : (
+              <ActivityPanel events={events} />
+            )}
+          </section>
+
+          <aside className="flex flex-col gap-4">
+            <SectionHeader title="Your plan" />
+            <div className="border-border bg-surface-sunken flex flex-col gap-3 border p-5">
+              <span className="text-overline text-muted-foreground">Current plan</span>
+              <span className="text-h3">{overview.subscriptionPlan ?? "No plan yet"}</span>
+              <div className={cx("bg-muted h-1.5 w-full")} role="presentation">
+                <div className={cx("h-full transition-[width] duration-modal ease-out", tone.bar)} style={{ width: `${percent}%` }} />
+              </div>
+              <span className={cx("text-caption font-mono", tone.text)}>{percent}% complete</span>
+            </div>
+          </aside>
+        </div>
       </div>
     </>
   );
