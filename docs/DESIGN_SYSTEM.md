@@ -388,6 +388,48 @@ scoped but redirected: `-ink` measures 5.68–6.74 on `--surface-sunken`, so any
 rendered as text on a raised neutral takes `-ink` rather than the §4.3 colour. §4.3 is
 tuned as text on white and says so.
 
+#### The tint floor applies to a tint that is ALONE — RESOLVED 2026-09-02
+
+The two tint rows above were written as scope limits, and then the thing itself was looked
+at: six `StatusBadge` variants rendered on all five light grounds, from `#FFFFFF` down to
+`--accent` `#EFEFEF`.
+
+**They are indistinguishable from each other.** Not degraded, not weaker — the same badge.
+On `--accent` the fill measures 1.01 against its ground and the badge is in no doubt at
+all, because the fill was never what identified it:
+
+```text
+border   the §4.3 colour       4.24–5.36:1 against the page
+label    the -ink step         4.71–8.95:1 on the tint
+glyph    one shape per tone    §14, survives greyscale
+fill     the tint              the FOURTH channel
+```
+
+§4.5 set the 1.10 floor while thinking of a tint as a surface. In `StatusBadge` it is not a
+surface, it is the last and least of four channels, and holding it to a floor meant for a
+bare panel measures a failure the product cannot exhibit.
+
+> **The 1.10 perceptibility floor applies to a tint used ALONE as a surface — a panel, a
+> card region, a bare fill. It does not apply to a tint inside a bordered, inked, glyphed
+> component, where it is one channel of four.**
+
+That closes 12 light failures and 5 dark ones with no token change, and it is the honest
+reading in both themes: the dark tints on `--surface` were the same non-problem.
+
+**What it does NOT excuse.** A tint with no border IS the sole carrier, and the floor
+applies with full force. The audit found two such uses and both were fixed rather than
+excused:
+
+```text
+Avatar tone tiles          bg-{tone}-subtle + -ink, no border  →  border added
+DashboardShell nav badge   bg-warning-subtle + -ink, no border →  border added
+```
+
+Every other use of a `-subtle` value in the codebase already carried its border. The
+distinction is now enforceable by reading one line: **if a tint appears without
+`border-{tone}` beside it, the floor applies and it must clear 1.10 on every ground it can
+land on.**
+
 #### The teal ramp
 
 `--teal-50 · 100 · 200 · 500 · 700 · 900`, **theme-stable**: 50 is always the lightest and
@@ -670,8 +712,8 @@ Computed against WCAG 2.1. Recorded so nobody re-derives them.
 | `#DC2626` destructive | **4.83:1** | AA text ✓ |
 | `#6E6C66` muted-foreground | **5.25:1** | AA text ✓ · and on every other ground, below |
 | `#847F75` input border | **3.98:1** | non-text contrast ✓ · and on every other ground, below |
-| `#E6E4E0` border | **1.27:1** | dividers and card edges ✓ · never a control boundary |
-| `#14181B` on `#F2F0EC` surface-sunken | **16.39:1** | AA text ✓ |
+| `#E5E5E5` border | **1.26:1** | dividers and card edges ✓ · never a control boundary |
+| `#14181B` on `#F0F0F0` surface-sunken | **16.32:1** | AA text ✓ |
 | `#F4F3F0` on `#14181B` surface-focal | **16.09:1** | AA text ✓ |
 
 #### Dark mode — on `#0A0A0A`
@@ -743,10 +785,10 @@ ground over, and did not generalise. That is the whole lesson.
 | Ground | Ratio |
 |---|---:|
 | `--surface` `#FFFFFF` | **3.98:1** ✓ |
-| `--muted` `#F6F5F3` | **3.65:1** ✓ |
-| `--secondary` `#F4F2EE` | **3.56:1** ✓ |
-| `--surface-sunken` `#F2F0EC` | **3.50:1** ✓ |
-| `--accent` `#F0EEE9` | **3.43:1** ✓ |
+| `--muted` `#F5F5F5` | **3.63:1** ✓ |
+| `--secondary` `#F3F3F3` | **3.54:1** ✓ |
+| `--surface-sunken` `#F0F0F0` | **3.47:1** ✓ |
+| `--accent` `#EFEFEF` | **3.40:1** ✓ |
 
 `#8B887F` also cleared every ground but reached only **3.06:1** on `--accent`. Rejected for
 the same reason `#959595` was rejected above: a margin of 0.06 is a reported pass that the
@@ -774,6 +816,41 @@ The last row is worth recording as a success. The audit found that exactly `--in
 
 > Dark mode is where measurement had not been repeated, which is the predictable result of
 > a system whose values were tuned in light and mirrored into dark.
+
+#### The rule is retroactive, not only forward — 2026-09-02
+
+> **Any token whose contrast was recorded against a single ground is presumed unmeasured
+> until re-measured against every ground it can sit on. Four instances of this miss have
+> been found; assume the fifth exists.**
+
+The four: `--input` on `--muted` (2.78, §4.4) · dark `--input` on `#262626` (2.84) · dark
+`-subtle` tints on `--surface` (1.02–1.10, §4.5) · light `-subtle` tints on every raised
+neutral (1.01–1.09, and failing since 2026-08-31).
+
+#### The retroactive pass — 2026-09-02
+
+Every VALIDATED figure in this document was checked for whether it was recorded against one
+ground or all, then re-measured against all. Results:
+
+| Token | Recorded against | Re-measured | Verdict |
+|---|---|---|---|
+| `--primary` as text | white, 5.36 | 4.66–4.92 on every raised neutral | clears |
+| `--ring` (light) | white, 5.36 | 4.66–4.92 on every raised neutral | clears |
+| `--chart-axis` | the page, 4.95 | 4.57–4.82 on every raised neutral, 6.00–7.94 dark | clears; charts sit in a `--muted` frame, which had never been checked |
+| `--chart-1..5` | the page, 5.02–7.10 | 4.37–6.52 light, 5.56–12.00 dark, all ≥3 | clears |
+| `--border-hover` | white, 1.50 | 1.30–1.37 on raised neutrals | clears |
+| **`--border` (dark)** | the page, 1.31 | **1.00 on `--muted`/`--secondary`/`--accent`** | **FAILED — the fifth instance** |
+
+**`--border` was `#262626`. Dark `--muted`, `--secondary` and `--accent` are also `#262626`.**
+A divider, a card edge or a table rule inside any dark panel was not faint, it was the same
+colour as its own ground. Nobody had measured a border against anything but the page, so
+nobody had compared the two numbers.
+
+`--border` in dark is now `#333333`: **1.20** on `#262626`, 1.57 on the page, still a
+hairline. `--border-hover` in dark is `#4A4A4A`, which also closes §24 item 6 — it had
+never had a value at all.
+
+> The rule predicted a fifth instance. There was one. Assume a sixth.
 
 #### The audit was broken, and said light mode was clean — 2026-09-02
 

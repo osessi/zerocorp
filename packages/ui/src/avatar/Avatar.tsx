@@ -15,13 +15,13 @@ import type { StatusTone } from "../tone";
  * only carrier: the badge keeps its label and its glyph (§14).
  */
 const AVATAR_TONE: Record<StatusTone, string> = {
-  success: "bg-success-subtle text-success-ink",
-  warning: "bg-warning-subtle text-warning-ink",
-  danger: "bg-destructive-subtle text-destructive-ink",
-  info: "bg-info-subtle text-info-ink",
-  processing: "bg-processing-subtle text-processing-ink",
-  neutral: "bg-secondary text-secondary-foreground",
-  ai: "bg-ai-subtle text-ai-ink",
+  success: "bg-success-subtle text-success-ink border border-success",
+  warning: "bg-warning-subtle text-warning-ink border border-warning",
+  danger: "bg-destructive-subtle text-destructive-ink border border-destructive",
+  info: "bg-info-subtle text-info-ink border border-info",
+  processing: "bg-processing-subtle text-processing-ink border border-processing",
+  neutral: "bg-secondary text-secondary-foreground border border-border",
+  ai: "bg-ai-subtle text-ai-ink border border-ai",
 };
 
 /** §7: an avatar is a control-sized object, so it takes the 4px tier, never a circle. */
@@ -61,7 +61,7 @@ export function Avatar({
       className={cx(
         dim.box,
         "rounded-sm inline-flex shrink-0 items-center justify-center overflow-hidden font-medium",
-        tone ? AVATAR_TONE[tone] : "bg-secondary text-secondary-foreground",
+        tone ? AVATAR_TONE[tone] : "bg-secondary text-secondary-foreground border border-border",
         className,
       )}
     >

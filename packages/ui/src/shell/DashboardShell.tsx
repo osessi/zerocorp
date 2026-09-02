@@ -112,7 +112,7 @@ function NavRow({
         ) : null}
 
         {!collapsed && item.badge !== undefined && item.badge > 0 ? (
-          <span className="bg-warning-subtle text-warning-ink text-caption inline-flex h-5 min-w-5 items-center justify-center px-1 font-mono tabular-nums">
+          <span className="bg-warning-subtle text-warning-ink border-warning text-caption inline-flex h-5 min-w-5 items-center justify-center border px-1 font-mono tabular-nums">
             {item.badge}
           </span>
         ) : null}

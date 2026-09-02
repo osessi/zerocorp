@@ -66,13 +66,13 @@ export function StatusBadge({ tone, children }: { tone: Tone; children: ReactNod
  * nothing here depends on colour alone (§14).
  */
 const AVATAR_TONE: Record<Tone, string> = {
-  success: "bg-success-subtle text-success-ink",
-  warning: "bg-warning-subtle text-warning-ink",
-  danger: "bg-destructive-subtle text-destructive-ink",
-  info: "bg-info-subtle text-info-ink",
-  processing: "bg-processing-subtle text-processing-ink",
+  success: "bg-success-subtle text-success-ink border border-success",
+  warning: "bg-warning-subtle text-warning-ink border border-warning",
+  danger: "bg-destructive-subtle text-destructive-ink border border-destructive",
+  info: "bg-info-subtle text-info-ink border border-info",
+  processing: "bg-processing-subtle text-processing-ink border border-processing",
   neutral: "bg-secondary text-secondary-foreground",
-  ai: "bg-ai-subtle text-ai-ink",
+  ai: "bg-ai-subtle text-ai-ink border border-ai",
 };
 
 export function Avatar({

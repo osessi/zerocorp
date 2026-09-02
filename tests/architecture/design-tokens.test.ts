@@ -322,4 +322,38 @@ describe("design tokens — the two systems stay separate", () => {
       expect(code(file)).not.toMatch(/@zerocorp\/site-renderer/);
     }
   });
+
+  /**
+   * A tint with no tone-coloured edge is the SOLE carrier, and the 1.10 perceptibility
+   * floor applies to it with full force (§4.5). A tint composed with `border-{tone}` or
+   * `border-l-{tone}` is the fourth channel of four -- border, ink, glyph, fill -- and is
+   * exempt, because measured on --accent the light tints reach 1.01-1.06 and inside a
+   * StatusBadge that is both true and irrelevant.
+   *
+   * FILE-scoped, not line-scoped. The first version checked one line and flagged Alert and
+   * Toast, which compose TONE_EDGE and TONE_SURFACE on ADJACENT lines. A line-based rule
+   * cannot see composition, and a rule that reports correct code is a rule people delete.
+   *
+   * §32b demonstration -- removing `border-success` from Avatar.tsx gives:
+   *   AssertionError: packages/ui/src/avatar/Avatar.tsx uses bg-success-subtle with no
+   *   border-success / border-l-success / TONE_EDGE anywhere in the file
+   */
+  it("never uses a -subtle tint without a tone-coloured edge somewhere in the same file", () => {
+    expect(UI_SOURCES.length).toBeGreaterThan(20);
+    const TONES = ["success", "warning", "info", "processing", "destructive", "ai"] as const;
+    const offenders: string[] = [];
+
+    for (const file of UI_SOURCES) {
+      const body = code(file);
+      // TONE_EDGE is the shared `border-l-{tone}` map; a file that composes it has an edge.
+      if (body.includes("TONE_EDGE")) continue;
+      for (const tone of TONES) {
+        if (!new RegExp(`bg-${tone}-subtle`).test(body)) continue;
+        if (new RegExp(`border-(l-)?${tone}\\b`).test(body)) continue;
+        offenders.push(`${file} uses bg-${tone}-subtle with no border-${tone} anywhere in the file`);
+      }
+    }
+
+    expect(offenders, offenders.join("\n")).toEqual([]);
+  });
 });
