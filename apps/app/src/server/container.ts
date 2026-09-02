@@ -1,4 +1,5 @@
 import "server-only";
+import { createStripePaymentProvider, type PaymentProvider } from "@zerocorp/billing";
 import {
   createAssessmentRepository,
   createBlocksRepository,
@@ -12,6 +13,8 @@ import {
   createUnitOfWork,
   createOnboardingRepository,
   createFormationRepository,
+  createPaymentLedger,
+  type PaymentLedger,
 } from "@zerocorp/db";
 import {
   createAssessmentService,
@@ -327,4 +330,37 @@ export function getFormationRequestService() {
     clock: { now: () => new Date() },
   });
   return formationRequests;
+}
+
+/**
+ * Payments.
+ *
+ * Null without keys, and every caller checks. A deployment without Stripe configured is a
+ * real, supported state — local development and CI both run in it — and it must answer
+ * "payments are not configured" rather than crash on boot or, worse, half-work.
+ */
+let payments: PaymentProvider | null | undefined;
+export function getPaymentProvider(): PaymentProvider | null {
+  if (payments !== undefined) return payments;
+  const secretKey = process.env["STRIPE_SECRET_KEY"];
+  const webhookSecret = process.env["STRIPE_WEBHOOK_SECRET"];
+  payments =
+    secretKey && webhookSecret
+      ? createStripePaymentProvider({
+          secretKey,
+          webhookSecret,
+          // The override lives here, in the layer allowed to know what a deployment is.
+          // The default and the reasoning are in contracts/pricing.ts.
+          ...(process.env["ZEROCORP_ACTIVATION_PRICE_MINOR"]
+            ? { priceMinor: Number(process.env["ZEROCORP_ACTIVATION_PRICE_MINOR"]) }
+            : {}),
+        })
+      : null;
+  return payments;
+}
+
+let ledger: PaymentLedger | undefined;
+export function getPaymentLedger(): PaymentLedger {
+  ledger ??= createPaymentLedger(databaseUrl());
+  return ledger;
 }

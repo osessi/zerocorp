@@ -23,3 +23,4 @@ export * from "./architect";
 export * from "./interview";
 export * from "./billing";
 export * from "./onboarding";
+export * from "./pricing";

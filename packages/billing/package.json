@@ -17,11 +17,12 @@
   },
   "dependencies": {
     "@zerocorp/application": "workspace:*",
+    "@zerocorp/config": "workspace:*",
     "@zerocorp/contracts": "workspace:*",
-    "@zerocorp/config": "workspace:*"
+    "stripe": "^22.6.1"
   },
   "devDependencies": {
-    "typescript": "^5.7.2",
-    "@types/node": "^22.10.2"
+    "@types/node": "^22.10.2",
+    "typescript": "^5.7.2"
   }
 }

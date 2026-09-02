@@ -28,3 +28,4 @@ export { closeAllConnections } from "./lifecycle";
 export { seedPopulatedTenant, findTenantIdForUser } from "./seed/populated";
 export { createOnboardingRepository } from "./onboarding/repository";
 export { createFormationRepository } from "./formation/repository";
+export { createPaymentLedger, type PaymentLedger } from "./billing/ledger";
