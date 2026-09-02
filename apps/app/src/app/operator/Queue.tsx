@@ -163,12 +163,16 @@ export function Queue({
                     {next.length > 0 ? (
                       <div className="flex flex-wrap items-center gap-2 pl-10">
                         <span className="text-caption text-muted-foreground mr-1">Move to</span>
-                        {next.map((to) => (
+                        {/* One filled primary per row: the move that advances the filing.
+                            Going back and cancelling are real options but they are not
+                            what an operator is here to do, and three teal buttons side by
+                            side makes the queue a wall of equal choices (§21). */}
+                        {next.map((to, i) => (
                           <Button
                             key={to}
                             onClick={() => move(row, to)}
                             disabled={pending}
-                            variant={to === "cancelled" ? "secondary" : "primary"}
+                            {...(i === 0 ? { variant: "primary" as const } : {})}
                           >
                             {LABEL[to] ?? to}
                           </Button>
