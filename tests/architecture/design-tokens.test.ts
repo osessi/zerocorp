@@ -493,4 +493,35 @@ describe("design tokens — the two systems stay separate", () => {
 
     expect(offenders, offenders.join("\n")).toEqual([]);
   });
+
+  /**
+   * One yellow, four steps, no fifth.
+   *
+   * `--accent-highlight` #FACC15 is the product mark, and the warning ramp is the same
+   * hue at three other lightnesses: --warning-wash, --warning-subtle, --warning. Asked
+   * for on 2026-09-03: "il faut utiliser ce jaune partout ou il y a du jaune sur le
+   * logiciel".
+   *
+   * An OPACITY of the mark is what breaks that. `bg-accent-highlight/15` composites to a
+   * colour nobody chose, which changes with whatever is behind it, and cannot be measured
+   * against a ground because it has no fixed value. The calendar had one and it read as a
+   * washed-out yellow beside a saturated one. If a lighter step is wanted, the ramp has
+   * two.
+   *
+   * §32b demonstration -- restoring bg-accent-highlight/15 on the calendar gives:
+   *   AssertionError: .../content/Calendar.tsx: accent-highlight/15 is a fifth yellow
+   */
+  it("never dilutes the mark into a fifth yellow", () => {
+    const SHIPPED = UI_SOURCES.filter((f) => !f.includes("/app/design-system/"));
+    expect(SHIPPED.length).toBeGreaterThan(20);
+    const offenders: string[] = [];
+
+    for (const file of SHIPPED) {
+      for (const m of code(file).matchAll(/accent-highlight(-ink)?\/(\[?[\w.%]+\]?)/g)) {
+        offenders.push(`${file}: accent-highlight/${m[2]} is a fifth yellow`);
+      }
+    }
+
+    expect(offenders, offenders.join("\n")).toEqual([]);
+  });
 });

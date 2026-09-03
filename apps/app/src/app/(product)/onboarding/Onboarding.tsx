@@ -268,9 +268,14 @@ function Reveal({ state, onEdit }: { state: OnboardingState; onEdit: (i: number)
                       <dt className="text-caption text-surface-focal-foreground/55 sm:w-48 sm:shrink-0">
                         {STEP_COPY[key].title}
                       </dt>
+                      {/*
+                        On the focal block the MARK is the readable step: 11.66:1 on
+                        --surface-focal. --warning is the dark step of the same ramp, for
+                        edges on a light ground, and reaches only 4.37 here.
+                      */}
                       <dd className="m-0 flex min-w-0 flex-1 flex-col gap-1">
                         {values.length === 0 ? (
-                          <span className="text-warning text-body-sm">Tell us this one</span>
+                          <span className="text-accent-highlight text-body-sm">Tell us this one</span>
                         ) : isListStep(key) ? (
                           <ul className="flex flex-col gap-1">
                             {values.map((v) => (

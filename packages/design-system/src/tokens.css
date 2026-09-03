@@ -50,7 +50,7 @@
      that matters most: adjacent to warning in one component the semantic reading breaks,
      so §4.8 forbids it. */
   --accent-highlight: #facc15;
-  --accent-highlight-ink: #422006;
+  --accent-highlight-ink: #3d3300; /* 8.20 on the mark, and hue 50 rather than 26: no brown */
 
   --secondary: #f3f3f3;
   --secondary-foreground: #18181b;
@@ -99,7 +99,7 @@
      4.65 --muted, 4.57 --secondary, 4.41 --accent, 4.45 --surface-sunken, 4.39 on its own
      --warning-subtle. 3.31 from --accent-highlight #FACC15, up from 3.28, so §4.8's
      never-adjacent rule holds on a better margin. */
-  --warning: #8a6a00;
+  --warning: #997a00;
   --info: #2563eb;
   --processing: #00786f;
   --destructive: #dc2626;
@@ -144,7 +144,7 @@
      label. Measured 5.30–6.80:1. */
   --success-subtle: #dcfce7;
   --success-ink: #166534;
-  --warning-subtle: #f7f0c2; /* 1.15 vs the page, up from 1.11 on #FEF3C7. §4.5 floor 1.10 */
+  --warning-subtle: #fef0b9; /* the mark's own hue, lightened. 1.14 vs the page; ink 10.99 */
   --warning-ink: #3d3300; /* 12.56 --surface, 11.52 --muted, 10.88 on --warning-subtle */
   --info-subtle: #dbeafe;
   --info-ink: #1d4ed8;
@@ -191,7 +191,7 @@
      larger area, so it needs a lighter ground. 4.53–4.78:1, and still ≥1.05 against the
      page so the wash is seen. */
   --success-wash: #f0fdf4;
-  --warning-wash: #fbf7dd; /* 1.08 vs the page, up from 1.01. --warning-ink 11.63 on it */
+  --warning-wash: #fef6d7; /* same hue, one step lighter again. 1.08 vs the page */
   --destructive-wash: #fef2f2;
   --info-wash: #eff6ff;
   --processing-wash: #f0fdfa;
@@ -251,7 +251,7 @@
   --chart-1: #00786f;
   --chart-2: #6d28d9;
   --chart-3: #2563eb;
-  --chart-4: #b45309;
+  --chart-4: #997a00;
   --chart-5: #be185d;
   --chart-grid: #e5e5e5;
   --chart-axis: #707070;
@@ -310,7 +310,7 @@
   /* Light-mode status colours reach only 3.69–4.10:1 on #0A0A0A: enough for a filled
      badge, not for status text. These lighter values are required on dark. */
   --success: #22c55e;
-  --warning: #eab308; /* moved with light: gold, not amber. 10.32 on the page */
+  --warning: #facc15; /* the mark itself. 12.93 page, 12.03 --surface, 9.88 on #262626 */
   --info: #3b82f6;
   --processing: #2dd4bf;
   --destructive: #ef4444;
@@ -338,7 +338,7 @@
 
   /* On a dark wash the bright §4.2 status colour IS the right ink. 4.71–8.95:1. */
   --success-ink: #22c55e;
-  --warning-ink: #eab308; /* 8.72 on --warning-subtle */
+  --warning-ink: #facc15; /* 10.92 on --warning-subtle, 12.15 on --warning-wash */
   --info-ink: #3b82f6;
   --processing-ink: #2dd4bf;
   --destructive-ink: #ef4444;
@@ -379,7 +379,7 @@
   --chart-1: #2dd4bf;
   --chart-2: #a78bfa;
   --chart-3: #60a5fa;
-  --chart-4: #fbbf24;
+  --chart-4: #facc15;
   --chart-5: #f472b6;
   --chart-grid: #262626;
   --chart-axis: #a3a3a3;

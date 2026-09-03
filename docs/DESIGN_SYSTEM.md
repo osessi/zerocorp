@@ -146,7 +146,7 @@ They share the token *architecture*, never the token *values*. See §15 and §16
 | `--ring` | `#00786F` | Focus ring |
 | `--destructive` | `#DC2626` | Destructive actions, errors |
 | `--success` | `#15803D` | Completed, healthy, verified |
-| `--warning` | `#8A6A00` | Needs attention, degraded, expiring |
+| `--warning` | `#997A00` | Needs attention, degraded, expiring |
 | `--info` | `#2563EB` | Neutral information, guidance |
 | `--processing` | `#00786F` | In progress, pending, running |
 
@@ -643,7 +643,7 @@ Numbers are Geist Mono. A tooltip exists to be compared against another tooltip 
 | `--primary-emphasis` | `#2DD4BF` | **PROPOSED** — teal **text**, links and icons on dark only |
 | `--destructive` | `#EF4444` | **PROPOSED** — `#DC2626` reaches only 4.10:1 on `#0A0A0A` |
 | `--success` | `#22C55E` | **PROPOSED** — 8.69:1 · `#15803D` reaches only 3.95:1 |
-| `--warning` | `#EAB308` | **PROPOSED** — 10.32:1 · the light `#8A6A00` reaches only 3.91:1 |
+| `--warning` | `#FACC15` | **PROPOSED** — 12.93:1 · the mark is theme-stable, so dark uses it directly rather than a second yellow (the light `#997A00` would reach 4.84 here) |
 | `--info` | `#3B82F6` | **PROPOSED** — 5.38:1 · `#2563EB` reaches only 3.83:1 |
 | `--processing` | `#2DD4BF` | **PROPOSED** — 10.64:1 · same value as `--primary-emphasis` |
 
@@ -676,7 +676,7 @@ on dark — not a second accent.
 
 ```text
 success      #15803D      completed · healthy · verified
-warning      #8A6A00      needs attention · degraded · expiring
+warning      #997A00      needs attention · degraded · expiring
 info         #2563EB      neutral information · guidance
 processing   #00786F      in progress · pending · running
 destructive  #DC2626      failed · error · destructive action
@@ -708,7 +708,7 @@ Computed against WCAG 2.1. Recorded so nobody re-derives them.
 | `#F0FDFA` on `#00786F` | **5.16:1** | AA text ✓ |
 | `#2563EB` info | **5.17:1** | AA text ✓ |
 | `#15803D` success | **5.02:1** | AA text ✓ |
-| `#8A6A00` warning | **5.07:1** | AA text ✓ |
+| `#997A00` warning | **4.09:1** | non-text ✓ · borders and icons only |
 | `#DC2626` destructive | **4.83:1** | AA text ✓ |
 | `#6E6C66` muted-foreground | **5.25:1** | AA text ✓ · and on every other ground, below |
 | `#847F75` input border | **3.98:1** | non-text contrast ✓ · and on every other ground, below |
@@ -721,7 +721,7 @@ Computed against WCAG 2.1. Recorded so nobody re-derives them.
 | Pair | Ratio | Verdict |
 |---|---:|---|
 | `#2DD4BF` processing | **10.64:1** | AA ✓ |
-| `#EAB308` warning | **10.32:1** | AA ✓ |
+| `#FACC15` warning | **12.93:1** | AA ✓ |
 | `#22C55E` success | **8.69:1** | AA ✓ |
 | `#3B82F6` info | **5.38:1** | AA ✓ |
 | `#EF4444` destructive | **5.26:1** | AA ✓ |
@@ -2589,11 +2589,38 @@ still reads as a warning and none of it reads as machine output.
 Separation from `--accent-highlight` `#FACC15` is **3.31**, up from 3.28. §4.8 still forbids
 the two in one component; the margin is simply better than it was.
 
-**The accent yellow is `#FACC15` and is used at full strength.** The warning family is a
-semantic tint and is pale by definition; it is not, and was never, the brand yellow. The
-one asked for is the vivid one, and it now carries the product mark in the rail header —
-the single place a non-semantic accent can hold the whole product's colour without ever
-being read as a status.
+**Amended the same day — there is now exactly one yellow.**
+
+The first pass kept two: `#FACC15` for the mark and a separate gold ramp for warning. That
+is one yellow too many. "Il faut utiliser ce jaune partout où il y a du jaune sur le
+logiciel" settles it, and it is the better answer anyway: a product with two yellows has a
+reader asking, every time, whether the difference means something.
+
+**One hue (48°), four steps, and the mark is the third of them.**
+
+| step | light | dark | measured 2026-09-03 |
+| --- | --- | --- | --- |
+| `--warning-wash` | `#FEF6D7` | `#161303` | 1.08 vs the page · ink 11.59 |
+| `--warning-subtle` | `#FEF0B9` | `#221E04` | 1.14 vs the page · ink 10.99 |
+| `--accent-highlight` **the mark** | `#FACC15` | `#FACC15` | ink 8.20 · theme-stable |
+| `--warning` | `#997A00` | `#FACC15` | 4.09 surface · 3.75 muted · 3.55 accent |
+| `--warning-ink` | `#3D3300` | `#FACC15` | 12.56 surface · 11.52 muted |
+
+`--accent-highlight-ink` moved from `#422006` to `#3D3300`: hue 26 to hue 50, 9.52 to 8.20,
+and the last brown in the palette is gone.
+
+`--chart-4` joins the ramp too — `#997A00` light, `#FACC15` dark — so the amber series in a
+chart is the same yellow as everything else rather than a sixth one.
+
+`--warning` at 4.09 is a **non-text** step: borders and icons, where SC 1.4.11 asks 3:1.
+The single place it was used as text, the onboarding recap on the focal block, now uses the
+mark itself at 11.66:1. That is the shape of the whole ramp: dark steps carry edges on
+light grounds, the mark carries light-on-dark and every fill, the ink carries text.
+
+**An opacity of the mark is a fifth yellow.** `bg-accent-highlight/15` composites to a
+colour nobody chose, moves with whatever is behind it, and cannot be measured against a
+ground because it has no fixed value. Gated in
+`tests/architecture/design-tokens.test.ts`, *never dilutes the mark into a fifth yellow*.
 
 Dark moved with it: `--warning` and `--warning-ink` to `#EAB308`, `--warning-subtle` to
 `#221E04`, `--warning-wash` to `#161303`.

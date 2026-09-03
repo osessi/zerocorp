@@ -65,9 +65,21 @@ export function Calendar({
             <div
               key={key}
               className={cx(
-                "border-border flex min-h-20 flex-col gap-1 border p-1.5",
-                past ? "bg-muted" : "bg-surface",
-                isToday && "bg-accent-highlight/15",
+                "flex min-h-20 flex-col gap-1 border p-1.5",
+                /*
+                  Today is the mark's own tint with the mark's own edge, all four sides.
+
+                  It was `bg-accent-highlight/15`: the mark at 15% alpha, which composites
+                  to a colour nobody chose, shifts with whatever is behind it, and cannot
+                  be measured against a ground because it has no fixed value. One yellow,
+                  four steps — if a lighter one is wanted, the ramp already has it.
+
+                  Written as an exclusive branch rather than a class appended after
+                  `border-border`: two utilities of equal specificity are resolved by the
+                  order Tailwind emits them, not the order they appear in the string.
+                */
+                isToday ? "border-warning bg-warning-subtle" : "border-border",
+                !isToday && (past ? "bg-muted" : "bg-surface"),
               )}
             >
               <span

@@ -117,7 +117,11 @@ function NavRow({
           title={collapsed ? item.label : undefined}
           {...(active ? { "aria-current": "page" } : {})}
           className={cx(
-            "group relative flex flex-1 items-center gap-3 border transition-[color,background-color,border-color,transform] duration-glide ease-glide",
+            // `min-w-0` on the flex CHILD, not only on the label inside it. A flex item's
+            // default min-width is auto, so `truncate` two levels down had nothing to
+            // truncate against and "Tell us about your business" simply pushed past the
+            // row. Invisible until the group got an edge for it to push past.
+            "group relative flex min-w-0 flex-1 items-center gap-3 border transition-[color,background-color,border-color,transform] duration-glide ease-glide",
             "focus-visible:outline-ring focus-visible:outline-2 focus-visible:-outline-offset-2",
             collapsed ? "h-11 justify-center px-0" : "h-11 px-2.5",
             /*
