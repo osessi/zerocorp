@@ -65,12 +65,15 @@ export interface DashboardShellProps {
   account?: ReactNode;
   topBar?: ReactNode;
   /**
-   * One announcement, across the whole product.
+   * One announcement, across the whole product, IN the top bar.
    *
-   * The blocking question used to be repeated on every screen that cared about it, which
-   * meant it was on Overview and on Company and nowhere else — so a founder reading
-   * Content had no idea their filing was paused. It is a property of the ACCOUNT, not of
-   * a page, so it belongs where the account chrome is.
+   * The blocking question was repeated on every screen that cared about it — Overview and
+   * Company and nowhere else — so a founder reading Content had no idea their filing was
+   * paused. It is a property of the ACCOUNT.
+   *
+   * It replaces the top bar's contents rather than adding a row beneath them. A second
+   * band under the chrome pushes the whole product down by 48px to say something that
+   * belongs in the chrome, and the bar was mostly empty anyway.
    */
   announcement?: ReactNode;
   children: ReactNode;
@@ -141,18 +144,35 @@ function NavRow({
             <span className="bg-destructive zc-pulse size-2 shrink-0 rounded-full" aria-label="Needs your attention" />
           ) : null}
 
+          {/*
+            The count wears the row's own colour.
+
+            A red pulsing dot beside a grey number said two different things about one
+            row. If the row is blocked, its number is part of what is blocked.
+          */}
           {!collapsed && item.badge !== undefined && item.badge > 0 ? (
             <span
               className={cx(
                 "text-caption rounded-sm inline-flex h-5 min-w-5 shrink-0 items-center justify-center px-1.5 font-mono tabular-nums",
-                "transition-[background-color] duration-glide ease-glide",
-                active ? "bg-accent-highlight text-accent-highlight-ink font-semibold" : "bg-muted text-muted-foreground",
+                "transition-[background-color,color] duration-glide ease-glide",
+                item.attention
+                  ? "bg-destructive-subtle text-destructive-ink border-destructive border font-semibold"
+                  : "bg-muted text-muted-foreground",
               )}
             >
               {item.badge}
             </span>
           ) : null}
         </Link>
+
+        {/*
+          The chevron column is always there, even when a section has no sub-sections.
+
+          Without it every count landed at a different x depending on whether its row
+          happened to expand, so five numbers in one list sat on four different verticals.
+          A reserved slot costs 28px and buys a column.
+        */}
+        {!collapsed && !hasChildren ? <span className="w-7 shrink-0" aria-hidden="true" /> : null}
 
         {hasChildren ? (
           <button
@@ -291,15 +311,16 @@ export function DashboardShell({
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        {topBar ? (
-          <header className="border-border flex h-14 shrink-0 items-center gap-4 border-b px-5 sm:px-8">
-            {topBar}
+        {announcement ?? topBar ? (
+          <header
+            className={cx(
+              "border-border flex h-14 shrink-0 items-center gap-4 border-b px-5 sm:px-8",
+              announcement ? "border-destructive bg-destructive-subtle" : null,
+            )}
+          >
+            {announcement ?? topBar}
           </header>
         ) : null}
-        {/* The announcement owns its own border, so it can carry a tone on four sides
-            rather than borrowing a neutral rule on one. §21.28 still applies to what is
-            inside it: the band spans the width, its content is centred. */}
-        {announcement ? <div className="shrink-0">{announcement}</div> : null}
         <main className="flex min-h-0 flex-1 flex-col overflow-y-auto">{children}</main>
       </div>
     </div>

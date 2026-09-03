@@ -61,23 +61,6 @@ const FOOTER = [
   { label: "Help", href: "/help", icon: LifebuoyIcon },
 ];
 
-/** The name of the screen you are on. One list, matched by prefix. */
-function screenTitle(pathname: string): string {
-  const map: [string, string][] = [
-    ["/dashboard", "Overview"],
-    ["/onboarding", "Tell us about your business"],
-    ["/company", "Company"],
-    ["/brand", "Brand"],
-    ["/website", "Website"],
-    ["/email", "Email"],
-    ["/content", "Content"],
-    ["/leads", "Customers"],
-    ["/settings", "Settings"],
-    ["/help", "Help"],
-  ];
-  return map.find(([href]) => pathname.startsWith(href))?.[1] ?? "ZeroCorp";
-}
-
 export function Shell({
   email,
   needsYou,
@@ -180,34 +163,28 @@ export function Shell({
       }
       announcement={
         announcement ? (
-          <div className="border-destructive bg-destructive-subtle border">
-            <div className="mx-auto flex w-full max-w-(--container-content) flex-wrap items-center gap-4 px-5 py-2.5 sm:px-8">
-              <WarningIcon size={17} weight="fill" className="text-destructive-ink shrink-0" aria-hidden="true" />
-              <p className="text-body-sm text-destructive-ink min-w-0 flex-1">
-                <span className="font-semibold">Waiting on you.</span> {announcement.message}
-              </p>
-              <ButtonLink href={announcement.href} variant="primary">
-                {announcement.action}
-              </ButtonLink>
-            </div>
-          </div>
+          <>
+            <WarningIcon size={17} weight="fill" className="text-destructive-ink shrink-0" aria-hidden="true" />
+            <p className="text-body-sm text-destructive-ink min-w-0 flex-1 truncate">
+              <span className="font-semibold">Waiting on you.</span> {announcement.message}
+            </p>
+            <ButtonLink href={announcement.href} variant="primary">
+              {announcement.action}
+            </ButtonLink>
+          </>
         ) : null
       }
       topBar={
-        <>
-          {/*
-            The SCREEN's name, not the business description.
+        /*
+          No page title here.
 
-            It printed `businessName`, which is seeded from the assessment headline — a
-            positioning sentence — so every page in the product was topped by "I design
-            brand identities for early-stage software companies." That is not a title, it
-            is a paragraph, and it said the same thing on all seven screens.
-          */}
-          <span className="text-body-sm truncate font-medium">{screenTitle(pathname)}</span>
-          <div className="ml-auto flex items-center gap-1">
-            <IconButton icon={BellIcon} label="Notifications" variant="ghost" />
-          </div>
-        </>
+          The sidebar already says which section you are on, in a highlighted row you
+          cannot miss, and every screen repeats its own name in its first heading. A third
+          copy in the chrome is a line of text that has never told anyone anything.
+        */
+        <div className="ml-auto flex items-center gap-1">
+          <IconButton icon={BellIcon} label="Notifications" variant="ghost" />
+        </div>
       }
     >
       {children}
