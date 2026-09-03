@@ -378,10 +378,15 @@ describe("design tokens — the two systems stay separate", () => {
 
     for (const file of UI_SOURCES) {
       for (const line of code(file).split("\n")) {
-        // A sided border with a width, on the same line as a tone colour.
-        const sided = /border-[tblr]-(?:[0-9]+|(?:success|warning|info|processing|destructive|ai|primary))\b/.exec(line);
-        if (!sided) continue;
-        if (!new RegExp(`border-(?:[tblr]-)?(?:${TONES})\\b`).test(line)) continue;
+        // A sided border of ANY form — `border-b`, `border-b-2`, `border-l-warning` —
+        // on the same line as a tone colour.
+        //
+        // The first version required a width or a tone suffix, so a bare `border-b`
+        // beside `border-warning` slipped through and shipped as a yellow band across
+        // the top of the dashboard. A rule with a hole is worse than no rule: it was
+        // green while the thing it exists to stop was on screen.
+        if (!/\bborder-[tblr]\b|\bborder-[tblr]-/.test(line)) continue;
+        if (!new RegExp(`\\bborder-(?:[tblr]-)?(?:${TONES})\\b`).test(line)) continue;
         offenders.push(`${file}: ${line.trim().slice(0, 90)}`);
       }
     }

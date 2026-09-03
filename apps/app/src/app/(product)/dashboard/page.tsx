@@ -71,17 +71,6 @@ const ACTION_LABEL: Record<string, string> = {
   pending: "Start",
 };
 
-/**
- * Progress, in the colours the dashboard already uses for it.
- *
- * Red under 50%, amber under 75%, green above. Decided in review; the same rule is on
- * the formation queue, so a founder learns it once.
- */
-function progressTone(percent: number): { bar: string; text: string } {
-  if (percent >= 75) return { bar: "bg-success", text: "text-success" };
-  if (percent >= 50) return { bar: "bg-warning", text: "text-warning-ink" };
-  return { bar: "bg-destructive", text: "text-destructive-ink" };
-}
 
 /**
  * The leading status indicator.
@@ -214,26 +203,6 @@ function StepRow({
   );
 }
 
-/** One figure in the rail. The yellow is the non-semantic accent — where to look. */
-function Stat({ label, value, sub, highlight }: { label: string; value: string; sub?: string | undefined; highlight?: boolean }) {
-  return (
-    <div className="flex items-baseline justify-between gap-3 py-2">
-      <span className="text-body-sm text-muted-foreground">{label}</span>
-      <span className="flex items-baseline gap-1.5">
-        <span
-          className={cx(
-            "text-h4 font-mono tabular-nums",
-            highlight ? "bg-accent-highlight text-accent-highlight-ink rounded-sm px-1.5" : "text-foreground",
-          )}
-        >
-          {value}
-        </span>
-        {sub ? <span className="text-caption text-muted-foreground">{sub}</span> : null}
-      </span>
-    </div>
-  );
-}
-
 export default async function Page() {
   const viewer = await getViewer();
   if (!viewer) redirect("/signin");
@@ -256,7 +225,6 @@ export default async function Page() {
   const included = overview.steps.filter((s) => s.included);
   const done = included.filter((s) => s.status === "done").length;
   const percent = included.length === 0 ? 0 : Math.round((done / included.length) * 100);
-  const tone = progressTone(percent);
   const st = overview.state;
   /*
     The open RFI outranks everything.
@@ -301,27 +269,25 @@ export default async function Page() {
     /* A viewport-height column: the cockpit is fixed, the grid below it takes the rest
        and its panels scroll inside themselves. */
     <div className="flex min-h-0 flex-1 flex-col">
-      {/*
-        The blocking question, and nothing else above the fold that is not a number.
+      <div className="mx-auto flex w-full max-w-(--container-content) flex-col gap-6 px-5 pt-6 sm:px-8">
+        {/*
+          No full-bleed band.
 
-        The cockpit block spent 240px on an eyebrow, a sentence, a progress bar and three
-        figures — and the figures, the only part read at a glance, were the smallest thing
-        on it. Replaced by four KPI cards. What is genuinely urgent gets a band; what is
-        merely status is a number.
-      */}
-      {st.openRfi ? (
-        <div className="border-warning bg-warning-subtle border-b">
-          <div className="mx-auto flex w-full max-w-(--container-content) flex-wrap items-center gap-4 px-5 py-3 sm:px-8">
-            <WarningIcon size={18} weight="fill" className="text-warning-ink shrink-0" aria-hidden="true" />
+          The blocking question shipped as a yellow strip across the whole width with a
+          border on its BOTTOM EDGE ONLY — the single-side accent, for the fourth time,
+          and my own CI rule had a hole that let it through. It is a card now, bordered on
+          four sides, the same width as everything else on the page.
+        */}
+        {st.openRfi ? (
+          <div className="border-warning bg-warning-subtle flex flex-wrap items-center gap-4 border p-4">
+            <WarningIcon size={20} weight="fill" className="text-warning-ink shrink-0" aria-hidden="true" />
             <p className="text-body-sm text-warning-ink min-w-0 flex-1">
               <span className="font-semibold">Waiting on you.</span> {st.openRfi}
             </p>
             <ButtonLink href="/company" variant="primary">Send your passport page</ButtonLink>
           </div>
-        </div>
-      ) : null}
+        ) : null}
 
-      <div className="mx-auto w-full max-w-(--container-content) px-5 pt-5 sm:px-8">
         <KpiRow>
           <Kpi
             label="Launch progress"
@@ -353,130 +319,85 @@ export default async function Page() {
       </div>
 
       {/*
-        A dashboard, not a document.
+        One big chart, then the work.
 
-        Everything Overview has fits in one screen: the charts, the plan and the rail are
-        all here without scrolling the page. What is long — the plan, the activity feed —
-        scrolls INSIDE its own panel, which is the difference between a control surface
-        and an article. `min-h-0` on the grid is what allows a child to be shorter than
-        its content and scroll; without it flex children refuse to shrink and the page
-        grows instead.
+        Two small charts side by side were cramped and neither was readable. Publishing
+        over time is the question this screen answers — is anything going out — so it
+        gets the full width, and the pipeline moves beside the plan where it is a
+        summary rather than a headline.
       */}
-      <div className="mx-auto grid w-full min-h-0 max-w-(--container-content) flex-1 grid-cols-1 gap-5 px-5 py-5 sm:px-8 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
-        <div className="flex min-h-0 min-w-0 flex-col gap-5">
-          <section className="flex min-h-0 flex-col gap-3">
+      <div className="mx-auto flex w-full max-w-(--container-content) flex-col gap-6 px-5 py-6 sm:px-8">
+        <PublishingChart data={st.publishingByWeek} />
+
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+          <section className="flex min-w-0 flex-col gap-3">
             <SectionHeader title="What ZeroCorp is building" count={included.length} countTone="processing" />
-            <ul className="border-border min-h-0 overflow-y-auto border">
+            <ul className="border-border border">
               {overview.steps.map((step, i) => (
                 <StepRow key={step.id} step={step} anchor={step.id === anchorId} state={st} index={i} />
               ))}
             </ul>
           </section>
 
-          {/* The charts. §4.7 settled every value on 2026-09-01 and nothing had ever
-              drawn one — a dashboard whose only shapes are rows is a list. */}
-          <section className="grid grid-cols-1 gap-6 xl:grid-cols-2">
-            <PublishingChart data={st.publishingByWeek} />
+          <aside className="flex min-w-0 flex-col gap-6">
             <PipelineChart data={st.leadsByStage} />
-          </section>
 
+            {/*
+              Brand. The numbers panel that used to sit here repeated all four KPI cards
+              a few hundred pixels below them, which is the kind of duplication that makes
+              a dashboard feel busy without saying anything more.
+            */}
+            {st.brandName ? (
+              <section className="border-border flex flex-col gap-3 border p-4">
+                <div className="flex items-baseline justify-between gap-3">
+                  <span className="text-overline text-muted-foreground">Your brand</span>
+                  <span className="text-caption text-muted-foreground font-mono tabular-nums">{st.brandComplete}/5</span>
+                </div>
+                {st.businessNamed ? (
+                  <span className="text-h4">{st.brandName}</span>
+                ) : (
+                  <span className="text-body-sm text-muted-foreground">
+                    Not named yet — ZeroCorp is using your description until you choose one.
+                  </span>
+                )}
+                {st.brandColors.length > 0 ? (
+                  <div className="flex gap-1.5">
+                    {st.brandColors.slice(0, 6).map((c) => (
+                      <span
+                        key={c}
+                        className="border-border size-7 border"
+                        style={{ backgroundColor: c }}
+                        title={c}
+                        aria-label={c}
+                      />
+                    ))}
+                  </div>
+                ) : null}
+                <ButtonLink
+                  href={st.businessNamed ? "/brand" : "/onboarding"}
+                  {...(st.businessNamed ? {} : { variant: "primary" as const })}
+                >
+                  {st.businessNamed ? "Open brand" : "Name your business"}
+                </ButtonLink>
+              </section>
+            ) : null}
+          </aside>
         </div>
 
-        {/* The rail. Everything a founder checks without reading. */}
-        <aside className="flex min-h-0 min-w-0 flex-col gap-4 overflow-y-auto">
-          {/* What is waiting, first, because it is the only part that asks for something. */}
-          {st.openRfi ? (
-            <section className="border-warning bg-warning-subtle flex flex-col gap-3 border p-4">
-              <span className="text-overline text-warning-ink">Waiting on you</span>
-              <p className="text-body-sm text-warning-ink">{st.openRfi}</p>
-              <ButtonLink href="/company" variant="primary">Send it</ButtonLink>
-            </section>
-          ) : null}
-
-          <section className="border-border flex shrink-0 flex-col border">
-            <div className="border-border bg-muted border-b px-4 py-2.5">
-              <span className="text-overline text-muted-foreground">Your business, in numbers</span>
+        <section className="flex flex-col gap-3">
+          <SectionHeader title="Recent activity" count={events.length} countTone="ai" />
+          {events.length === 0 ? (
+            <EmptyState
+              title="Nothing has happened yet"
+              body="Every action shows up here with the agent that took it."
+              action={<ButtonLink href="/company">Start your company</ButtonLink>}
+            />
+          ) : (
+            <div className="border-border border p-4">
+              <ActivityPanel events={events} />
             </div>
-            <div className="divide-border flex flex-col divide-y px-4 py-1">
-              <Stat label="Articles published" value={String(st.postsPublished)} sub={st.postsScheduled > 0 ? `+${st.postsScheduled} scheduled` : undefined} highlight={st.postsPublished > 0} />
-              <Stat label="Prospects found" value={String(st.leadsTotal)} sub={st.leadsReplied > 0 ? `${st.leadsReplied} replied` : undefined} highlight={st.leadsTotal > 0} />
-              <Stat label="Keywords tracked" value={String(st.keywords)} />
-              <Stat label="Pages" value={String(st.pages)} sub={`${st.pagesPublished} live`} />
-              <Stat
-                label="Mailboxes warming"
-                value={String(st.mailboxes)}
-                sub={st.warmupDay !== null ? `${Math.max(0, st.warmupTotal - st.warmupDay)}d left` : undefined}
-              />
-            </div>
-          </section>
-
-          {/* Brand had no entry point anywhere in the product. */}
-          {st.brandName ? (
-            <section className="border-border flex flex-col gap-3 border p-4">
-              <div className="flex items-baseline justify-between gap-3">
-                <span className="text-overline text-muted-foreground">Your brand</span>
-                <span className="text-caption text-muted-foreground font-mono tabular-nums">{st.brandComplete}/5</span>
-              </div>
-              {/* A name, or an honest admission that there is not one yet. The seeded
-                  "name" is the assessment headline until onboarding step 1 is answered,
-                  and printing a positioning sentence as a heading is worse than empty. */}
-              {st.businessNamed ? (
-                <span className="text-h4">{st.brandName}</span>
-              ) : (
-                <span className="text-body-sm text-muted-foreground">
-                  Not named yet — ZeroCorp is using your description until you choose one.
-                </span>
-              )}
-              {st.brandColors.length > 0 ? (
-                <div className="flex gap-1.5">
-                  {st.brandColors.slice(0, 6).map((c) => (
-                    <span
-                      key={c}
-                      className="border-border size-7 border"
-                      style={{ backgroundColor: c }}
-                      title={c}
-                      aria-label={c}
-                    />
-                  ))}
-                </div>
-              ) : null}
-              <ButtonLink href={st.businessNamed ? "/brand" : "/onboarding"} {...(st.businessNamed ? {} : { variant: "primary" as const })}>
-                {st.businessNamed ? "Open brand" : "Name your business"}
-              </ButtonLink>
-            </section>
-          ) : null}
-
-          <section className="border-border bg-surface-sunken flex flex-col gap-3 border p-4">
-            <span className="text-overline text-muted-foreground">Current plan</span>
-            <span className="text-h4">{overview.subscriptionPlan ?? "No plan yet"}</span>
-            <div className="bg-muted h-1.5 w-full" role="presentation">
-              <div className={cx("h-full transition-[width] duration-modal ease-out", tone.bar)} style={{ width: `${percent}%` }} />
-            </div>
-            <span className={cx("text-caption font-mono tabular-nums", tone.text)}>{percent}% complete</span>
-          </section>
-
-          {/*
-            Activity last, and bounded.
-
-            It sat second with `min-h-0` and no scroll container, so it overflowed its box
-            and the numbers panel painted straight through it. A flex child that can grow
-            without a scroller does not shrink, it overlaps.
-          */}
-          <section className="flex shrink-0 flex-col gap-3">
-            <SectionHeader title="Recent activity" count={events.length} countTone="ai" />
-            {events.length === 0 ? (
-              <EmptyState
-                title="Nothing has happened yet"
-                body="Every action shows up here with the agent that took it."
-                action={<ButtonLink href="/company">Start your company</ButtonLink>}
-              />
-            ) : (
-              <div className="border-border max-h-80 overflow-y-auto border p-3">
-                <ActivityPanel events={events} />
-              </div>
-            )}
-          </section>
-        </aside>
+          )}
+        </section>
       </div>
     </div>
   );

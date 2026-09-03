@@ -37,7 +37,7 @@ export function Kpi({
   const Arrow = delta?.direction === "up" ? TrendUpIcon : delta?.direction === "down" ? TrendDownIcon : MinusIcon;
 
   return (
-    <div className="bg-surface flex flex-col gap-3 p-5">
+    <div className="border-border bg-surface hover:border-input flex flex-col gap-3 border p-5 transition-[border-color] duration-glide ease-glide">
       <div className="flex items-start justify-between gap-3">
         <span className="text-body-sm text-muted-foreground">{label}</span>
         {delta ? (
@@ -74,9 +74,14 @@ export function Kpi({
   );
 }
 
-/** Four across, separated by one hairline grid rather than four boxes with gaps. */
+/**
+ * Four SEPARATE cards.
+ *
+ * They were glued into one bordered grid with 1px seams, which reads as a table of four
+ * cells rather than four things. Separate cards with real space between them is what the
+ * reference does and it is right: each number is its own object, and the gap is what says
+ * so.
+ */
 export function KpiRow({ children }: { children: ReactNode }) {
-  return (
-    <div className="border-border bg-border grid grid-cols-1 gap-px border sm:grid-cols-2 xl:grid-cols-4">{children}</div>
-  );
+  return <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">{children}</div>;
 }
