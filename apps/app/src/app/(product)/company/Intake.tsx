@@ -89,7 +89,7 @@ export function Intake({
         <div className="flex flex-col gap-1">
           <h2 className="text-h4">Where do you live?</h2>
           <p className="text-body-sm text-muted-foreground">
-            Not where you sell — where you are resident. It decides which structures are open to
+            Not where you sell. Where you are resident, which decides what structures are open to
             you, how your tax ID is issued, and how long it takes.
           </p>
         </div>

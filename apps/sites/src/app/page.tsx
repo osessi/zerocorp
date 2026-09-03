@@ -6,5 +6,5 @@
  * No business logic here — this file stays a thin adapter.
  */
 export default function Page() {
-  return <main>ZeroCorp tenant site renderer — scaffold</main>;
+  return <main>ZeroCorp tenant site renderer, scaffold</main>;
 }

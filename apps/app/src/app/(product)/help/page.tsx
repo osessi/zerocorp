@@ -1,7 +1,7 @@
 import { PageHeader } from "@zerocorp/ui";
 import { Panel } from "../ui";
 
-export const metadata = { title: "Help — ZeroCorp" };
+export const metadata = { title: "Help · ZeroCorp" };
 
 export default function Page() {
   return (

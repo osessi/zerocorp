@@ -3,7 +3,7 @@ import { getInterviewService } from "../../../server/container";
 import { Conversation, type Turn } from "./Conversation";
 
 export const metadata = {
-  title: "Your business assessment — ZeroCorp",
+  title: "Your business assessment · ZeroCorp",
 };
 
 export default async function Page({ params }: { params: Promise<{ token: string }> }) {

@@ -8,7 +8,7 @@ import { getSettingsRepository, getSystemUnitOfWork, getUnitOfWork } from "../..
 import { getViewer } from "../../../server/session";
 import { Fact, FactCell, FactGrid, Panel, Row, Rows } from "../ui";
 
-export const metadata = { title: "Settings — ZeroCorp" };
+export const metadata = { title: "Settings · ZeroCorp" };
 
 export default async function Page() {
   const viewer = await getViewer();

@@ -6,7 +6,7 @@ import { BuildButton } from "../BuildButton";
 import { buildBrand } from "../build-actions";
 import { Empty, Fact, FactCell, FactGrid, Panel } from "../ui";
 
-export const metadata = { title: "Brand — ZeroCorp" };
+export const metadata = { title: "Brand · ZeroCorp" };
 
 export default async function Page() {
   const viewer = await getViewer();
@@ -33,10 +33,10 @@ export default async function Page() {
         <Panel title="Positioning">
           {view?.identity ? (
             <FactGrid>
-              <FactCell><Fact label="Name" value={view.identity.name ?? "—"} /></FactCell>
-              <FactCell><Fact label="Positioning" value={view.identity.positioning ?? "—"} /></FactCell>
-              <FactCell><Fact label="Ideal customer" value={view.identity.icp ?? "—"} /></FactCell>
-              <FactCell><Fact label="Tone of voice" value={view.identity.toneOfVoice ?? "—"} /></FactCell>
+              <FactCell><Fact label="Name" value={view.identity.name ?? "Not set"} /></FactCell>
+              <FactCell><Fact label="Positioning" value={view.identity.positioning ?? "Not set"} /></FactCell>
+              <FactCell><Fact label="Ideal customer" value={view.identity.icp ?? "Not set"} /></FactCell>
+              <FactCell><Fact label="Tone of voice" value={view.identity.toneOfVoice ?? "Not set"} /></FactCell>
             </FactGrid>
           ) : (
             <Empty

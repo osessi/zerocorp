@@ -3,7 +3,7 @@ import { getOnboardingService } from "../../../server/container";
 import { getViewer } from "../../../server/session";
 import { Onboarding } from "./Onboarding";
 
-export const metadata = { title: "Tell us about your business — ZeroCorp" };
+export const metadata = { title: "Tell us about your business · ZeroCorp" };
 
 /**
  * Tell us about your business — the deep onboarding.

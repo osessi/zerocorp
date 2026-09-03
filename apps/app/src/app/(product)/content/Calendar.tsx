@@ -113,7 +113,7 @@ export function Calendar({
       </div>
 
       <p className="text-caption text-muted-foreground">
-        Four weeks from this Monday. Drafts have no date and are not shown — the article list has them.
+        Four weeks from this Monday. Drafts have no date and are not shown here. The article list has them.
       </p>
     </div>
   );

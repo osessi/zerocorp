@@ -3,7 +3,7 @@ import { getOperatorRepository } from "../../server/container";
 import { getViewer } from "../../server/session";
 import { Queue } from "./Queue";
 
-export const metadata = { title: "Formation queue — ZeroCorp Operator" };
+export const metadata = { title: "Formation queue · ZeroCorp Operator" };
 
 /**
  * The operator console.

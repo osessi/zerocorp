@@ -27,3 +27,4 @@ export * from "./avatar/index";
 export * from "./cockpit/index";
 export * from "./panels/index";
 export * from "./chart/index";
+export * from "./audio/index";

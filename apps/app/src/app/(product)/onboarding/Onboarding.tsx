@@ -98,45 +98,126 @@ export function Onboarding({ initial }: { initial: OnboardingState }) {
   const Icon = copy.icon;
 
   return (
-    <div className="mx-auto flex w-full max-w-3xl flex-col gap-8 px-5 py-10 sm:px-8">
-      <header className="flex flex-col gap-4">
-        <div className="flex items-center justify-between gap-4">
+    <div className="mx-auto grid w-full max-w-6xl gap-8 px-5 py-10 sm:px-8 lg:grid-cols-[17rem_1fr] lg:gap-12">
+      {/*
+        The eight questions, down the side, with what was said in each.
+
+        A SegmentedProgress alone was the whole map before this: eight anonymous segments
+        that told a founder how far through they were and nothing about where. Eight
+        questions is long enough that "which one was the customer one" becomes a real
+        question, and the answer was to guess and press Back until it appeared.
+
+        Every answered row is a button, because a map you cannot navigate from is a
+        decoration. Every answered row also shows its own answer, truncated — the rail is
+        then a summary of the interview so far rather than a list of ticks, and it is the
+        only place before the reveal where a founder can see what they have actually said.
+      */}
+      <nav aria-label="Questions" className="flex flex-col gap-4 lg:sticky lg:top-6 lg:self-start">
+        <div className="flex items-baseline justify-between gap-3">
           <span className="text-overline text-muted-foreground">Tell us about your business</span>
           <span className="text-caption text-muted-foreground font-mono tabular-nums">
-            {index + 1} of {ONBOARDING_STEPS.length}
+            {answeredCount}/{ONBOARDING_STEPS.length}
           </span>
         </div>
+
         <SegmentedProgress
           total={ONBOARDING_STEPS.length}
           completed={answeredCount}
           current={index}
           label={`Question ${index + 1} of ${ONBOARDING_STEPS.length}`}
         />
-      </header>
 
-      <div className="flex flex-col gap-5">
+        <ol className="flex flex-col gap-1.5">
+          {ONBOARDING_STEPS.map((key, i) => {
+            const answered = (state.answers[key] ?? []).length > 0;
+            const active = i === index;
+            const said = (state.answers[key] ?? []).join(", ");
+            const RowIcon = STEP_COPY[key].icon;
+            // A button only where pressing it does something. A disabled button for a
+            // question nobody has reached yet sits in the tab order and then refuses.
+            const Row = answered && !active ? "button" : "div";
+            return (
+              <li key={key}>
+                <Row
+                  {...(Row === "button"
+                    ? { type: "button" as const, onClick: () => goTo(i) }
+                    : {})}
+                  className={cx(
+                    "duration-glide ease-glide flex w-full items-start gap-2.5 border px-3 py-2.5 text-left transition-[background-color,border-color]",
+                    active
+                      ? /* --processing and --primary are the same teal; there is no
+                           --primary-subtle, and inventing one to match a class name is
+                           how a palette grows a token nobody decided. */
+                        "border-processing bg-processing-subtle"
+                      : answered
+                        ? "border-border bg-surface hover:border-border-hover hover:bg-accent"
+                        : "border-border border-dashed",
+                  )}
+                >
+                  {answered && !active ? (
+                    <CheckIcon size={15} weight="bold" className="text-success mt-0.5 shrink-0" aria-hidden="true" />
+                  ) : (
+                    <RowIcon
+                      size={15}
+                      className={cx("mt-0.5 shrink-0", active ? "text-primary" : "text-muted-foreground")}
+                      aria-hidden="true"
+                    />
+                  )}
+                  <span className="flex min-w-0 flex-col gap-0.5">
+                    <span
+                      className={cx(
+                        "text-body-sm",
+                        active ? "text-foreground font-medium" : answered ? "text-foreground" : "text-muted-foreground",
+                      )}
+                    >
+                      {STEP_COPY[key].title}
+                    </span>
+                    {said ? (
+                      <span className="text-caption text-muted-foreground truncate">{said}</span>
+                    ) : null}
+                  </span>
+                </Row>
+              </li>
+            );
+          })}
+        </ol>
+      </nav>
+
+      <div className="flex min-w-0 flex-col gap-6">
         <div className="flex items-start gap-4">
-          <span className="border-primary text-primary flex size-10 shrink-0 items-center justify-center border">
-            <Icon size={20} aria-hidden="true" />
+          <span className="border-primary text-primary flex size-12 shrink-0 items-center justify-center border">
+            <Icon size={24} aria-hidden="true" />
           </span>
           <div className="flex flex-col gap-2">
-            <h1 className="text-h2">{copy.title}</h1>
-            <p className="text-body text-muted-foreground">{copy.help}</p>
+            <span className="text-caption text-muted-foreground font-mono tabular-nums">
+              {index + 1} of {ONBOARDING_STEPS.length}
+            </span>
+            <h1 className="text-h1 text-balance">{copy.title}</h1>
+            <p className="text-body-lg text-muted-foreground max-w-prose">{copy.help}</p>
           </div>
         </div>
 
         {/*
-          Why this question exists. Eight questions before anything is built is a lot to
-          ask, and a founder who can see what each one is FOR keeps going.
+          Why this question exists, and what a real answer sounds like.
 
-          A full border, not a left bar: §21.27 refuses the thick-left-bar panel, and the
-          CI rule caught this the first time it was written that way. The tint carries its
-          own tone border, per the bare-tint rule in §4.5.
+          Eight questions before anything is built is a lot to ask, and a founder who can
+          see what each one is FOR keeps going. The example sits beside it because the
+          hardest part of an open question is not knowing how much to say, and a
+          placeholder disappears the moment anyone starts typing — which is exactly when
+          it is still needed.
+
+          Full borders, not left bars: §21.27, and separated rather than welded, §21.29.
         */}
-        <p className="border-processing bg-processing-subtle text-processing-ink text-body-sm border px-4 py-2.5">
-          <SparkleIcon size={14} className="mr-1.5 inline" aria-hidden="true" />
-          {copy.why}
-        </p>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <p className="border-processing bg-processing-subtle text-processing-ink text-body-sm flex gap-2 border px-4 py-3">
+            <SparkleIcon size={15} className="mt-0.5 shrink-0" aria-hidden="true" />
+            {copy.why}
+          </p>
+          <div className="border-border bg-surface-sunken flex flex-col gap-1.5 border px-4 py-3">
+            <span className="text-overline text-muted-foreground">Something like</span>
+            <p className="text-body-sm text-muted-foreground italic">{copy.placeholder}</p>
+          </div>
+        </div>
 
         <PromptDock
           key={step}
@@ -157,25 +238,25 @@ export function Onboarding({ initial }: { initial: OnboardingState }) {
             {error}
           </p>
         ) : null}
-      </div>
 
-      <nav className="border-border flex items-center justify-between border-t pt-5">
-        <Button onClick={() => goTo(Math.max(0, index - 1))} disabled={index === 0 || pending}>
-          <ArrowLeftIcon size={16} aria-hidden="true" /> Back
-        </Button>
-        <span className="text-caption text-muted-foreground">
-          {answeredCount === ONBOARDING_STEPS.length
-            ? "Every question answered"
-            : `${ONBOARDING_STEPS.length - answeredCount} left`}
-        </span>
-        <Button
-          variant="primary"
-          onClick={() => submit(draft || existing)}
-          disabled={pending || (draft || existing).trim().length === 0}
-        >
-          {pending ? "Saving" : "Next"} <ArrowRightIcon size={16} aria-hidden="true" />
-        </Button>
-      </nav>
+        <nav className="flex flex-wrap items-center justify-between gap-3">
+          <Button onClick={() => goTo(Math.max(0, index - 1))} disabled={index === 0 || pending}>
+            <ArrowLeftIcon size={16} aria-hidden="true" /> Back
+          </Button>
+          <span className="text-caption text-muted-foreground">
+            {answeredCount === ONBOARDING_STEPS.length
+              ? "Every question answered"
+              : `${ONBOARDING_STEPS.length - answeredCount} left`}
+          </span>
+          <Button
+            variant="primary"
+            onClick={() => submit(draft || existing)}
+            disabled={pending || (draft || existing).trim().length === 0}
+          >
+            {pending ? "Saving" : "Next"} <ArrowRightIcon size={16} aria-hidden="true" />
+          </Button>
+        </nav>
+      </div>
     </div>
   );
 }
@@ -226,7 +307,7 @@ function Reveal({ state, onEdit }: { state: OnboardingState; onEdit: (i: number)
           <span className="text-overline text-surface-focal-foreground/60">Tell us about your business</span>
           <h1 className={cx("text-display-l", ENTER)}>Here is what we understood.</h1>
           <p className={cx("text-body-lg text-surface-focal-foreground/70 max-w-prose", ENTER)} style={staggerStyle(1, 8, REVEAL_MS)}>
-            Everything ZeroCorp builds reads this. Change anything that is not right — one click,
+            Everything ZeroCorp builds reads this. Change anything that is not right. One click,
             and far cheaper now than after a website exists.
           </p>
         </div>
@@ -314,7 +395,7 @@ function Reveal({ state, onEdit }: { state: OnboardingState; onEdit: (i: number)
           <div className="flex gap-2">
             <ButtonLink href="/dashboard">Later</ButtonLink>
             <Button variant="primary" onClick={finish} disabled={pending}>
-              {pending ? "Starting" : "This is right — start building"}
+              {pending ? "Starting" : "This is right, start building"}
             </Button>
           </div>
         </div>
