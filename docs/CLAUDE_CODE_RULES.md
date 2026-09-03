@@ -697,6 +697,29 @@ affected feature tests
 
 ---
 
+## 32a. Two shapes that keep coming back
+
+Both were asked for repeatedly, both kept returning because each new instance looked like
+a special case. Neither is.
+
+```text
+NO border on a single side carrying a tone.   §21.27 · CI-enforced
+   Four sides, or none, or dotted. A 2px bar on the left of a panel and a 2px bar on
+   the top of a card are the same shape rotated.
+
+NO full-bleed content.                        §21.28 · centre it
+   A band's BACKGROUND may span the width; its CONTENT sits in the same centred
+   container as the page body. A strip starting at a different x than the table
+   under it makes a screen feel unfinished for reasons nobody can name.
+```
+
+The first is enforced by a test in `tests/architecture/design-tokens.test.ts`. That test
+was itself written with a hole — it required a border WIDTH or a tone SUFFIX, so a bare
+`border-b` beside `border-warning` passed — and shipped a yellow band across a dashboard
+while reporting green. See §32b: a rule with a hole is worse than no rule.
+
+---
+
 ## 32b. A check that cannot fail is a defect
 
 > **A check that cannot report a failure is worse than no check, because it produces

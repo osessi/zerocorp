@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type ComponentType, type ElementType, type ReactNode } from "react";
-import { CaretLeftIcon } from "@phosphor-icons/react/dist/ssr";
+import { CaretLeftIcon, CaretRightIcon } from "@phosphor-icons/react/dist/ssr";
 import { cx } from "../cx";
 
 /**
@@ -64,6 +64,15 @@ export interface DashboardShellProps {
   /** The account row, pinned to the very bottom. */
   account?: ReactNode;
   topBar?: ReactNode;
+  /**
+   * One announcement, across the whole product.
+   *
+   * The blocking question used to be repeated on every screen that cared about it, which
+   * meant it was on Overview and on Company and nowhere else — so a founder reading
+   * Content had no idea their filing was paused. It is a property of the ACCOUNT, not of
+   * a page, so it belongs where the account chrome is.
+   */
+  announcement?: ReactNode;
   children: ReactNode;
 }
 
@@ -79,89 +88,106 @@ function NavRow({
   Link: ElementType;
 }) {
   const Icon = item.icon;
+  const hasChildren = !collapsed && !!item.children && item.children.length > 0;
+
+  /*
+    Sub-sections open on a CHEVRON, not on being the active section.
+
+    They only appeared once you were already on the page, which is the wrong way round:
+    the reason to show them is so somebody can see what is in a section BEFORE going
+    there, and jump straight to the part they want. The active section starts open
+    because that is the one you are looking at.
+  */
+  const [open, setOpen] = useState(active);
 
   return (
     <li className="flex flex-col">
-      <Link
-        href={item.href}
-        title={collapsed ? item.label : undefined}
-        {...(active ? { "aria-current": "page" } : {})}
-        className={cx(
-          "group relative flex items-center gap-3 border transition-[color,background-color,border-color,transform] duration-glide ease-glide",
-          "focus-visible:outline-ring focus-visible:outline-2 focus-visible:-outline-offset-2",
-          collapsed ? "h-11 justify-center px-0" : "h-11 px-2.5",
-          /*
-            A FULL border on the active row, on all four sides.
+      <div className="relative flex items-stretch">
+        <Link
+          href={item.href}
+          title={collapsed ? item.label : undefined}
+          {...(active ? { "aria-current": "page" } : {})}
+          className={cx(
+            "group relative flex flex-1 items-center gap-3 border transition-[color,background-color,border-color,transform] duration-glide ease-glide",
+            "focus-visible:outline-ring focus-visible:outline-2 focus-visible:-outline-offset-2",
+            collapsed ? "h-11 justify-center px-0" : "h-11 px-2.5",
+            active
+              ? "border-border bg-accent text-foreground"
+              : "border-transparent text-muted-foreground hover:bg-accent/50 hover:text-foreground motion-safe:hover:translate-x-0.5",
+          )}
+        >
+          {Icon ? (
+            <span
+              className={cx(
+                "rounded-sm flex size-7 shrink-0 items-center justify-center border",
+                "transition-[color,background-color,border-color,transform] duration-glide ease-glide",
+                active
+                  ? "border-primary bg-primary text-primary-foreground"
+                  : "border-border group-hover:border-input-hover group-hover:text-foreground",
+              )}
+            >
+              <Icon size={16} weight="regular" aria-hidden="true" />
+            </span>
+          ) : null}
 
-            It was a 2px bar on the left edge, and I wrote a comment arguing that §21.27
-            only forbids a bare left bar as a panel's ONLY edge. That was a rationalisation
-            of a rule stated more times than it should have needed. The instruction was
-            explicit: a full outline, a dotted one, or none. This is the full one.
-          */
-          active
-            ? "border-border bg-accent text-foreground"
-            : "border-transparent text-muted-foreground hover:bg-accent/50 hover:text-foreground motion-safe:hover:translate-x-0.5",
-        )}
-      >
-        {Icon ? (
-          <span
+          {!collapsed ? (
+            <span className="flex min-w-0 flex-1 flex-col">
+              <span className={cx("text-label truncate", active && "font-medium")}>{item.label}</span>
+            </span>
+          ) : null}
+
+          {/* RED, not yellow. Yellow is "look here"; this is "something is blocked". */}
+          {!collapsed && item.attention ? (
+            <span className="bg-destructive zc-pulse size-2 shrink-0 rounded-full" aria-label="Needs your attention" />
+          ) : null}
+
+          {!collapsed && item.badge !== undefined && item.badge > 0 ? (
+            <span
+              className={cx(
+                "text-caption rounded-sm inline-flex h-5 min-w-5 shrink-0 items-center justify-center px-1.5 font-mono tabular-nums",
+                "transition-[background-color] duration-glide ease-glide",
+                active ? "bg-accent-highlight text-accent-highlight-ink font-semibold" : "bg-muted text-muted-foreground",
+              )}
+            >
+              {item.badge}
+            </span>
+          ) : null}
+        </Link>
+
+        {hasChildren ? (
+          <button
+            type="button"
+            onClick={() => setOpen((v) => !v)}
+            aria-expanded={open}
+            aria-label={`${open ? "Hide" : "Show"} ${item.label} sections`}
             className={cx(
-              "rounded-sm flex size-7 shrink-0 items-center justify-center border",
-              "transition-[color,background-color,border-color,transform] duration-glide ease-glide",
-              active
-                ? "border-primary bg-primary text-primary-foreground"
-                : "border-border group-hover:border-input-hover group-hover:text-foreground",
+              "text-muted-foreground hover:text-foreground hover:bg-accent focus-visible:outline-ring",
+              "flex w-7 shrink-0 items-center justify-center border border-transparent",
+              "transition-[color,background-color,transform] duration-glide ease-glide",
+              "focus-visible:outline-2 focus-visible:-outline-offset-2",
             )}
           >
-            <Icon size={16} weight="regular" aria-hidden="true" />
-          </span>
+            <CaretRightIcon
+              size={13}
+              weight="bold"
+              aria-hidden="true"
+              className={cx("transition-transform duration-glide ease-glide", open && "rotate-90")}
+            />
+          </button>
         ) : null}
+      </div>
 
-        {!collapsed ? (
-          <span className="flex min-w-0 flex-1 flex-col">
-            <span className={cx("text-label truncate", active && "font-medium")}>{item.label}</span>
-          </span>
-        ) : null}
-
-        {/* Attention marks the ROW, with a dot. The count keeps one treatment everywhere. */}
-        {!collapsed && item.attention ? (
-          <span
-            className="bg-accent-highlight zc-pulse size-2 shrink-0 rounded-full"
-            aria-label="Needs your attention"
-          />
-        ) : null}
-
-        {!collapsed && item.badge !== undefined && item.badge > 0 ? (
-          <span
-            className={cx(
-              "text-caption rounded-sm inline-flex h-5 min-w-5 shrink-0 items-center justify-center px-1.5 font-mono tabular-nums",
-              "transition-[background-color] duration-normal",
-              active ? "bg-accent-highlight text-accent-highlight-ink font-semibold" : "bg-muted text-muted-foreground",
-            )}
-          >
-            {item.badge}
-          </span>
-        ) : null}
-      </Link>
-
-      {/*
-        Sub-sections, under the section you are in.
-
-        The sidebar said which of seven screens you were on and nothing else, so the
-        second level of structure existed only as tabs inside the page. Showing it here
-        while the section is active makes the navigation describe the whole product
-        instead of its front doors.
-      */}
-      {active && !collapsed && item.children && item.children.length > 0 ? (
-        <ul className="border-border mt-1 mb-1 ml-5 flex flex-col gap-0.5 border-l pl-3">
-          {item.children.map((child) => (
+      {hasChildren && open ? (
+        <ul className="mt-1 mb-1 ml-6 flex flex-col gap-0.5">
+          {item.children!.map((child) => (
             <li key={child.href}>
               <Link
                 href={child.href}
                 className={cx(
-                  "text-caption text-muted-foreground hover:text-foreground focus-visible:outline-ring",
-                  "flex items-center justify-between gap-2 py-1.5 transition-[color] duration-fast",
-                  "focus-visible:outline-2 focus-visible:-outline-offset-2",
+                  "text-caption text-muted-foreground hover:text-foreground hover:bg-accent focus-visible:outline-ring",
+                  "flex items-center justify-between gap-2 border border-transparent px-2.5 py-1.5",
+                  "transition-[color,background-color,transform] duration-glide ease-glide",
+                  "focus-visible:outline-2 focus-visible:-outline-offset-2 motion-safe:hover:translate-x-0.5",
                 )}
               >
                 <span className="truncate">{child.label}</span>
@@ -185,6 +211,7 @@ export function DashboardShell({
   footerNav = [],
   account,
   topBar,
+  announcement,
   children,
 }: DashboardShellProps) {
   const [collapsed, setCollapsed] = useState(false);
@@ -269,6 +296,10 @@ export function DashboardShell({
             {topBar}
           </header>
         ) : null}
+        {/* The announcement owns its own border, so it can carry a tone on four sides
+            rather than borrowing a neutral rule on one. §21.28 still applies to what is
+            inside it: the band spans the width, its content is centred. */}
+        {announcement ? <div className="shrink-0">{announcement}</div> : null}
         <main className="flex min-h-0 flex-1 flex-col overflow-y-auto">{children}</main>
       </div>
     </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { cx } from "../cx";
 
 /**
@@ -55,11 +55,40 @@ export function Tabs({
   banner?: ReactNode;
 }) {
   const [active, setActive] = useState(defaultTab ?? tabs[0]?.id ?? "");
+
+  /*
+    The URL fragment selects a tab.
+
+    The sidebar's sub-sections link to /company#filing, and before this they scrolled to
+    an anchor that no longer existed — the tabs replaced the stacked sections that used to
+    carry those ids, so every sub-link went nowhere. Reading the hash makes those links
+    work again, and it gives back the one thing local state had cost: a tab you can send
+    to somebody.
+
+    `hashchange` as well as mount, because clicking /company#entity while already on
+    /company changes the hash without remounting anything.
+  */
+  useEffect(() => {
+    const fromHash = () => {
+      const id = window.location.hash.slice(1);
+      if (id && tabs.some((t) => t.id === id)) setActive(id);
+    };
+    fromHash();
+    window.addEventListener("hashchange", fromHash);
+    return () => window.removeEventListener("hashchange", fromHash);
+  }, [tabs]);
+
   const current = tabs.find((t) => t.id === active) ?? tabs[0];
 
   return (
     <div className="flex flex-col">
-      <div className="border-border bg-surface sticky top-0 z-20 flex items-end justify-between gap-4 overflow-x-auto border-b">
+      {/*
+        The BAND spans the width; its CONTENT is centred on the same container as the page
+        body. §21.28. A strip starting at a different x than the table under it makes the
+        screen feel unfinished for a reason nobody can name.
+      */}
+      <div className="border-border bg-surface sticky top-0 z-20 border-b">
+        <div className="mx-auto flex w-full max-w-(--container-content) items-end justify-between gap-4 overflow-x-auto px-5 sm:px-8">
         <div role="tablist" aria-label="Sections" className="flex items-stretch">
           {tabs.map((tab) => {
             const on = tab.id === current?.id;
@@ -69,7 +98,12 @@ export function Tabs({
                 type="button"
                 role="tab"
                 aria-selected={on}
-                onClick={() => setActive(tab.id)}
+                onClick={() => {
+                  setActive(tab.id);
+                  // Keep the URL honest without a navigation: replaceState leaves no
+                  // history entry, so Back still means "the previous page".
+                  window.history.replaceState(null, "", `#${tab.id}`);
+                }}
                 className={cx(
                   "text-body-sm focus-visible:outline-ring relative flex items-center gap-2.5 whitespace-nowrap",
                   // Generous target. 44px tall, real horizontal padding — the previous
@@ -88,8 +122,10 @@ export function Tabs({
                     {tab.count}
                   </span>
                 ) : null}
+                {/* RED, not yellow. Yellow is the non-semantic "look here" accent (§4.8)
+                    and this is not decoration — something is actually blocked. */}
                 {tab.attention ? (
-                  <span className="bg-accent-highlight zc-pulse size-2 shrink-0 rounded-full" aria-label="Needs attention" />
+                  <span className="bg-destructive zc-pulse size-2 shrink-0 rounded-full" aria-label="Needs attention" />
                 ) : null}
                 {/* The selected marker is a 2px rule on the BOTTOM edge of a tab strip —
                     which is what a tab is. §21.27 is about a bar down the left side of a
@@ -99,7 +135,8 @@ export function Tabs({
             );
           })}
         </div>
-        {action ? <div className="shrink-0 py-2 pr-4">{action}</div> : null}
+        {action ? <div className="shrink-0 py-2">{action}</div> : null}
+        </div>
       </div>
 
       {banner ? <div className="border-border border-b">{banner}</div> : null}

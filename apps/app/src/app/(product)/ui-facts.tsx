@@ -36,30 +36,41 @@ const TONE: Record<FactTone, { edge: string; ink: string; wash: string }> = {
   neutral: { edge: "border-border", ink: "text-foreground", wash: "bg-surface" },
 };
 
+/**
+ * A label and a value. Nothing else.
+ *
+ * There was a third line under every value explaining what the field meant — "Where the
+ * entity is registered" under a jurisdiction, "What you will own" under a structure. A
+ * founder who is forming a company knows what a jurisdiction is, and a caption that
+ * restates its own label is filler that makes the card longer and says nothing.
+ */
 export function BigFact({
   label,
   value,
-  hint,
   tone = "neutral",
   mono,
 }: {
   label: string;
   value: ReactNode;
-  hint?: string;
   tone?: FactTone;
   mono?: boolean;
 }) {
   const t = TONE[tone];
   return (
-    <div className={cx("flex flex-col gap-1.5 border p-4", t.edge, t.wash)}>
+    <div className={cx("flex flex-col gap-2 border p-5", t.edge, t.wash)}>
       <span className="text-overline text-muted-foreground">{label}</span>
       <span className={cx("text-h3 leading-tight", mono && "font-mono tabular-nums", t.ink)}>{value}</span>
-      {hint ? <span className="text-caption text-muted-foreground">{hint}</span> : null}
     </div>
   );
 }
 
-/** Facts side by side, one hairline between them. */
+/**
+ * Facts side by side, SEPARATED.
+ *
+ * They were glued into one bordered grid with 1px seams, which reads as a table of four
+ * cells rather than four facts. Same correction as the KPI cards: each is its own object
+ * and the gap is what says so.
+ */
 export function BigFactGrid({ children }: { children: ReactNode }) {
-  return <div className="border-border bg-border grid grid-cols-1 gap-px border sm:grid-cols-2 lg:grid-cols-4">{children}</div>;
+  return <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">{children}</div>;
 }

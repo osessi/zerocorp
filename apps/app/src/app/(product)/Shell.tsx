@@ -14,10 +14,11 @@ import {
   LifebuoyIcon,
   PaletteIcon,
   SparkleIcon,
+  WarningIcon,
   SignOutIcon,
   UsersThreeIcon,
 } from "@phosphor-icons/react/dist/ssr";
-import { DashboardShell, IconButton, type NavGroup } from "@zerocorp/ui";
+import { ButtonLink, DashboardShell, IconButton, type NavGroup } from "@zerocorp/ui";
 import { signOut } from "./actions";
 
 /**
@@ -81,12 +82,15 @@ export function Shell({
   email,
   needsYou,
   counts,
+  announcement,
   children,
 }: {
   email: string;
   needsYou: number;
   /** How much of each thing exists. Keyed by href so the nav stays the single list. */
   counts: Record<string, number>;
+  /** The one thing blocking the account, shown on every screen. */
+  announcement?: { message: string; href: string; action: string } | null;
   children: ReactNode;
 }) {
   const pathname = usePathname();
@@ -173,6 +177,21 @@ export function Shell({
             <IconButton icon={SignOutIcon} label="Sign out" variant="ghost" size="sm" type="submit" />
           </form>
         </div>
+      }
+      announcement={
+        announcement ? (
+          <div className="border-destructive bg-destructive-subtle border">
+            <div className="mx-auto flex w-full max-w-(--container-content) flex-wrap items-center gap-4 px-5 py-2.5 sm:px-8">
+              <WarningIcon size={17} weight="fill" className="text-destructive-ink shrink-0" aria-hidden="true" />
+              <p className="text-body-sm text-destructive-ink min-w-0 flex-1">
+                <span className="font-semibold">Waiting on you.</span> {announcement.message}
+              </p>
+              <ButtonLink href={announcement.href} variant="primary">
+                {announcement.action}
+              </ButtonLink>
+            </div>
+          </div>
+        ) : null
       }
       topBar={
         <>

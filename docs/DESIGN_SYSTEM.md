@@ -2569,6 +2569,37 @@ status tones, and those tones already mean something specific.
 
 ---
 
+### 21.28 Every region is centred on the workspace — VALIDATED 2026-09-03
+
+> **Nothing spans the raw width of the content area. Every band — a page header, a tab
+> strip, a banner, a footer — puts its contents in the same centred container as the page
+> body:** `mx-auto w-full max-w-(--container-content) px-5 sm:px-8`.
+
+Written down because it has been asked for more times than any other single thing in this
+document, and it kept coming back because each new full-bleed element looked like a
+special case at the time. They are not special cases.
+
+A band whose background reaches the edges is fine and often right — a tab strip needs its
+rule to run the full width, or it looks like a floating box. What may never reach the edge
+is its **content**. The pattern is always:
+
+```text
+<div className="border-border border-b">                    ← the band, full width
+  <div className="mx-auto w-full max-w-(--container-content) px-5 sm:px-8">
+    …                                                       ← the content, centred
+  </div>
+</div>
+```
+
+The failure it prevents: a tab strip starting at x=288 while the table under it starts at
+x=464, so the two disagree about where the page begins. A reader does not consciously
+notice the misalignment; they notice the screen feels unfinished and cannot say why.
+
+> Same rule, same reason, as §21.27 on left bars: an element that decides its own edges is
+> an element that disagrees with its neighbours.
+
+---
+
 ### 21.27 Panels — VALIDATED 2026-09-01
 
 > **A coloured left bar is never a panel's only edge.**

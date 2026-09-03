@@ -129,26 +129,22 @@ export default async function Page() {
                 <BigFact
                 label="Jurisdiction"
                 value={(view.request?.jurisdictionCode ?? "—").toUpperCase()}
-                hint="Where the entity is registered"
                 tone="processing"
                 mono
                 />
                 <BigFact
                 label="Structure"
                 value={ENTITY_LABEL[view.request?.entityTypeCode ?? ""] ?? view.request?.entityTypeCode ?? "—"}
-                hint="What you will own"
                 tone="ai"
                 />
                 <BigFact
                 label="Filed by"
                 value="A ZeroCorp operator"
-                hint="Not an API — a person files this"
                 tone="info"
                 />
                 <BigFact
                 label="Open questions"
                 value={String(view.openRfis.length)}
-                hint={view.openRfis.length > 0 ? "Your filing is paused" : "Nothing is waiting"}
                 tone={view.openRfis.length > 0 ? "warning" : "success"}
                 mono
                 />

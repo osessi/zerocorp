@@ -10,7 +10,6 @@ import {
   MagnifyingGlassIcon,
   PaletteIcon,
   UsersThreeIcon,
-  WarningIcon,
 } from "@phosphor-icons/react/dist/ssr";
 import {
   AGENTS,
@@ -271,48 +270,34 @@ export default async function Page() {
     <div className="flex min-h-0 flex-1 flex-col">
       <div className="mx-auto flex w-full max-w-(--container-content) flex-col gap-6 px-5 pt-6 sm:px-8">
         {/*
-          No full-bleed band.
+          No banner here.
 
-          The blocking question shipped as a yellow strip across the whole width with a
-          border on its BOTTOM EDGE ONLY — the single-side accent, for the fourth time,
-          and my own CI rule had a hole that let it through. It is a card now, bordered on
-          four sides, the same width as everything else on the page.
+          The blocking question used to be repeated on Overview and on Company and nowhere
+          else, so a founder reading Content had no idea their filing was paused. It is a
+          property of the ACCOUNT, so it lives in the shell now and shows on every screen.
         */}
-        {st.openRfi ? (
-          <div className="border-warning bg-warning-subtle flex flex-wrap items-center gap-4 border p-4">
-            <WarningIcon size={20} weight="fill" className="text-warning-ink shrink-0" aria-hidden="true" />
-            <p className="text-body-sm text-warning-ink min-w-0 flex-1">
-              <span className="font-semibold">Waiting on you.</span> {st.openRfi}
-            </p>
-            <ButtonLink href="/company" variant="primary">Send your passport page</ButtonLink>
-          </div>
-        ) : null}
-
         <KpiRow>
           <Kpi
             label="Launch progress"
             value={`${percent}%`}
-            note={`${done} of ${included.length} steps complete`}
+            sub={`${done} of ${included.length}`}
             delta={{ text: `${included.length - done} left`, direction: done === included.length ? "flat" : "up" }}
           />
           <Kpi
             label="Articles published"
             value={String(st.postsPublished)}
             {...(st.postsScheduled > 0 ? { sub: `+${st.postsScheduled} scheduled` } : {})}
-            note="Search follows consistency, not volume"
             delta={{ text: `${st.postsDraft} drafts`, direction: st.postsDraft > 0 ? "up" : "flat" }}
           />
           <Kpi
             label="Prospects found"
             value={String(st.leadsTotal)}
             {...(st.leadsReplied > 0 ? { sub: `${st.leadsReplied} replied` } : {})}
-            note={st.leadsQualified > 0 ? `${st.leadsQualified} qualified so far` : "Discovery is running"}
             delta={{ text: `${st.leadsReplied} replies`, direction: st.leadsReplied > 0 ? "up" : "flat" }}
           />
           <Kpi
             label="Needs you"
             value={String(needsYou)}
-            note={needsYou > 0 ? "Everything else is running" : "Nothing is blocked"}
             highlight={needsYou > 0}
           />
         </KpiRow>

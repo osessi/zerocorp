@@ -32,7 +32,6 @@ export function PublishingChart({ data }: { data: readonly { week: string; publi
         { key: "published", label: "Published", slot: 1, pattern: "solid" },
         { key: "scheduled", label: "Scheduled", slot: 2, pattern: "solid" },
       ]}
-      footer="Scheduled articles have a date. Drafts do not, and are not counted here."
     >
       <ResponsiveContainer width="100%" height={200}>
         <AreaChart data={[...data]} margin={{ left: 4, right: 4, top: 4 }}>
@@ -88,7 +87,6 @@ export function PipelineChart({ data }: { data: readonly { stage: string; count:
       title="Prospect pipeline"
       subtitle="Where every lead stands today"
       series={[]}
-      footer="A lead can be contacted without being qualified first, so these are stages rather than a funnel."
     >
       <ResponsiveContainer width="100%" height={200}>
         <BarChart data={[...data]} margin={{ left: 4, right: 4, top: 4 }} layout="vertical">

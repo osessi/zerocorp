@@ -41,6 +41,11 @@ export default async function ProductLayout({ children }: { children: ReactNode 
       email={viewer.email}
       needsYou={needsYou}
       counts={counts}
+      announcement={
+        st?.openRfi
+          ? { message: st.openRfi, href: "/company#filing", action: "Send your passport page" }
+          : null
+      }
     >
       {children}
     </Shell>

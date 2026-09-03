@@ -21,7 +21,6 @@ export function Kpi({
   value,
   sub,
   delta,
-  note,
   highlight,
 }: {
   label: string;
@@ -29,9 +28,13 @@ export function Kpi({
   /** A unit or a qualifier, beside the number. */
   sub?: string;
   delta?: { text: string; direction: "up" | "down" | "flat" };
-  /** One line saying whether the number is good news. */
-  note?: string;
-  /** The one figure on the screen worth marking. Yellow, §4.8. */
+  /**
+   * The figure that is actually blocked.
+   *
+   * RED, not yellow. Yellow is the non-semantic "look here" accent (§4.8) and this is not
+   * decoration — a founder with something waiting on them needs the status colour that
+   * means a person must act.
+   */
   highlight?: boolean;
 }) {
   const Arrow = delta?.direction === "up" ? TrendUpIcon : delta?.direction === "down" ? TrendDownIcon : MinusIcon;
@@ -61,7 +64,7 @@ export function Kpi({
         <span
           className={cx(
             "text-display-l font-mono tabular-nums leading-none",
-            highlight ? "bg-accent-highlight text-accent-highlight-ink rounded-sm px-2" : "text-foreground",
+            highlight ? "bg-destructive-subtle text-destructive-ink border-destructive rounded-sm border px-2" : "text-foreground",
           )}
         >
           {value}
@@ -69,7 +72,6 @@ export function Kpi({
         {sub ? <span className="text-body-sm text-muted-foreground">{sub}</span> : null}
       </span>
 
-      {note ? <span className="text-caption text-muted-foreground">{note}</span> : null}
     </div>
   );
 }

@@ -50,25 +50,21 @@ export default async function Page() {
                       <BigFact
                         label="SPF"
                         value={view.domain.spfStatus}
-                        hint="Who may send as you"
                         tone={view.domain.spfStatus === "verified" ? "success" : "warning"}
                       />
                       <BigFact
                         label="DKIM"
                         value={view.domain.dkimStatus}
-                        hint="Proves the mail is really yours"
                         tone={view.domain.dkimStatus === "verified" ? "success" : "warning"}
                       />
                       <BigFact
                         label="DMARC"
                         value={view.domain.dmarcStatus}
-                        hint="What to do with forgeries"
                         tone={view.domain.dmarcStatus === "verified" ? "success" : "warning"}
                       />
                       <BigFact
                         label="Reputation"
                         value={view.domain.reputationScore === null ? "—" : String(view.domain.reputationScore)}
-                        hint="Out of 100, as providers see you"
                         tone="processing"
                         mono
                       />
