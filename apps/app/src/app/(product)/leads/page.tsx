@@ -47,6 +47,7 @@ export default async function Page() {
 
 
       <Tabs
+        tone="grow"
         banner={
           withoutBasis > 0 ? (
             <div className="mx-auto w-full max-w-(--container-content) px-5 py-4 sm:px-8">

@@ -28,10 +28,17 @@ import { signOut } from "./actions";
  * The groups are the journey PRODUCT_SPEC.md §29.3 describes — Build, Launch, Grow —
  * not a filing system. A founder reading this rail should be able to see what ZeroCorp
  * does for them, in the order it does it, without opening anything.
+ *
+ * Each stage carries its own tint — green, blue, violet, DESIGN_SYSTEM.md §4.9. Three
+ * grey labels over nine grey rows said the same thing, and said it only to whoever read
+ * them. The tone is declared ONCE, here, and the same value goes to the screen's tab band
+ * so the rail and the workspace are one system. It is not a status: nothing green here
+ * means healthy and nothing violet means anything is wrong.
  */
 const GROUPS: NavGroup[] = [
   {
     label: "Build",
+    tone: "build",
     items: [
       { label: "Overview", href: "/dashboard", icon: ChartBarIcon },
       // Renamed from "Launch your business", which collided with the dashboard's plan
@@ -43,6 +50,7 @@ const GROUPS: NavGroup[] = [
   },
   {
     label: "Launch",
+    tone: "launch",
     items: [
       { label: "Website", href: "/website", icon: BrowserIcon },
       { label: "Email", href: "/email", icon: EnvelopeSimpleIcon },
@@ -50,6 +58,7 @@ const GROUPS: NavGroup[] = [
   },
   {
     label: "Grow",
+    tone: "grow",
     items: [
       { label: "Content", href: "/content", icon: ArticleIcon },
       { label: "Customers", href: "/leads", icon: UsersThreeIcon },

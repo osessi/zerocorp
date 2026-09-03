@@ -4,6 +4,25 @@ import { ButtonLink, StatusBadge, StatusStamp, Tabs, cx } from "@zerocorp/ui";
 import { Intake } from "./Intake";
 import { BigFact, BigFactGrid, FACT_TONE } from "../ui-facts";
 
+/**
+ * The COUNTRY, not the subdivision.
+ *
+ * The catalogue codes its jurisdictions as `us-wy`, `us-de`, `gb`, and the screen was
+ * printing that code raw: "US-WY". Nobody asked for the state, and a founder reading
+ * their own company page should not have to decode an ISO 3166-2 fragment to find out
+ * which country they are incorporating in. The subdivision is a filing detail; the
+ * country is the fact.
+ *
+ * `Intl.DisplayNames` rather than a 249-row map, for the same reason `Intake` uses it:
+ * a hand-written list goes stale the next time a country renames itself.
+ */
+const REGION_NAMES = new Intl.DisplayNames(["en"], { type: "region" });
+function countryOf(jurisdictionCode: string | null | undefined): string {
+  const country = (jurisdictionCode ?? "").split("-")[0]?.toUpperCase();
+  if (!country || country.length !== 2) return "\u2014";
+  return REGION_NAMES.of(country) ?? country;
+}
+
 /** The catalog code, in the words a founder used when they chose it. */
 const ENTITY_LABEL: Record<string, string> = {
   us_llc: "LLC",
@@ -86,6 +105,7 @@ export default async function Page() {
         else, which is the whole point of a second level.
       */}
       <Tabs
+        tone="build"
         banner={
           view.openRfis.length > 0 ? (
             <div className="mx-auto w-full max-w-(--container-content) px-5 py-4 sm:px-8">
@@ -153,10 +173,9 @@ export default async function Page() {
                 */}
                 <BigFactGrid>
                 <BigFact
-                label="Jurisdiction"
-                value={(view.request?.jurisdictionCode ?? "—").toUpperCase()}
+                label="Country"
+                value={countryOf(view.request?.jurisdictionCode ?? view.company?.jurisdictionCode)}
                 tone="processing"
-                mono
                 />
                 <BigFact
                 label="Structure"
@@ -205,7 +224,7 @@ export default async function Page() {
                   ) : null}
                   <FactGrid>
                   <FactCell><Fact label="Legal name" value={view.company.legalName} /></FactCell>
-                  <FactCell><Fact label="Jurisdiction" value={view.company.jurisdictionCode.toUpperCase()} tone="text-chart-1" /></FactCell>
+                  <FactCell><Fact label="Country" value={countryOf(view.company.jurisdictionCode)} tone="text-chart-1" /></FactCell>
                   <FactCell><Fact label="Status" value={view.company.status} /></FactCell>
                   <FactCell><Fact label="Origin" value={view.company.origin === "imported" ? "Imported" : "Formed by ZeroCorp"} /></FactCell>
                   </FactGrid>
@@ -314,8 +333,8 @@ export default async function Page() {
                     <BuildingsIcon size={20} weight="duotone" className={cx("shrink-0", t.ink)} aria-hidden="true" />
                     <span className={cx("text-h4 leading-none", t.ink)}>{entity.customerLabel}</span>
                   </div>
-                  <span className={cx("text-caption w-fit border px-2 py-1 font-mono tracking-wide", t.edge, t.ink)}>
-                    {entity.jurisdictionCode.toUpperCase()}
+                  <span className={cx("text-caption w-fit border px-2 py-1", t.edge, t.ink)}>
+                    {countryOf(entity.jurisdictionCode)}
                   </span>
                   <span className="text-caption text-muted-foreground">
                     Typically {entity.typicalDaysMin} to {entity.typicalDaysMax} days

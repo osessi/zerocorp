@@ -33,6 +33,7 @@ export default async function Page() {
     <>
 
       <Tabs
+        tone="grow"
         action={<BuildButton action={buildContentPlan} label="Build my content plan" busyLabel="Planning" />}
         defaultTab="articles"
         tabs={[

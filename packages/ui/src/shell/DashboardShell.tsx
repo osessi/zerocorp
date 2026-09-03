@@ -3,6 +3,7 @@
 import { useState, type ComponentType, type ElementType, type ReactNode } from "react";
 import { CaretLeftIcon, CaretRightIcon } from "@phosphor-icons/react/dist/ssr";
 import { cx } from "../cx";
+import { JOURNEY, NEUTRAL, type JourneyTone, type ToneClasses } from "./journey";
 
 /**
  * DashboardShell · SidebarNavigation · TopCommandBar — DESIGN_SYSTEM.md §21.2 to §21.4.
@@ -51,6 +52,8 @@ export interface NavItem {
 
 export interface NavGroup {
   readonly label: string;
+  /** Which journey stage this group is. Omitted, the group stays neutral. */
+  readonly tone?: JourneyTone;
   readonly items: readonly NavItem[];
 }
 
@@ -83,11 +86,14 @@ function NavRow({
   item,
   active,
   collapsed,
+  tone,
   Link,
 }: {
   item: NavItem;
   active: boolean;
   collapsed: boolean;
+  /** The group's journey classes. NEUTRAL outside a journey block. */
+  tone: ToneClasses;
   Link: ElementType;
 }) {
   const Icon = item.icon;
@@ -114,9 +120,13 @@ function NavRow({
             "group relative flex flex-1 items-center gap-3 border transition-[color,background-color,border-color,transform] duration-glide ease-glide",
             "focus-visible:outline-ring focus-visible:outline-2 focus-visible:-outline-offset-2",
             collapsed ? "h-11 justify-center px-0" : "h-11 px-2.5",
-            active
-              ? "border-border bg-accent text-foreground"
-              : "border-transparent text-muted-foreground hover:bg-accent/50 hover:text-foreground motion-safe:hover:translate-x-0.5",
+            /*
+              On a tinted ground the active row is a PANE OF THE PAGE, not a darker grey.
+              `bg-accent` is a neutral #efefef, and dropping it onto a green wash reads as
+              dirt rather than as selection. The row lifts to --background instead and
+              takes the group's own edge, which is the same move a tab makes.
+            */
+            active ? tone.activeRow : cx(tone.rest, "motion-safe:hover:translate-x-0.5"),
           )}
         >
           {Icon ? (
@@ -124,9 +134,7 @@ function NavRow({
               className={cx(
                 "rounded-sm flex size-7 shrink-0 items-center justify-center border",
                 "transition-[color,background-color,border-color,transform] duration-glide ease-glide",
-                active
-                  ? "border-primary bg-primary text-primary-foreground"
-                  : "border-border group-hover:border-input-hover group-hover:text-foreground",
+                active ? tone.activeTile : tone.tile,
               )}
             >
               <Icon size={16} weight="regular" aria-hidden="true" />
@@ -157,7 +165,7 @@ function NavRow({
                 "transition-[background-color,color] duration-glide ease-glide",
                 item.attention
                   ? "bg-destructive-subtle text-destructive-ink border-destructive border font-semibold"
-                  : "bg-muted text-muted-foreground",
+                  : tone.count,
               )}
             >
               {item.badge}
@@ -181,7 +189,8 @@ function NavRow({
             aria-expanded={open}
             aria-label={`${open ? "Hide" : "Show"} ${item.label} sections`}
             className={cx(
-              "text-muted-foreground hover:text-foreground hover:bg-accent focus-visible:outline-ring",
+              "focus-visible:outline-ring",
+              tone.child,
               "flex w-7 shrink-0 items-center justify-center border border-transparent",
               "transition-[color,background-color,transform] duration-glide ease-glide",
               "focus-visible:outline-2 focus-visible:-outline-offset-2",
@@ -204,7 +213,8 @@ function NavRow({
               <Link
                 href={child.href}
                 className={cx(
-                  "text-caption text-muted-foreground hover:text-foreground hover:bg-accent focus-visible:outline-ring",
+                  "text-caption focus-visible:outline-ring",
+                  tone.child,
                   "flex items-center justify-between gap-2 border border-transparent px-2.5 py-1.5",
                   "transition-[color,background-color,transform] duration-glide ease-glide",
                   "focus-visible:outline-2 focus-visible:-outline-offset-2 motion-safe:hover:translate-x-0.5",
@@ -240,44 +250,106 @@ export function DashboardShell({
     <div className="bg-background text-foreground flex h-dvh overflow-hidden">
       <aside
         className={cx(
-          "border-border relative hidden shrink-0 flex-col border-r transition-[width] duration-emphasis ease-out lg:flex",
+          "border-border hidden shrink-0 flex-col border-r transition-[width] duration-emphasis ease-out lg:flex",
           collapsed ? "w-16" : "w-64",
         )}
       >
+        {/*
+          The mark, the wordmark, and the control that folds the rail — one row, nothing
+          floating.
+
+          The collapse chevron used to be an absolutely positioned square straddling the
+          rail's right edge at `-right-3`. Half of it sat over the workspace, where the
+          sticky tab band (z-20) and the announcement painted across it, so it arrived on
+          screen sliced. A control that lives on a seam gets cut by whatever owns the
+          seam; this one now lives inside the header and cannot be clipped by anything.
+
+          The mark is the REAL yellow, at full strength. --accent-highlight is the
+          non-semantic accent (§4.8) and a brand tile is the one place it can carry the
+          whole product's colour without ever being mistaken for a status.
+        */}
         <div
           className={cx(
-            "border-border flex h-14 shrink-0 items-center border-b",
-            collapsed ? "justify-center px-3" : "px-4",
+            "border-border flex h-14 shrink-0 items-center gap-2.5 border-b",
+            collapsed ? "justify-center px-2" : "px-3",
           )}
         >
-          <span className="text-label tracking-tight">{collapsed ? brand.charAt(0) : brand}</span>
+          {collapsed ? (
+            /* Folded, the mark IS the control. Nothing else fits in 64px, and a rail with
+               no way back open is a trap. */
+            <button
+              type="button"
+              onClick={() => setCollapsed(false)}
+              aria-label="Expand navigation"
+              title="Expand navigation"
+              className="bg-accent-highlight text-accent-highlight-ink focus-visible:outline-ring flex size-9 items-center justify-center text-body-sm font-mono leading-none font-bold focus-visible:outline-2 focus-visible:outline-offset-2"
+            >
+              {brand.charAt(0)}
+            </button>
+          ) : (
+            <>
+              <span
+                className="bg-accent-highlight text-accent-highlight-ink flex size-8 shrink-0 items-center justify-center text-body-sm font-mono leading-none font-bold"
+                aria-hidden="true"
+              >
+                {brand.charAt(0)}
+              </span>
+              <span className="text-label min-w-0 flex-1 truncate tracking-tight">{brand}</span>
+              <button
+                type="button"
+                onClick={() => setCollapsed(true)}
+                aria-label="Collapse navigation"
+                title="Collapse navigation"
+                className="border-border text-muted-foreground hover:border-input-hover hover:text-foreground focus-visible:outline-ring flex size-7 shrink-0 items-center justify-center border transition-[color,border-color] duration-normal focus-visible:outline-2 focus-visible:outline-offset-2"
+              >
+                <CaretLeftIcon size={12} aria-hidden="true" />
+              </button>
+            </>
+          )}
         </div>
 
-        <nav className="flex flex-1 flex-col gap-6 overflow-y-auto px-3 py-5" aria-label="Main">
-          {groups.map((group) => (
-            <div key={group.label} className="flex flex-col gap-2">
-              {/*
-                The group label disappears when collapsed rather than truncating. A
-                three-letter stump of "LAUNCH" is noise where a gap is a boundary.
-              */}
-              {!collapsed ? (
-                <p className="text-overline text-muted-foreground px-2.5 pb-1">{group.label}</p>
-              ) : (
-                <span className="bg-border mx-auto h-px w-6" aria-hidden="true" />
-              )}
-              <ul className="flex flex-col gap-1.5">
-                {group.items.map((item) => (
-                  <NavRow
-                    key={item.href}
-                    item={item}
-                    active={item.href === activePath}
-                    collapsed={collapsed}
-                    Link={Link}
-                  />
-                ))}
-              </ul>
-            </div>
-          ))}
+        <nav className="flex flex-1 flex-col gap-4 overflow-y-auto px-2.5 py-4" aria-label="Main">
+          {groups.map((group) => {
+            const tone = group.tone ? JOURNEY[group.tone] : NEUTRAL;
+            return (
+              /*
+                A group is a BLOCK, on its own ground, with an edge on all four sides.
+
+                Not a border on one side and not a bare label over a gap: a stack of rows
+                under a caption is a list you have to read, and three tinted blocks are a
+                shape you learn once. `gap-4` on the nav is what keeps them separate —
+                blocks welded into a column are the same defect as cards welded into a
+                grid, and the space between them is what says they are three things.
+              */
+              <div
+                key={group.label}
+                className={cx("flex flex-col gap-2 border p-2", tone.block || "border-transparent")}
+              >
+                {/*
+                  Collapsed, the label goes and the TINT stays. A three-letter stump of
+                  "LAUNCH" is noise, and the grey hairline that used to stand in for it
+                  said only "a boundary" — the ground says which boundary.
+                */}
+                {!collapsed ? (
+                  <p className={cx("text-overline px-1.5 pb-0.5", tone.label || "text-muted-foreground")}>
+                    {group.label}
+                  </p>
+                ) : null}
+                <ul className="flex flex-col gap-1.5">
+                  {group.items.map((item) => (
+                    <NavRow
+                      key={item.href}
+                      item={item}
+                      active={item.href === activePath}
+                      collapsed={collapsed}
+                      tone={tone}
+                      Link={Link}
+                    />
+                  ))}
+                </ul>
+              </div>
+            );
+          })}
         </nav>
 
         {footerNav.length > 0 ? (
@@ -289,6 +361,7 @@ export function DashboardShell({
                   item={item}
                   active={item.href === activePath}
                   collapsed={collapsed}
+                  tone={NEUTRAL}
                   Link={Link}
                 />
               ))}
@@ -300,14 +373,6 @@ export function DashboardShell({
           <div className="border-border shrink-0 border-t p-3">{account}</div>
         ) : null}
 
-        <button
-          type="button"
-          onClick={() => setCollapsed((c) => !c)}
-          aria-label={collapsed ? "Expand navigation" : "Collapse navigation"}
-          className="border-border bg-background hover:border-input-hover focus-visible:outline-ring absolute top-[3.25rem] -right-3 z-10 flex size-6 items-center justify-center border transition-[color,background-color,border-color] duration-normal focus-visible:outline-2 focus-visible:outline-offset-2"
-        >
-          <CaretLeftIcon size={12} className={cx("transition-transform duration-emphasis", collapsed && "rotate-180")} />
-        </button>
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">

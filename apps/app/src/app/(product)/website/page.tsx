@@ -27,6 +27,7 @@ export default async function Page() {
     <>
 
       <Tabs
+        tone="launch"
         defaultTab={view.pages.length > 0 ? "pages" : "domain"}
         tabs={[
           {

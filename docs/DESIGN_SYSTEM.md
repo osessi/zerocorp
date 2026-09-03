@@ -2589,8 +2589,32 @@ still reads as a warning and none of it reads as machine output.
 Separation from `--accent-highlight` `#FACC15` is **3.31**, up from 3.28. §4.8 still forbids
 the two in one component; the margin is simply better than it was.
 
+**The accent yellow is `#FACC15` and is used at full strength.** The warning family is a
+semantic tint and is pale by definition; it is not, and was never, the brand yellow. The
+one asked for is the vivid one, and it now carries the product mark in the rail header —
+the single place a non-semantic accent can hold the whole product's colour without ever
+being read as a status.
+
 Dark moved with it: `--warning` and `--warning-ink` to `#EAB308`, `--warning-subtle` to
 `#221E04`, `--warning-wash` to `#161303`.
+
+---
+
+### 21.30 A control never lives on a seam — VALIDATED 2026-09-03
+
+> **No control is positioned half inside one region and half inside another.**
+
+The rail's collapse chevron was an absolutely positioned square at `-right-3`, straddling
+the sidebar's own border. Half of it hung over the workspace, where the sticky tab band
+(`z-20`) and the announcement band paint, so it reached the screen sliced — reported as
+"le chevron est coupé, et à plusieurs endroits c'est le cas".
+
+Raising its `z-index` would have hidden the symptom. The shape is the defect: an element
+whose box crosses a boundary is an element whose clipping, stacking and hit area are all
+decided by a region that does not know it exists. The control moved **inside** the rail's
+header row, where it is a normal 28px button in normal flow.
+
+> If a control needs to sit between two regions, it belongs to one of them. Pick one.
 
 ---
 

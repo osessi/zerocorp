@@ -28,6 +28,7 @@ export default async function Page() {
     <>
 
       <Tabs
+        tone="launch"
         tabs={[
           {
             id: "auth",

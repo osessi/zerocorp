@@ -213,8 +213,10 @@ export function Intake({
                       className="accent-primary size-4"
                     />
                     <span className={cx("text-body-sm w-36 shrink-0", active && "font-medium")}>{e.customerLabel}</span>
-                    <span className="text-body-sm text-muted-foreground w-24 shrink-0 font-mono">
-                      {e.jurisdictionCode.toUpperCase()}
+                    {/* The country, not the ISO subdivision. "US-WY" is a filing detail;
+                        a founder choosing a structure is choosing a country. */}
+                    <span className="text-body-sm text-muted-foreground w-36 shrink-0">
+                      {REGION_NAMES.of(e.jurisdictionCode.split("-")[0]!.toUpperCase()) ?? e.jurisdictionCode}
                     </span>
                     <span className="text-caption text-muted-foreground min-w-0 flex-1">
                       Typically {e.typicalDaysMin} to {e.typicalDaysMax} days
