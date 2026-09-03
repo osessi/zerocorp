@@ -2688,6 +2688,32 @@ and takes the group's edge, which is the same move a tab makes.
 Collapsed, the label goes and the tint stays. The grey hairline that used to stand in for
 the label said only "a boundary"; the ground says *which* boundary.
 
+### 21.31 Reference material never looks like the customer's own data — VALIDATED 2026-09-03
+
+> **A block showing what the product can do in general is rendered smaller, quieter and
+> lower than a block showing what is happening to this customer.**
+
+The Company screen had "Your formation" — four tinted cards carrying the founder's own
+jurisdiction, structure and open questions — and directly under it "What ZeroCorp can
+form", four tinted cards of the same size carrying a catalogue. Two blocks with identical
+weight, one of which is the reason the page exists and one of which is a price list.
+
+Three levers, applied together. None of them is a rule about colour or shape:
+
+```text
+SIZE      a caption title instead of an h3; two lines a card instead of five
+COLOUR    the surface goes neutral; the category colour survives in the icon and
+          the name, which is all it was ever doing
+POSITION  pushed below the fold by spacing, so the screen ends on the customer's
+          own data rather than on a catalogue
+```
+
+What does **not** get demoted with it: the honesty field. Every row still says whether a
+filing is automated or lodged by a ZeroCorp operator, because a customer is never told a
+filing is automatic when a person does it by hand (D17). Quieter is not vaguer.
+
+---
+
 ### 21.30 A control never lives on a seam — VALIDATED 2026-09-03
 
 > **No control is positioned half inside one region and half inside another.**

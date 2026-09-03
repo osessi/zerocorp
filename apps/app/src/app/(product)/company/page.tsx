@@ -302,55 +302,55 @@ export default async function Page() {
         ]}
       />
 
-      <div className="mx-auto flex w-full max-w-(--container-content) flex-col gap-4 px-5 pb-10 sm:px-8">
-        <Panel title="What ZeroCorp can form" count={entities.length}>
-          {/*
-            One card per structure, each in its OWN colour.
+      {/*
+        The catalogue, DEMOTED.
 
-            It was four rows welded into a bordered slab, in one grey, and a founder
-            comparing an LLC in Wyoming against a Ltd in the UK could not tell the four
-            apart without reading every line. The tone is keyed to the STRUCTURE, so the
-            same structure is the same colour wherever it appears on this screen —
-            including the "Structure" fact above. A colour that tracked the data would be
-            a status; this is a category.
+        It was four tinted cards the size of the four facts above it, which made "what
+        ZeroCorp is able to form, in general" look exactly as important as "what is
+        happening to YOUR filing". It is reference material: true, worth having on the
+        page, and never the reason anyone opened it.
 
-            Separated, not welded. Standing rule.
-          */}
-          <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        Three things carry the demotion, and none of them is a rule:
+
+          SIZE      a caption title instead of an h3, two lines a card instead of five
+          COLOUR    the surface goes neutral; the structure's colour survives only in
+                    the icon and the name, which is all it ever needed to do
+          POSITION  pushed down by pt-10, so the fold lands above it rather than on it
+
+        The per-structure colour stays because it is what makes four names scannable, and
+        the automation label stays on every row because a founder is never told a filing
+        is automatic when a ZeroCorp operator does it by hand.
+      */}
+      <div className="mx-auto w-full max-w-(--container-content) px-5 pt-10 pb-10 sm:px-8">
+        <section className="flex flex-col gap-3">
+          <h2 className="text-overline text-muted-foreground">
+            What ZeroCorp can form{" "}
+            <span className="font-mono tabular-nums">{entities.length}</span>
+          </h2>
+          <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-4">
             {entities.map((entity) => {
               const t = STRUCTURE_TONE[entity.code] ?? STRUCTURE_TONE_FALLBACK;
               return (
                 <li
                   key={`${entity.jurisdictionCode}-${entity.code}`}
-                  className={cx(
-                    "flex flex-col gap-3 border p-4",
-                    "duration-glide ease-glide transition-transform motion-safe:hover:-translate-y-0.5",
-                    t.edge,
-                    t.wash,
-                  )}
+                  className="border-border bg-surface hover:border-border-hover duration-glide ease-glide flex flex-col gap-1 border px-3 py-2.5 transition-[border-color]"
                 >
-                  <div className="flex items-center gap-2.5">
-                    <BuildingsIcon size={20} weight="duotone" className={cx("shrink-0", t.ink)} aria-hidden="true" />
-                    <span className={cx("text-h4 leading-none", t.ink)}>{entity.customerLabel}</span>
-                  </div>
-                  <span className={cx("text-caption w-fit border px-2 py-1", t.edge, t.ink)}>
-                    {countryOf(entity.jurisdictionCode)}
+                  <span className="flex items-center gap-2">
+                    <BuildingsIcon size={16} weight="duotone" className={cx("shrink-0", t.ink)} aria-hidden="true" />
+                    <span className={cx("text-body-sm font-medium", t.ink)}>{entity.customerLabel}</span>
+                    <span className="text-caption text-muted-foreground min-w-0 truncate">
+                      {countryOf(entity.jurisdictionCode)}
+                    </span>
                   </span>
                   <span className="text-caption text-muted-foreground">
-                    Typically {entity.typicalDaysMin} to {entity.typicalDaysMax} days
+                    {entity.typicalDaysMin} to {entity.typicalDaysMax} days ·{" "}
+                    {entity.automationLevel === "automated" ? "automated" : "filed by an operator"}
                   </span>
-                  {/*
-                    The honesty field, rendered. A founder is never told a filing is
-                    automatic when a ZeroCorp operator does it by hand.
-                  */}
-                  <StatusBadge tone={entity.automationLevel === "automated" ? "success" : "info"}>
-                    {entity.automationLevel === "automated" ? "Automated" : "Filed by an operator"}
-                  </StatusBadge>
                 </li>
               );
             })}
           </ul>
-        </Panel>
+        </section>
       </div>
 
     </>
