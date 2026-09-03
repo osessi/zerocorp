@@ -28,6 +28,7 @@ import {
 } from "@zerocorp/ui";
 import type { BusinessState, PlanStepRow } from "@zerocorp/application";
 import { outcomeFor, waitingFor } from "./outcome";
+import { PipelineChart, PublishingChart } from "./Charts";
 import { getDashboardRepository, getUnitOfWork } from "../../../server/container";
 import { getViewer } from "../../../server/session";
 
@@ -299,8 +300,9 @@ export default async function Page() {
   });
 
   return (
-    <>
-      {/* The one focal region on the page. Everything below it sits on --background. */}
+    /* A viewport-height column: the cockpit is fixed, the grid below it takes the rest
+       and its panels scroll inside themselves. */
+    <div className="flex min-h-0 flex-1 flex-col">
       <CockpitHeader
         /* The company name, not the business description: `businessName` holds the
            founder's own sentence about what they do, which the command bar already
@@ -349,18 +351,48 @@ export default async function Page() {
         alone on its line and the rail content — the numbers, the plan, the brand — got
         pushed below the fold where nobody scrolled to it.
       */}
-      <div className="mx-auto grid w-full max-w-(--container-content) grid-cols-1 gap-8 px-5 py-8 sm:px-8 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
-        <div className="flex min-w-0 flex-col gap-8">
-          <section className="flex flex-col gap-3">
+      {/*
+        A dashboard, not a document.
+
+        Everything Overview has fits in one screen: the charts, the plan and the rail are
+        all here without scrolling the page. What is long — the plan, the activity feed —
+        scrolls INSIDE its own panel, which is the difference between a control surface
+        and an article. `min-h-0` on the grid is what allows a child to be shorter than
+        its content and scroll; without it flex children refuse to shrink and the page
+        grows instead.
+      */}
+      <div className="mx-auto grid w-full min-h-0 max-w-(--container-content) flex-1 grid-cols-1 gap-5 px-5 py-5 sm:px-8 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+        <div className="flex min-h-0 min-w-0 flex-col gap-5">
+          <section className="flex min-h-0 flex-col gap-3">
             <SectionHeader title="What ZeroCorp is building" count={included.length} countTone="processing" />
-            <ul className="border-border border">
+            <ul className="border-border min-h-0 overflow-y-auto border">
               {overview.steps.map((step, i) => (
                 <StepRow key={step.id} step={step} anchor={step.id === anchorId} state={st} index={i} />
               ))}
             </ul>
           </section>
 
-          <section className="flex flex-col gap-3">
+          {/* The charts. §4.7 settled every value on 2026-09-01 and nothing had ever
+              drawn one — a dashboard whose only shapes are rows is a list. */}
+          <section className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+            <PublishingChart data={st.publishingByWeek} />
+            <PipelineChart data={st.leadsByStage} />
+          </section>
+
+        </div>
+
+        {/* The rail. Everything a founder checks without reading. */}
+        <aside className="flex min-h-0 min-w-0 flex-col gap-4 overflow-y-auto">
+          {/* What is waiting, first, because it is the only part that asks for something. */}
+          {st.openRfi ? (
+            <section className="border-warning bg-warning-subtle flex flex-col gap-3 border p-4">
+              <span className="text-overline text-warning-ink">Waiting on you</span>
+              <p className="text-body-sm text-warning-ink">{st.openRfi}</p>
+              <ButtonLink href="/company" variant="primary">Send it</ButtonLink>
+            </section>
+          ) : null}
+
+          <section className="flex min-h-0 flex-col gap-3">
             <SectionHeader title="Recent activity" count={events.length} countTone="ai" />
             {events.length === 0 ? (
               <EmptyState
@@ -372,20 +404,8 @@ export default async function Page() {
               <ActivityPanel events={events} />
             )}
           </section>
-        </div>
 
-        {/* The rail. Everything a founder checks without reading. */}
-        <aside className="flex min-w-0 flex-col gap-6">
-          {/* What is waiting, first, because it is the only part that asks for something. */}
-          {st.openRfi ? (
-            <section className="border-warning bg-warning-subtle flex flex-col gap-3 border p-4">
-              <span className="text-overline text-warning-ink">Waiting on you</span>
-              <p className="text-body-sm text-warning-ink">{st.openRfi}</p>
-              <ButtonLink href="/company" variant="primary">Send it</ButtonLink>
-            </section>
-          ) : null}
-
-          <section className="border-border flex flex-col border">
+          <section className="border-border flex shrink-0 flex-col border">
             <div className="border-border bg-muted border-b px-4 py-2.5">
               <span className="text-overline text-muted-foreground">Your business, in numbers</span>
             </div>
@@ -448,6 +468,6 @@ export default async function Page() {
           </section>
         </aside>
       </div>
-    </>
+    </div>
   );
 }

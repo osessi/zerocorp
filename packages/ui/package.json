@@ -20,7 +20,8 @@
     "@phosphor-icons/react": "^2.1.10",
     "@zerocorp/contracts": "workspace:*",
     "@zerocorp/design-system": "workspace:*",
-    "react": "^19.0.0"
+    "react": "^19.0.0",
+    "recharts": "^3.10.1"
   },
   "devDependencies": {
     "@types/react": "^19.0.2",

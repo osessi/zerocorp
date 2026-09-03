@@ -26,3 +26,4 @@ export * from "./shell/index";
 export * from "./avatar/index";
 export * from "./cockpit/index";
 export * from "./panels/index";
+export * from "./chart/index";

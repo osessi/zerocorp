@@ -1,7 +1,16 @@
 import { redirect } from "next/navigation";
 import { BuildingsIcon, FileTextIcon, QuestionIcon } from "@phosphor-icons/react/dist/ssr";
-import { ButtonLink, PageHeader, StatusBadge, StatusStamp, SubNav } from "@zerocorp/ui";
+import { ButtonLink, PageHeader, StatusBadge, StatusStamp, Tabs } from "@zerocorp/ui";
 import { Intake } from "./Intake";
+import { BigFact, BigFactGrid } from "../ui-facts";
+
+/** The catalog code, in the words a founder used when they chose it. */
+const ENTITY_LABEL: Record<string, string> = {
+  us_llc: "LLC",
+  us_ccorp: "C-Corporation",
+  gb_ltd: "Private Limited",
+  gb_llp: "LLP",
+};
 import { getBlocksRepository, getFormationCatalog, getUnitOfWork } from "../../../server/container";
 import { getViewer } from "../../../server/session";
 import { Empty, Fact, FactCell, FactGrid, Panel, Row, Rows } from "../ui";
@@ -67,31 +76,22 @@ export default async function Page() {
         }
       />
 
-      <SubNav
-        items={[
-          { id: "entity", label: "Entity", icon: BuildingsIcon },
-          { id: "filing", label: "Filing", count: view.openRfis.length, attention: view.openRfis.length > 0, icon: QuestionIcon },
-          { id: "registrations", label: "Registrations", count: view.registrations.length },
-          { id: "documents", label: "Documents", count: view.documents.length, icon: FileTextIcon },
-        ]}
-      />
+      {/*
+        The blocking question sits ABOVE the tabs, not inside one.
 
-      <div className="mx-auto flex w-full max-w-(--container-content) flex-col gap-8 px-5 py-8 sm:px-8">
-        {/*
-          The RFI comes FIRST and is gated on nothing.
-
-          It used to sit behind a test on `companies` being non-empty. During formation
-          `companies` is empty BY DEFINITION — the company does not exist yet, that is
-          the whole point of the order — so the one thing actually blocking the customer
-          was the one thing the screen could never show. Same defect as Website, with a
-          worse consequence.
-        */}
-        {view.openRfis.length > 0 ? (
+        It is what stops the filing, so it must be visible whichever tab you are on —
+        putting it behind "Filing" would hide the thing the screen exists to tell you
+        from anyone who happened to land on Documents.
+      */}
+      {view.openRfis.length > 0 ? (
+        <div className="mx-auto w-full max-w-(--container-content) px-5 pt-6 sm:px-8">
           <section className="border-warning bg-warning-subtle flex flex-col gap-4 border p-5">
             <div className="flex items-center gap-3">
               <QuestionIcon size={20} weight="fill" className="text-warning-ink shrink-0" aria-hidden="true" />
               <h2 className="text-h4 text-warning-ink">
-                {view.openRfis.length === 1 ? "One thing is needed before we can file" : `${view.openRfis.length} things are needed before we can file`}
+                {view.openRfis.length === 1
+                  ? "One thing is needed before we can file"
+                  : `${view.openRfis.length} things are needed before we can file`}
               </h2>
             </div>
             <ul className="flex flex-col gap-3">
@@ -106,107 +106,182 @@ export default async function Page() {
               Your filing is paused until this arrives. Nothing else is blocked.
             </p>
           </section>
-        ) : null}
+        </div>
+      ) : null}
 
-        {/* The order, whether or not a company exists yet. This IS the company page while
-            a formation is in flight, and hiding it until the entity exists meant showing
-            nothing during the only period where the customer is anxious about it. */}
-        <div id="filing" className="scroll-mt-16" />
-        {order && status ? (
-          <Panel title="Your formation">
-            <div className="flex flex-col gap-5 p-5">
-              <div className="flex flex-wrap items-center justify-between gap-4">
+      {/*
+        REAL tabs, one panel at a time.
+
+        The first version was anchors down one long page, so a "tab" scrolled you rather
+        than changing what you were looking at. Entity now shows the entity and nothing
+        else, which is the whole point of a second level.
+      */}
+      <Tabs
+        defaultTab={view.openRfis.length > 0 ? "filing" : view.company ? "entity" : "filing"}
+        tabs={[
+          {
+            id: "filing",
+            label: "Filing",
+            icon: <QuestionIcon size={17} aria-hidden="true" />,
+            count: view.openRfis.length,
+            attention: view.openRfis.length > 0,
+            content: (
+              <div className="mx-auto flex w-full max-w-(--container-content) flex-col gap-8 px-5 py-8 sm:px-8">
+                <Panel title="Your formation">
+                <div className="flex flex-col gap-5 p-5">
+                <div className="flex flex-wrap items-center justify-between gap-4">
                 <div className="flex flex-col gap-1">
-                  <span className="text-overline text-muted-foreground">Filing</span>
-                  <span className="text-h4">{view.request?.proposedNames?.[0] ?? view.company?.legalName ?? "Your company"}</span>
+                <span className="text-overline text-muted-foreground">Filing</span>
+                <span className="text-h4">{view.request?.proposedNames?.[0] ?? view.company?.legalName ?? "Your company"}</span>
                 </div>
-                <StatusBadge tone={status.tone}>{status.label}</StatusBadge>
+                {status ? <StatusBadge tone={status.tone}>{status.label}</StatusBadge> : null}
+                </div>
+                {/*
+                The four facts that matter, at a size that says so.
+
+                They were four grey labels above four grey values, so the jurisdiction of
+                a company being formed carried exactly the weight of everything around it
+                and nobody read any of it. Each field now has its own colour — the colour
+                belongs to the FIELD, not the value, so jurisdiction is always teal and a
+                founder learns where to look once.
+                */}
+                <BigFactGrid>
+                <BigFact
+                label="Jurisdiction"
+                value={(view.request?.jurisdictionCode ?? "—").toUpperCase()}
+                hint="Where the entity is registered"
+                tone="processing"
+                mono
+                />
+                <BigFact
+                label="Structure"
+                value={ENTITY_LABEL[view.request?.entityTypeCode ?? ""] ?? view.request?.entityTypeCode ?? "—"}
+                hint="What you will own"
+                tone="ai"
+                />
+                <BigFact
+                label="Filed by"
+                value="A ZeroCorp operator"
+                hint="Not an API — a person files this"
+                tone="info"
+                />
+                <BigFact
+                label="Open questions"
+                value={String(view.openRfis.length)}
+                hint={view.openRfis.length > 0 ? "Your filing is paused" : "Nothing is waiting"}
+                tone={view.openRfis.length > 0 ? "warning" : "success"}
+                mono
+                />
+                </BigFactGrid>
+                </div>
+                </Panel>
+                {!order ? (
+                  <Panel title="Form your company">
+                  <div className="p-5">
+                  <Intake entities={[...entities]} targetMarkets={[]} />
+                  </div>
+                  </Panel>
+                ) : null}
               </div>
-              <FactGrid>
-                <FactCell><Fact label="Jurisdiction" value={(view.request?.jurisdictionCode ?? "—").toUpperCase()} tone="font-mono text-chart-1" /></FactCell>
-                <FactCell><Fact label="Structure" value={view.request?.entityTypeCode ?? "—"} /></FactCell>
-                <FactCell><Fact label="Filed by" value="A ZeroCorp operator" /></FactCell>
-                <FactCell>
-                  <Fact
-                    label="Open questions"
-                    value={`${view.openRfis.length}`}
-                    tone={view.openRfis.length > 0 ? "font-mono tabular-nums text-warning-ink" : "font-mono tabular-nums text-muted-foreground"}
-                  />
-                </FactCell>
-              </FactGrid>
-            </div>
-          </Panel>
-        ) : null}
-
-        {view.company ? (
-          <>
-            <div id="entity" className="scroll-mt-16" />
-            <Panel title="Your entity">
-              {view.company.status === "active" ? (
-                <div className="flex justify-end px-5 pt-5">
+            ),
+          },
+          {
+            id: "entity",
+            label: "Entity",
+            icon: <BuildingsIcon size={17} aria-hidden="true" />,
+            content: (
+              <div className="mx-auto flex w-full max-w-(--container-content) flex-col gap-8 px-5 py-8 sm:px-8">
+                {view.company ? (
+                  <Panel title="Your entity">
+                  {view.company.status === "active" ? (
+                  <div className="flex justify-end px-5 pt-5">
                   <StatusStamp
-                    milestone="formed"
-                    {...(view.company.formationDate ? { date: String(view.company.formationDate) } : {})}
+                  milestone="formed"
+                  {...(view.company.formationDate ? { date: String(view.company.formationDate) } : {})}
                   />
-                </div>
-              ) : null}
-              <FactGrid>
-                <FactCell><Fact label="Legal name" value={view.company.legalName} /></FactCell>
-                <FactCell><Fact label="Jurisdiction" value={view.company.jurisdictionCode.toUpperCase()} tone="text-chart-1" /></FactCell>
-                <FactCell><Fact label="Status" value={view.company.status} /></FactCell>
-                <FactCell><Fact label="Origin" value={view.company.origin === "imported" ? "Imported" : "Formed by ZeroCorp"} /></FactCell>
-              </FactGrid>
-            </Panel>
-
-            <div id="registrations" className="scroll-mt-16" />
-            <Panel title="Registrations" count={view.registrations.length}>
-              {view.registrations.length === 0 ? (
-                <Empty title="Nothing requested yet" body="A tax ID follows the entity rather than arriving with it: separate filing, separate authority, separate clock." />
-              ) : (
-                <Rows>
+                  </div>
+                  ) : null}
+                  <FactGrid>
+                  <FactCell><Fact label="Legal name" value={view.company.legalName} /></FactCell>
+                  <FactCell><Fact label="Jurisdiction" value={view.company.jurisdictionCode.toUpperCase()} tone="text-chart-1" /></FactCell>
+                  <FactCell><Fact label="Status" value={view.company.status} /></FactCell>
+                  <FactCell><Fact label="Origin" value={view.company.origin === "imported" ? "Imported" : "Formed by ZeroCorp"} /></FactCell>
+                  </FactGrid>
+                  </Panel>
+                ) : (
+                  <Empty
+                    title="No entity yet"
+                    body="It appears the moment the authority registers your company. The Filing tab has the current status."
+                  />
+                )}
+              </div>
+            ),
+          },
+          {
+            id: "registrations",
+            label: "Registrations",
+            count: view.registrations.length,
+            content: (
+              <div className="mx-auto flex w-full max-w-(--container-content) flex-col gap-8 px-5 py-8 sm:px-8">
+                {view.company ? (
+                  <Panel title="Registrations" count={view.registrations.length}>
+                  {view.registrations.length === 0 ? (
+                  <Empty title="Nothing requested yet" body="A tax ID follows the entity rather than arriving with it: separate filing, separate authority, separate clock." />
+                  ) : (
+                  <Rows>
                   {view.registrations.map((r) => (
-                    <Row key={`${r.kind}-${r.authority}`}>
-                      <span className="text-body-sm w-32 shrink-0">{REGISTRATION_LABEL[r.kind] ?? r.kind}</span>
-                      <span className="text-body-sm text-muted-foreground w-32 shrink-0">{r.authority}</span>
-                      <span className="text-body-sm min-w-0 flex-1 font-mono">{r.identifier ?? "—"}</span>
-                      <StatusBadge tone={r.status === "issued" ? "success" : r.status === "rejected" ? "danger" : "processing"}>
-                        {r.status.replace(/_/g, " ")}
-                      </StatusBadge>
-                    </Row>
+                  <Row key={`${r.kind}-${r.authority}`}>
+                  <span className="text-body-sm w-32 shrink-0">{REGISTRATION_LABEL[r.kind] ?? r.kind}</span>
+                  <span className="text-body-sm text-muted-foreground w-32 shrink-0">{r.authority}</span>
+                  <span className="text-body-sm min-w-0 flex-1 font-mono">{r.identifier ?? "—"}</span>
+                  <StatusBadge tone={r.status === "issued" ? "success" : r.status === "rejected" ? "danger" : "processing"}>
+                  {r.status.replace(/_/g, " ")}
+                  </StatusBadge>
+                  </Row>
                   ))}
-                </Rows>
-              )}
-            </Panel>
-          </>
-        ) : order ? null : (
-          <Panel title="Form your company">
-            <div className="p-5">
-              <Intake entities={[...entities]} targetMarkets={[]} />
-            </div>
-          </Panel>
-        )}
-
-        <div id="documents" className="scroll-mt-16" />
-        <Panel title="Documents" count={view.documents.length}>
-          {view.documents.length === 0 ? (
-            <Empty title="No documents yet" body="Certificates land here as the filing progresses. Anything you upload goes to private storage with short-lived links." />
-          ) : (
-            <Rows>
-              {view.documents.map((d) => (
+                  </Rows>
+                  )}
+                  </Panel>
+                ) : (
+                  <Empty
+                    title="Nothing to register yet"
+                    body="A tax ID follows the entity rather than arriving with it: separate filing, separate authority, separate clock."
+                  />
+                )}
+              </div>
+            ),
+          },
+          {
+            id: "documents",
+            label: "Documents",
+            icon: <FileTextIcon size={17} aria-hidden="true" />,
+            count: view.documents.length,
+            content: (
+              <div className="mx-auto flex w-full max-w-(--container-content) flex-col gap-8 px-5 py-8 sm:px-8">
+                <Panel title="Documents" count={view.documents.length}>
+                {view.documents.length === 0 ? (
+                <Empty title="No documents yet" body="Certificates land here as the filing progresses. Anything you upload goes to private storage with short-lived links." />
+                ) : (
+                <Rows>
+                {view.documents.map((d) => (
                 <Row key={d.id}>
-                  <FileTextIcon size={18} className="text-chart-3 shrink-0" aria-hidden="true" />
-                  <span className="text-body-sm min-w-0 flex-1">{d.type.replace(/_/g, " ")}</span>
-                  <span className="text-caption text-muted-foreground font-mono tabular-nums">
-                    {d.issuedAt ? d.issuedAt.toISOString().slice(0, 10) : "—"}
-                  </span>
+                <FileTextIcon size={18} className="text-chart-3 shrink-0" aria-hidden="true" />
+                <span className="text-body-sm min-w-0 flex-1">{d.type.replace(/_/g, " ")}</span>
+                <span className="text-caption text-muted-foreground font-mono tabular-nums">
+                {d.issuedAt ? d.issuedAt.toISOString().slice(0, 10) : "—"}
+                </span>
                 </Row>
-              ))}
-            </Rows>
-          )}
-        </Panel>
+                ))}
+                </Rows>
+                )}
+                </Panel>
+              </div>
+            ),
+          },
+        ]}
+      />
 
-        {/* Reference material, not content. It was a full panel of four rows competing
-            with the customer's own filing; it is now a disclosure at the bottom. */}
+      <div className="mx-auto w-full max-w-(--container-content) px-5 pb-10 sm:px-8">
         <details className="border-border border">
           <summary className="text-body-sm hover:bg-accent cursor-pointer px-5 py-3 font-medium">
             What ZeroCorp can form <span className="text-muted-foreground font-mono">{entities.length}</span>

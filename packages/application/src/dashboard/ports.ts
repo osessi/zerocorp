@@ -82,6 +82,14 @@ export interface BusinessState {
    * brand identities for early-stage software companies." becomes a brand name.
    */
   readonly businessNamed: boolean;
+  /**
+   * Output over time, and the pipeline right now.
+   *
+   * Two series, computed in SQL rather than by pulling every row and grouping in JS: a
+   * dashboard that fetches twenty articles to count them will fetch two thousand later.
+   */
+  readonly publishingByWeek: readonly { readonly week: string; readonly published: number; readonly scheduled: number }[];
+  readonly leadsByStage: readonly { readonly stage: string; readonly count: number; readonly slot: number }[];
   /** The formation order in flight, and what it is waiting on. */
   readonly formationStatus: string | null;
   readonly openRfi: string | null;

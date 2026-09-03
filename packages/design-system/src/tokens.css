@@ -351,6 +351,8 @@
   --color-primary-emphasis: var(--primary-emphasis);
   --color-accent-highlight: var(--accent-highlight);
   --color-accent-highlight-ink: var(--accent-highlight-ink);
+  --ease-glide: cubic-bezier(0.32, 0.72, 0, 1);
+  --duration-glide: 260ms;
   --color-surface-sunken: var(--surface-sunken);
   --color-surface-focal: var(--surface-focal);
   --color-surface-focal-foreground: var(--surface-focal-foreground);
@@ -501,6 +503,23 @@
 
   --ease-out: cubic-bezier(0, 0, 0.2, 1);
   --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* ---------------------------------------------------------------------------
+     --ease-glide and --duration-glide — the hover curve. Added 2026-09-03.
+
+     `--ease-out` at 150ms is correct for a state CHANGE: a badge turning green should
+     arrive and stop. It is wrong for something following a cursor, where the same curve
+     reads as a snap — the movement is over before the eye registers it started, and a row
+     that jumps 2px in 150ms feels brittle rather than responsive.
+
+     cubic-bezier(0.32, 0.72, 0, 1) leaves fast and settles long. It is the curve iOS uses
+     for exactly this reason, and paired with 260ms it makes a hover feel like something
+     with mass rather than a class being toggled.
+
+     For MOVEMENT under a cursor only. State changes keep --ease-out; a status colour
+     that took 260ms to settle would read as lag. */
+  --ease-glide: cubic-bezier(0.32, 0.72, 0, 1);
+  --duration-glide: 260ms;
 
   /* -------------------------------------------------------------------------
      Layout and breakpoints — §12, VALIDATED.

@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { BrowserIcon, GlobeHemisphereWestIcon } from "@phosphor-icons/react/dist/ssr";
-import { ButtonLink, EmptyState, PageHeader, StatusBadge, StatusDot, SubNav } from "@zerocorp/ui";
+import { ButtonLink, EmptyState, PageHeader, StatusBadge, StatusDot, Tabs } from "@zerocorp/ui";
 import { getBlocksRepository, getUnitOfWork } from "../../../server/container";
 import { getViewer } from "../../../server/session";
 import { BuildButton } from "../BuildButton";
@@ -36,79 +36,80 @@ export default async function Page() {
         actions={<BuildButton action={buildWebsite} label="Build my website" busyLabel="Building" />}
       />
 
-      <SubNav
-        items={[
-          { id: "pages", label: "Pages", count: view.pages.length, icon: BrowserIcon },
-          { id: "domain", label: "Domain", icon: GlobeHemisphereWestIcon, attention: !view.domain },
-        ]}
-      />
-
-      <div className="mx-auto flex w-full max-w-(--container-content) flex-col gap-10 px-5 py-8 sm:px-8">
-        {/*
-          NOTHING here is gated on the domain.
-
-          The previous version wrapped this whole screen in `!view.domain`, and a domain
-          is optional: a site can be built, have pages and be edited long before anyone
-          buys a hostname. The result was a tenant with one site and three real pages
-          seeing a single "Start with the domain" empty state. That is not an empty
-          screen, it is a screen emptied by a condition — the same shape as a check that
-          hides its own input instead of reporting it (§32b).
-
-          Each panel now reports its OWN state. A missing domain is a missing domain, not
-          a missing website.
-        */}
-        <div id="pages" className="scroll-mt-16" />
-        <Panel title="Pages" count={view.pages.length}>
-          {view.pages.length === 0 ? (
-            <Empty
-              title="No pages yet"
-              body="Pages are built from validated blocks and stored as data, never as generated code."
-            />
-          ) : (
-            <Rows>
-              {view.pages.map((page) => {
+      <Tabs
+        defaultTab={view.pages.length > 0 ? "pages" : "domain"}
+        tabs={[
+          {
+            id: "pages",
+            label: "Pages",
+            icon: <BrowserIcon size={17} aria-hidden="true" />,
+            count: view.pages.length,
+            content: (
+              <div className="mx-auto flex w-full max-w-(--container-content) flex-col gap-8 px-5 py-8 sm:px-8">
+                <Panel title="Pages" count={view.pages.length}>
+                {view.pages.length === 0 ? (
+                <Empty
+                title="No pages yet"
+                body="Pages are built from validated blocks and stored as data, never as generated code."
+                />
+                ) : (
+                <Rows>
+                {view.pages.map((page) => {
                 const live = page.status === "published";
                 return (
-                  <Row key={page.id} muted={live}>
-                    <BrowserIcon
-                      size={18}
-                      className={live ? "text-muted-foreground shrink-0" : "text-chart-1 shrink-0"}
-                      aria-hidden="true"
-                    />
-                    <span className={live ? "text-body-sm w-48 shrink-0" : "text-body-sm w-48 shrink-0 font-medium"}>
-                      {page.title}
-                    </span>
-                    <span className="text-body-sm text-muted-foreground w-40 shrink-0 font-mono">/{page.slug}</span>
-                    <span className="text-caption text-muted-foreground min-w-0 flex-1">{page.type}</span>
-                    <StatusDot tone={live ? "success" : "processing"}>{page.status}</StatusDot>
-                    {!live ? <ButtonLink href="/website">Review</ButtonLink> : null}
-                  </Row>
+                <Row key={page.id} muted={live}>
+                <BrowserIcon
+                size={18}
+                className={live ? "text-muted-foreground shrink-0" : "text-chart-1 shrink-0"}
+                aria-hidden="true"
+                />
+                <span className={live ? "text-body-sm w-48 shrink-0" : "text-body-sm w-48 shrink-0 font-medium"}>
+                {page.title}
+                </span>
+                <span className="text-body-sm text-muted-foreground w-40 shrink-0 font-mono">/{page.slug}</span>
+                <span className="text-caption text-muted-foreground min-w-0 flex-1">{page.type}</span>
+                <StatusDot tone={live ? "success" : "processing"}>{page.status}</StatusDot>
+                {!live ? <ButtonLink href="/website">Review</ButtonLink> : null}
+                </Row>
                 );
-              })}
-            </Rows>
-          )}
-        </Panel>
+                })}
+                </Rows>
+                )}
+                </Panel>
 
-        <div id="domain" className="scroll-mt-16" />
-        <Panel title="Domain">
-          {view.domain ? (
-            <FactGrid>
-              <FactCell><Fact label="Hostname" value={view.domain.hostname} tone="font-mono text-chart-1" /></FactCell>
-              <FactCell><Fact label="Domain" value={<StatusBadge tone={dnsTone(view.domain.status)}>{view.domain.status}</StatusBadge>} /></FactCell>
-              <FactCell><Fact label="DNS" value={<StatusBadge tone={dnsTone(view.domain.dnsStatus)}>{view.domain.dnsStatus}</StatusBadge>} /></FactCell>
-              <FactCell><Fact label="SSL" value={<StatusBadge tone={dnsTone(view.domain.sslStatus)}>{view.domain.sslStatus}</StatusBadge>} /></FactCell>
-            </FactGrid>
-          ) : (
-            <EmptyState
-              icon={GlobeHemisphereWestIcon}
-              title="No domain connected"
-              body="Your pages exist and can be edited now. A domain is what puts them at your own address, and it is also what email warm-up needs before it can start."
-              action={<BuildButton action={buildWebsite} label="Connect a domain" busyLabel="Connecting" />}
-            />
-          )}
-        </Panel>
+              </div>
+            ),
+          },
+          {
+            id: "domain",
+            label: "Domain",
+            icon: <GlobeHemisphereWestIcon size={17} aria-hidden="true" />,
+            attention: !view.domain,
+            content: (
+              <div className="mx-auto flex w-full max-w-(--container-content) flex-col gap-8 px-5 py-8 sm:px-8">
+                <Panel title="Domain">
+                {view.domain ? (
+                <FactGrid>
+                <FactCell><Fact label="Hostname" value={view.domain.hostname} tone="font-mono text-chart-1" /></FactCell>
+                <FactCell><Fact label="Domain" value={<StatusBadge tone={dnsTone(view.domain.status)}>{view.domain.status}</StatusBadge>} /></FactCell>
+                <FactCell><Fact label="DNS" value={<StatusBadge tone={dnsTone(view.domain.dnsStatus)}>{view.domain.dnsStatus}</StatusBadge>} /></FactCell>
+                <FactCell><Fact label="SSL" value={<StatusBadge tone={dnsTone(view.domain.sslStatus)}>{view.domain.sslStatus}</StatusBadge>} /></FactCell>
+                </FactGrid>
+                ) : (
+                <EmptyState
+                icon={GlobeHemisphereWestIcon}
+                title="No domain connected"
+                body="Your pages exist and can be edited now. A domain is what puts them at your own address, and it is also what email warm-up needs before it can start."
+                action={<BuildButton action={buildWebsite} label="Connect a domain" busyLabel="Connecting" />}
+                />
+                )}
+                </Panel>
 
-      </div>
+              </div>
+            ),
+          },
+        ]}
+      />
     </>
   );
 }

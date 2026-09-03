@@ -31,6 +31,12 @@ export const COLOR_TRANSITION =
  *
  * Still 1px, still no bounce (§10). The reduced-motion rule in tokens.css collapses the
  * duration, so it lands instantly for anyone who asked for that.
+ *
+ * `--ease-glide` at 260ms, not `--ease-out` at 150ms. 150ms is right for a state change —
+ * a badge turning green should arrive and stop — and wrong for something following a
+ * cursor, where the same curve reads as a snap. The movement is over before the eye
+ * registers it started, and a row that jumps 2px in 150ms feels brittle. Leaves fast,
+ * settles long.
  */
 export const CONTROL_TRANSITION =
-  "transition-[color,background-color,border-color,transform,box-shadow] duration-normal ease-out";
+  "transition-[color,background-color,border-color,transform,box-shadow] duration-glide ease-glide";

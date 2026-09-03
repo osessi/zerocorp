@@ -40,7 +40,7 @@ export function CockpitHeader({
 }) {
   return (
     <header className="border-border bg-surface w-full border-b">
-      <div className="mx-auto flex max-w-(--container-content) flex-col gap-6 px-5 py-8 sm:px-8">
+      <div className="mx-auto flex max-w-(--container-content) flex-col gap-4 px-5 py-5 sm:px-8">
         <div className="flex flex-wrap items-start justify-between gap-x-6 gap-y-3">
           <div className="flex min-w-0 flex-col gap-2">
             <span className="text-overline text-muted-foreground">{eyebrow}</span>
@@ -58,7 +58,7 @@ export function CockpitHeader({
                 </p>
               </div>
             ) : (
-              <h1 className="text-h1 max-w-prose text-balance">{headline}</h1>
+              <h1 className="text-h2 max-w-prose text-balance">{headline}</h1>
             )}
           </div>
 
@@ -84,13 +84,13 @@ export function CockpitHeader({
           three tinted boxes: three cells with three fills read as conditional formatting
           in a spreadsheet, which is what the previous version looked like.
         */}
-        <dl className="border-border divide-border flex flex-col divide-y border-t pt-5 sm:flex-row sm:divide-x sm:divide-y-0 sm:border-t sm:pt-5">
+        <dl className="border-border divide-border flex flex-col divide-y border-t pt-4 sm:flex-row sm:divide-x sm:divide-y-0 sm:pt-4">
           {metrics.map((m, i) => (
-            <div key={m.label} className={cx("flex flex-1 flex-col gap-1 py-3 sm:py-0", i > 0 && "sm:pl-8")}>
+            <div key={m.label} className={cx("flex flex-1 flex-col gap-0.5 py-2 sm:py-0", i > 0 && "sm:pl-8")}>
               <dd className="flex items-baseline gap-2">
                 <span
                   className={cx(
-                    "text-display-l font-mono tabular-nums",
+                    "text-h1 font-mono tabular-nums",
                     m.highlight ? "bg-accent-highlight text-accent-highlight-ink rounded-sm px-2" : "text-foreground",
                   )}
                 >

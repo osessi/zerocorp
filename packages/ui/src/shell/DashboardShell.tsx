@@ -87,7 +87,7 @@ function NavRow({
         title={collapsed ? item.label : undefined}
         {...(active ? { "aria-current": "page" } : {})}
         className={cx(
-          "group relative flex items-center gap-3 border transition-[color,background-color,border-color,transform] duration-normal ease-out",
+          "group relative flex items-center gap-3 border transition-[color,background-color,border-color,transform] duration-glide ease-glide",
           "focus-visible:outline-ring focus-visible:outline-2 focus-visible:-outline-offset-2",
           collapsed ? "h-11 justify-center px-0" : "h-11 px-2.5",
           /*
@@ -107,7 +107,7 @@ function NavRow({
           <span
             className={cx(
               "rounded-sm flex size-7 shrink-0 items-center justify-center border",
-              "transition-[color,background-color,border-color] duration-normal ease-out",
+              "transition-[color,background-color,border-color,transform] duration-glide ease-glide",
               active
                 ? "border-primary bg-primary text-primary-foreground"
                 : "border-border group-hover:border-input-hover group-hover:text-foreground",

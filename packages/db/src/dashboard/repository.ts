@@ -132,6 +132,40 @@ export function createDashboardRepository(): DashboardRepository<Tx> {
             .limit(1)
         : [];
 
+      /*
+        Six weeks of publishing, bucketed in SQL.
+
+        `date_trunc('week', ...)` is Monday-first in Postgres, which matches the editorial
+        calendar. A week with nothing in it still appears, because a gap in a time series
+        that silently closes up tells the wrong story about cadence.
+      */
+      const weekRows = (await tx.execute(sql`
+        with weeks as (
+          select generate_series(
+            date_trunc('week', now()) - interval '5 weeks',
+            date_trunc('week', now()),
+            interval '1 week'
+          ) as w
+        )
+        select
+          to_char(weeks.w, 'DD Mon') as week,
+          coalesce(count(*) filter (where p.status = 'published'), 0) as published,
+          coalesce(count(*) filter (where p.status = 'scheduled'), 0) as scheduled
+        from weeks
+        left join posts p
+          on p.tenant_id = ${ctx.tenantId}
+         and date_trunc('week', coalesce(p.published_at, p.scheduled_for)) = weeks.w
+        group by weeks.w
+        order by weeks.w`)) as unknown as Record<string, unknown>[];
+
+      const stageRows = (await tx.execute(sql`
+        select status as stage, count(*) as count
+        from leads where tenant_id = ${ctx.tenantId}
+        group by status`)) as unknown as Record<string, unknown>[];
+
+      // The five stages in journey order, so the chart reads left to right as progress
+      // rather than in whatever order the group by returned.
+      const STAGE_ORDER = ["discovered", "enriched", "qualified", "contacted", "replied"];
       const n = (k: string) => Number(counts?.[k] ?? 0);
       const brandFields = brand
         ? [brand.name, brand.positioning, brand.icp, brand.valueProposition, brand.toneOfVoice].filter(Boolean).length
@@ -167,6 +201,16 @@ export function createDashboardRepository(): DashboardRepository<Tx> {
           brandColors: (brand?.colors as string[] | null) ?? [],
           brandComplete: brandFields,
           businessNamed: (((profile.onboardingAnswered as string[] | null) ?? []).includes("business_name")),
+          publishingByWeek: weekRows.map((r) => ({
+            week: String(r["week"]),
+            published: Number(r["published"] ?? 0),
+            scheduled: Number(r["scheduled"] ?? 0),
+          })),
+          leadsByStage: STAGE_ORDER.map((stage, i) => ({
+            stage,
+            count: Number(stageRows.find((r) => r["stage"] === stage)?.["count"] ?? 0),
+            slot: (i % 5) + 1,
+          })),
           formationStatus: order?.status ?? null,
           openRfi: rfi?.question ?? null,
         },
