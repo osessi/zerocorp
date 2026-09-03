@@ -64,20 +64,39 @@ export function Shell({
   businessName,
   email,
   needsYou,
+  counts,
   children,
 }: {
   businessName: string;
   email: string;
   needsYou: number;
+  /** How much of each thing exists. Keyed by href so the nav stays the single list. */
+  counts: Record<string, number>;
   children: ReactNode;
 }) {
   const pathname = usePathname();
 
+  /*
+    Counts in the navigation.
+
+    DashboardShell has supported a badge per entry since it was written and nothing ever
+    passed one, so a tenant with twenty articles and fifteen leads had a sidebar
+    indistinguishable from an empty account. The count is the cheapest possible signal
+    that the product is doing something.
+  */
   const groups = GROUPS.map((group) => ({
     ...group,
-    items: group.items.map((item) =>
-      item.href === "/dashboard" && needsYou > 0 ? { ...item, badge: needsYou } : item,
-    ),
+    items: group.items.map((item) => {
+      if (item.href === "/dashboard") {
+        return needsYou > 0 ? { ...item, badge: needsYou, badgeTone: "attention" as const } : item;
+      }
+      const n = counts[item.href] ?? 0;
+      if (n === 0) return item;
+      // Company only ever badges when something is actually waiting, so it is attention
+      // rather than a count: "1" next to Company means one open question, not one company.
+      const tone = item.href === "/company" ? ("attention" as const) : ("count" as const);
+      return { ...item, badge: n, badgeTone: tone };
+    }),
   }));
 
   return (

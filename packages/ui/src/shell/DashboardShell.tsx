@@ -34,6 +34,15 @@ export interface NavItem {
   readonly icon?: Glyph;
   /** A count. A dot is a state indicator and never a count — §21.4. */
   readonly badge?: number;
+  /**
+   * What the badge MEANS.
+   *
+   * `count` is information — how many articles, how many leads. `attention` is the one
+   * that wants you. Yellow marks the second, per §4.8: it is the non-semantic accent
+   * whose whole job is "look here", and using it on every count would make it mean
+   * nothing at all.
+   */
+  readonly badgeTone?: "count" | "attention";
   /** One line under the label, shown only when the sidebar is expanded. */
   readonly hint?: string;
 }
@@ -112,7 +121,14 @@ function NavRow({
         ) : null}
 
         {!collapsed && item.badge !== undefined && item.badge > 0 ? (
-          <span className="bg-warning-subtle text-warning-ink border-warning text-caption inline-flex h-5 min-w-5 items-center justify-center border px-1 font-mono tabular-nums">
+          <span
+            className={cx(
+              "text-caption rounded-sm inline-flex h-5 min-w-5 items-center justify-center px-1.5 font-mono tabular-nums",
+              item.badgeTone === "attention"
+                ? "bg-accent-highlight text-accent-highlight-ink font-semibold"
+                : "bg-muted text-muted-foreground",
+            )}
+          >
             {item.badge}
           </span>
         ) : null}

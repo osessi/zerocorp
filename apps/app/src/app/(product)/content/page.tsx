@@ -1,6 +1,8 @@
 import { redirect } from "next/navigation";
 import { ArticleIcon, MagnifyingGlassIcon } from "@phosphor-icons/react/dist/ssr";
-import { ButtonLink, PageHeader, StatusBadge, StatusDot } from "@zerocorp/ui";
+import { ButtonLink, PageHeader, StatusBadge, StatusDot, SubNav } from "@zerocorp/ui";
+import { ArticleIcon as ArticlesIcon, CalendarBlankIcon, MagnifyingGlassIcon as KeywordsIcon } from "@phosphor-icons/react/dist/ssr";
+import { Calendar } from "./Calendar";
 import { getBlocksRepository, getUnitOfWork } from "../../../server/container";
 import { getViewer } from "../../../server/session";
 import { BuildButton } from "../BuildButton";
@@ -26,6 +28,8 @@ export default async function Page() {
 
   const published = view.posts.filter((p) => p.status === "published").length;
 
+  const scheduled = view.posts.filter((p) => p.status === "scheduled").length;
+
   return (
     <>
       <PageHeader
@@ -39,7 +43,16 @@ export default async function Page() {
         actions={<BuildButton action={buildContentPlan} label="Build my content plan" busyLabel="Planning" />}
       />
 
-      <div className="flex flex-col gap-10 px-5 py-8 sm:px-8">
+      <SubNav
+        items={[
+          { id: "keywords", label: "Keywords", count: view.keywords.length, icon: KeywordsIcon },
+          { id: "calendar", label: "Calendar", count: scheduled, icon: CalendarBlankIcon, attention: scheduled > 0 },
+          { id: "articles", label: "Articles", count: view.posts.length, icon: ArticlesIcon },
+        ]}
+      />
+
+      <div className="mx-auto flex w-full max-w-(--container-content) flex-col gap-10 px-5 py-8 sm:px-8">
+        <div id="keywords" className="scroll-mt-16" />
         <Panel title="Keywords" count={view.keywords.length}>
           {view.keywords.length === 0 ? (
             <Empty
@@ -71,6 +84,14 @@ export default async function Page() {
           )}
         </Panel>
 
+        <div id="calendar" className="scroll-mt-16" />
+        <Panel title="Editorial calendar" count={scheduled}>
+          <div className="p-5">
+            <Calendar posts={view.posts} />
+          </div>
+        </Panel>
+
+        <div id="articles" className="scroll-mt-16" />
         <Panel title="Articles" count={view.posts.length}>
           {view.posts.length === 0 ? (
             <Empty

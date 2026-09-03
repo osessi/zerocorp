@@ -30,6 +30,28 @@
      since 2026-08-31 and nothing had needed it until CockpitHeader. */
   --primary-emphasis: #2dd4bf;
 
+  /* ---------------------------------------------------------------------------
+     --accent-highlight — a NON-SEMANTIC accent. §4.8.
+     
+     Yellow, and deliberately not a sixth status tone: the five semantic tones are
+     unchanged and this one means nothing. It marks WHERE TO LOOK, not what is wrong.
+     Count chips, the sidebar counts, one figure per screen, a chart series.
+     
+     THEME-STABLE, both the fill and its ink. A yellow chip is a yellow chip in both
+     themes, and because the fill is always light the ink must always be dark — the
+     StatusBadge trick of pairing a flipping fill with --background does not work here.
+     
+     A FILL, never text. #facc15 as text on white is 1.53:1. There is no yellow that is
+     both saturated enough to mark and dark enough to read, which is exactly why it is
+     the accent and not a status.
+     
+     Measured: ink on fill 9.52:1. Fill against every ground 1.33 (--accent) to 1.53
+     (page), 11.66 on --surface-focal. 3.28 from --warning #b45309, which is the number
+     that matters most: adjacent to warning in one component the semantic reading breaks,
+     so §4.8 forbids it. */
+  --accent-highlight: #facc15;
+  --accent-highlight-ink: #422006;
+
   --secondary: #f3f3f3;
   --secondary-foreground: #18181b;
 
@@ -327,6 +349,8 @@
   --color-surface: var(--surface);
   --color-surface-elevated: var(--surface-elevated);
   --color-primary-emphasis: var(--primary-emphasis);
+  --color-accent-highlight: var(--accent-highlight);
+  --color-accent-highlight-ink: var(--accent-highlight-ink);
   --color-surface-sunken: var(--surface-sunken);
   --color-surface-focal: var(--surface-focal);
   --color-surface-focal-foreground: var(--surface-focal-foreground);

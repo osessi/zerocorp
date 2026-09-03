@@ -43,6 +43,48 @@ export interface BusinessOverview {
   readonly activity: readonly ActivityRow[];
   readonly companyStatus: string | null;
   readonly companyName: string | null;
+  /**
+   * The tenant's actual state.
+   *
+   * The Command Center answers "what is ZeroCorp doing for me", and it could not: the
+   * query fetched the plan and the activity feed and nothing else. A tenant with twenty
+   * articles, fifteen leads, ten keywords and two mailboxes warming saw none of it,
+   * because the dashboard never asked. That is not a layout problem.
+   */
+  readonly state: BusinessState;
+}
+
+export interface BusinessState {
+  readonly postsPublished: number;
+  readonly postsScheduled: number;
+  readonly postsDraft: number;
+  readonly leadsTotal: number;
+  readonly leadsReplied: number;
+  readonly leadsQualified: number;
+  readonly keywords: number;
+  readonly mailboxes: number;
+  readonly warmupDay: number | null;
+  readonly warmupTotal: number;
+  readonly pages: number;
+  readonly pagesPublished: number;
+  readonly siteStatus: string | null;
+  /** Which of the brand's five fields are filled. The rail shows completeness. */
+  readonly brandName: string | null;
+  readonly brandColors: readonly string[];
+  readonly brandComplete: number;
+  /**
+   * Whether the founder has actually NAMED the business.
+   *
+   * `business_profiles.business_name` is seeded at conversion from the assessment
+   * headline — a positioning sentence, not a name — because the free assessment never
+   * asks what the business is called. Onboarding step 1 does. Until it is answered the
+   * "name" is a 60-character sentence, and printing it as a heading is how "I design
+   * brand identities for early-stage software companies." becomes a brand name.
+   */
+  readonly businessNamed: boolean;
+  /** The formation order in flight, and what it is waiting on. */
+  readonly formationStatus: string | null;
+  readonly openRfi: string | null;
 }
 
 export interface DashboardRepository<TTx = unknown> {

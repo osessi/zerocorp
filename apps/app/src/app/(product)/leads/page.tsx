@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { ListBulletsIcon, WarningIcon } from "@phosphor-icons/react/dist/ssr";
-import { Alert, Avatar, ButtonLink, PageHeader, StatusBadge, StatusDot, initialsOf } from "@zerocorp/ui";
+import { Alert, Avatar, ButtonLink, PageHeader, StatusBadge, StatusDot, SubNav, initialsOf } from "@zerocorp/ui";
+import { DownloadSimpleIcon, ListBulletsIcon as ListsIcon, UsersThreeIcon as PeopleIcon } from "@phosphor-icons/react/dist/ssr";
 import { getBlocksRepository, getUnitOfWork } from "../../../server/container";
 import { getViewer } from "../../../server/session";
 import { BuildButton } from "../BuildButton";
@@ -54,7 +55,27 @@ export default async function Page() {
         actions={<BuildButton action={defineTarget} label="Define my target" busyLabel="Defining" />}
       />
 
-      <div className="flex flex-col gap-10 px-5 py-8 sm:px-8">
+      <SubNav
+        items={[
+          { id: "overview", label: "Overview", icon: PeopleIcon },
+          { id: "lists", label: "Lists", count: view.lists.length, icon: ListsIcon },
+          { id: "leads", label: "Prospects", count: view.total, attention: replied > 0 },
+        ]}
+        action={
+          view.recent.length > 0 ? (
+            /* A real link, not a script-driven save: the download is a GET the browser
+               performs itself, which also means it works from a bookmark. */
+            <a
+              href="/api/leads/export"
+              className="text-body-sm text-foreground border-input hover:bg-accent focus-visible:outline-ring inline-flex items-center gap-2 border px-3 py-1.5 focus-visible:outline-2 focus-visible:outline-offset-2"
+            >
+              <DownloadSimpleIcon size={16} aria-hidden="true" /> Export CSV
+            </a>
+          ) : null
+        }
+      />
+
+      <div className="mx-auto flex w-full max-w-(--container-content) flex-col gap-10 px-5 py-8 sm:px-8">
         {withoutBasis > 0 ? (
           <Alert tone="warning" title="Some records have no lawful basis recorded">
             {withoutBasis} of these were stored without a reason we may hold them. A prospect
@@ -62,6 +83,7 @@ export default async function Page() {
           </Alert>
         ) : null}
 
+        <div id="overview" className="scroll-mt-16" />
         <Panel title="Overview">
           <FactGrid>
             <FactCell><Fact label="Prospects" value={`${view.total}`} tone="font-mono tabular-nums text-chart-1" /></FactCell>
@@ -77,6 +99,7 @@ export default async function Page() {
           </FactGrid>
         </Panel>
 
+        <div id="lists" className="scroll-mt-16" />
         <Panel title="Lists" count={view.lists.length}>
           {view.lists.length === 0 ? (
             <Empty
@@ -97,6 +120,7 @@ export default async function Page() {
           )}
         </Panel>
 
+        <div id="leads" className="scroll-mt-16" />
         <Panel title="Recently found" count={view.recent.length}>
           {view.recent.length === 0 ? (
             <Empty

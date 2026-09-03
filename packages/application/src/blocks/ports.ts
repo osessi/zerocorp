@@ -28,6 +28,10 @@ export interface CompanyView {
     readonly status: string;
     readonly jurisdictionCode: string;
     readonly entityTypeId: string;
+    /** The names the founder proposed, best first. The screen could not name the filing. */
+    readonly proposedNames: readonly string[];
+    /** The structure code a founder recognises, resolved from the catalog id. */
+    readonly entityTypeCode: string | null;
   } | null;
   readonly orders: readonly {
     readonly id: string;
@@ -119,6 +123,8 @@ export interface CustomersView {
     readonly id: string;
     readonly companyName: string;
     readonly domain: string | null;
+    /** §29.3 block 9 ships contact resolution in V1. The CSV export needs it. */
+    readonly email: string | null;
     readonly country: string | null;
     readonly industry: string | null;
     readonly status: string;

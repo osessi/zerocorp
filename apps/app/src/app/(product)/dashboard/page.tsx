@@ -23,7 +23,8 @@ import {
   type AgentKey,
 } from "@zerocorp/ui";
 import { ButtonLink } from "@zerocorp/ui";
-import type { PlanStepRow } from "@zerocorp/application";
+import type { BusinessState, PlanStepRow } from "@zerocorp/application";
+import { outcomeFor, waitingFor } from "./outcome";
 import { getDashboardRepository, getUnitOfWork } from "../../../server/container";
 import { getViewer } from "../../../server/session";
 
@@ -123,56 +124,103 @@ function StepMarker({ state }: { state: "done" | "current" | "pending" }) {
  *   pending   unfilled, normal title
  *   done      recedes: muted title, no tile, no action. It is history.
  */
-function StepRow({ step, anchor }: { step: PlanStepRow; anchor: boolean }) {
+function StepRow({
+  step,
+  anchor,
+  state,
+}: {
+  step: PlanStepRow;
+  anchor: boolean;
+  state: BusinessState;
+}) {
   const Icon = CATEGORY_ICON[step.category] ?? GearIcon;
   const done = step.status === "done";
-  const state = done ? "done" : anchor ? "current" : "pending";
+  const marker = done ? "done" : anchor ? "current" : "pending";
   const href = CATEGORY_HREF[step.category] ?? "/company";
+  const outcome = outcomeFor(step.category, state);
+  const waiting = waitingFor(step.status, step.category, state);
 
   return (
     <li
       className={cx(
-        "border-border flex items-center gap-4 border-b px-5 py-4 last:border-b-0",
+        "border-border grid grid-cols-[auto_1fr_auto] items-center gap-x-4 gap-y-1 border-b px-4 py-3 last:border-b-0",
         "transition-[background-color] duration-normal ease-out",
         anchor ? "bg-surface-sunken" : "hover:bg-accent",
         !step.included && "opacity-55",
       )}
     >
-      <StepMarker state={state} />
+      <StepMarker state={marker} />
 
-      {/* The icon tile is a rank, not decoration: it appears on the row you are meant to
-          look at and disappears on the ones you are not. */}
-      {!done ? (
-        <span
-          className={cx(
-            "flex size-9 shrink-0 items-center justify-center border",
-            anchor ? "border-primary text-primary" : "border-border text-muted-foreground",
-          )}
-        >
-          <Icon size={18} weight="regular" aria-hidden="true" />
+      <div className="flex min-w-0 items-center gap-3">
+        {!done ? (
+          <span
+            className={cx(
+              "flex size-8 shrink-0 items-center justify-center border",
+              anchor ? "border-primary text-primary" : "border-border text-muted-foreground",
+            )}
+          >
+            <Icon size={16} weight="regular" aria-hidden="true" />
+          </span>
+        ) : null}
+        <span className="flex min-w-0 flex-col">
+          <span
+            className={cx(
+              "truncate",
+              done ? "text-body-sm text-muted-foreground" : anchor ? "text-body font-semibold" : "text-body-sm font-medium",
+              !step.included && "line-through",
+            )}
+          >
+            {step.title}
+          </span>
+          {/*
+            The middle column. A done row says what it PRODUCED — "12 published, 3
+            scheduled" — and an open one says what it is waiting on. Before this, a row
+            was a title, a description and five hundred pixels of nothing.
+          */}
+          <span className="text-caption text-muted-foreground truncate">
+            {outcome ?? (done ? step.outcome : step.outcome)}
+          </span>
         </span>
-      ) : null}
+      </div>
 
-      <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-        <span
-          className={cx(
-            "text-body-sm",
-            done ? "text-muted-foreground" : anchor ? "text-h4" : "font-medium",
-            !step.included && "line-through",
-          )}
-        >
-          {step.title}
-        </span>
-        {/* A finished step does not need its promise explained again. */}
-        {!done ? <span className="text-body-sm text-muted-foreground">{step.outcome}</span> : null}
-      </span>
-
-      {step.included && !done ? (
-        <ButtonLink href={href} variant={anchor ? "primary" : "secondary"}>
-          {ACTION_LABEL[step.status] ?? "Open"}
-        </ButtonLink>
-      ) : null}
+      <div className="flex shrink-0 items-center gap-3">
+        {waiting ? (
+          <span
+            className={cx(
+              "text-caption hidden sm:inline",
+              step.status === "blocked" ? "text-warning-ink font-medium" : "text-muted-foreground",
+            )}
+          >
+            {waiting}
+          </span>
+        ) : null}
+        {step.included && !done ? (
+          <ButtonLink href={href} {...(anchor ? { variant: "primary" as const } : {})}>
+            {ACTION_LABEL[step.status] ?? "Open"}
+          </ButtonLink>
+        ) : null}
+      </div>
     </li>
+  );
+}
+
+/** One figure in the rail. The yellow is the non-semantic accent — where to look. */
+function Stat({ label, value, sub, highlight }: { label: string; value: string; sub?: string | undefined; highlight?: boolean }) {
+  return (
+    <div className="flex items-baseline justify-between gap-3 py-2">
+      <span className="text-body-sm text-muted-foreground">{label}</span>
+      <span className="flex items-baseline gap-1.5">
+        <span
+          className={cx(
+            "text-h4 font-mono tabular-nums",
+            highlight ? "bg-accent-highlight text-accent-highlight-ink rounded-sm px-1.5" : "text-foreground",
+          )}
+        >
+          {value}
+        </span>
+        {sub ? <span className="text-caption text-muted-foreground">{sub}</span> : null}
+      </span>
+    </div>
   );
 }
 
@@ -199,9 +247,18 @@ export default async function Page() {
   const done = included.filter((s) => s.status === "done").length;
   const percent = included.length === 0 ? 0 : Math.round((done / included.length) * 100);
   const tone = progressTone(percent);
+  const st = overview.state;
+  /*
+    The open RFI outranks everything.
+
+    A formation order sitting in operator_review with an open question is the one thing
+    actually blocking this customer's company from existing, and the dashboard said
+    "Nothing needs you right now". It was not a phrasing problem: the RFI was never
+    fetched, so the screen could not know.
+  */
   const blockedStep = included.find((s) => s.status === "blocked");
   const runningIndex = included.findIndex((s) => s.status === "in_progress");
-  const needsYou = included.filter((s) => s.status === "blocked").length;
+  const needsYou = included.filter((s) => s.status === "blocked").length + (overview.state.openRfi ? 1 : 0);
   const anchorId =
     blockedStep?.id ??
     included.find((s) => s.status === "in_progress")?.id ??
@@ -244,7 +301,13 @@ export default async function Page() {
             ? "ZeroCorp is building your business. Nothing needs you right now."
             : `${needsYou} steps are waiting on you`
         }
-        blocked={blockedStep ? { label: blockedStep.title } : undefined}
+        blocked={
+          st.openRfi
+            ? { label: st.openRfi }
+            : blockedStep
+              ? { label: blockedStep.title }
+              : undefined
+        }
         total={included.length}
         completed={done}
         current={runningIndex >= 0 ? runningIndex : undefined}
@@ -267,25 +330,25 @@ export default async function Page() {
       {/* `w-full` is load-bearing. The shell centres its children, so the focal header —
           which is w-full — filled 1184px while this div shrink-wrapped to 958, putting the
           two left edges 113px apart. Same container, same padding, same edge. */}
-      <div className="mx-auto flex w-full max-w-(--container-content) flex-col gap-8 px-5 py-8 sm:px-8">
-        <section className="flex flex-col gap-4">
-          <SectionHeader
-            title="What ZeroCorp is building"
-            count={included.length}
-            countTone="processing"
-          />
-          <ul className="border-border border">
-            {/* Exactly one anchor: the blocked step if there is one, otherwise the step
-                in flight, otherwise the first thing not yet started. A list with two
-                "you are here" markers has none. */}
-            {overview.steps.map((step) => (
-              <StepRow key={step.id} step={step} anchor={step.id === anchorId} />
-            ))}
-          </ul>
-        </section>
+      {/*
+        Two columns, not one.
 
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_20rem]">
-          <section className="flex flex-col gap-4">
+        A single 1200px column with rows this light cannot look dense: everything is
+        alone on its line and the rail content — the numbers, the plan, the brand — got
+        pushed below the fold where nobody scrolled to it.
+      */}
+      <div className="mx-auto grid w-full max-w-(--container-content) grid-cols-1 gap-8 px-5 py-8 sm:px-8 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+        <div className="flex min-w-0 flex-col gap-8">
+          <section className="flex flex-col gap-3">
+            <SectionHeader title="What ZeroCorp is building" count={included.length} countTone="processing" />
+            <ul className="border-border border">
+              {overview.steps.map((step) => (
+                <StepRow key={step.id} step={step} anchor={step.id === anchorId} state={st} />
+              ))}
+            </ul>
+          </section>
+
+          <section className="flex flex-col gap-3">
             <SectionHeader title="Recent activity" count={events.length} countTone="ai" />
             {events.length === 0 ? (
               <EmptyState
@@ -297,19 +360,81 @@ export default async function Page() {
               <ActivityPanel events={events} />
             )}
           </section>
-
-          <aside className="flex flex-col gap-4">
-            <SectionHeader title="Your plan" />
-            <div className="border-border bg-surface-sunken flex flex-col gap-3 border p-5">
-              <span className="text-overline text-muted-foreground">Current plan</span>
-              <span className="text-h3">{overview.subscriptionPlan ?? "No plan yet"}</span>
-              <div className={cx("bg-muted h-1.5 w-full")} role="presentation">
-                <div className={cx("h-full transition-[width] duration-modal ease-out", tone.bar)} style={{ width: `${percent}%` }} />
-              </div>
-              <span className={cx("text-caption font-mono", tone.text)}>{percent}% complete</span>
-            </div>
-          </aside>
         </div>
+
+        {/* The rail. Everything a founder checks without reading. */}
+        <aside className="flex min-w-0 flex-col gap-6">
+          {/* What is waiting, first, because it is the only part that asks for something. */}
+          {st.openRfi ? (
+            <section className="border-warning bg-warning-subtle flex flex-col gap-3 border p-4">
+              <span className="text-overline text-warning-ink">Waiting on you</span>
+              <p className="text-body-sm text-warning-ink">{st.openRfi}</p>
+              <ButtonLink href="/company" variant="primary">Send it</ButtonLink>
+            </section>
+          ) : null}
+
+          <section className="border-border flex flex-col border">
+            <div className="border-border bg-muted border-b px-4 py-2.5">
+              <span className="text-overline text-muted-foreground">Your business, in numbers</span>
+            </div>
+            <div className="divide-border flex flex-col divide-y px-4 py-1">
+              <Stat label="Articles published" value={String(st.postsPublished)} sub={st.postsScheduled > 0 ? `+${st.postsScheduled} scheduled` : undefined} highlight={st.postsPublished > 0} />
+              <Stat label="Prospects found" value={String(st.leadsTotal)} sub={st.leadsReplied > 0 ? `${st.leadsReplied} replied` : undefined} highlight={st.leadsTotal > 0} />
+              <Stat label="Keywords tracked" value={String(st.keywords)} />
+              <Stat label="Pages" value={String(st.pages)} sub={`${st.pagesPublished} live`} />
+              <Stat
+                label="Mailboxes warming"
+                value={String(st.mailboxes)}
+                sub={st.warmupDay !== null ? `${Math.max(0, st.warmupTotal - st.warmupDay)}d left` : undefined}
+              />
+            </div>
+          </section>
+
+          {/* Brand had no entry point anywhere in the product. */}
+          {st.brandName ? (
+            <section className="border-border flex flex-col gap-3 border p-4">
+              <div className="flex items-baseline justify-between gap-3">
+                <span className="text-overline text-muted-foreground">Your brand</span>
+                <span className="text-caption text-muted-foreground font-mono tabular-nums">{st.brandComplete}/5</span>
+              </div>
+              {/* A name, or an honest admission that there is not one yet. The seeded
+                  "name" is the assessment headline until onboarding step 1 is answered,
+                  and printing a positioning sentence as a heading is worse than empty. */}
+              {st.businessNamed ? (
+                <span className="text-h4">{st.brandName}</span>
+              ) : (
+                <span className="text-body-sm text-muted-foreground">
+                  Not named yet — ZeroCorp is using your description until you choose one.
+                </span>
+              )}
+              {st.brandColors.length > 0 ? (
+                <div className="flex gap-1.5">
+                  {st.brandColors.slice(0, 6).map((c) => (
+                    <span
+                      key={c}
+                      className="border-border size-7 border"
+                      style={{ backgroundColor: c }}
+                      title={c}
+                      aria-label={c}
+                    />
+                  ))}
+                </div>
+              ) : null}
+              <ButtonLink href={st.businessNamed ? "/brand" : "/onboarding"} {...(st.businessNamed ? {} : { variant: "primary" as const })}>
+                {st.businessNamed ? "Open brand" : "Name your business"}
+              </ButtonLink>
+            </section>
+          ) : null}
+
+          <section className="border-border bg-surface-sunken flex flex-col gap-3 border p-4">
+            <span className="text-overline text-muted-foreground">Current plan</span>
+            <span className="text-h4">{overview.subscriptionPlan ?? "No plan yet"}</span>
+            <div className="bg-muted h-1.5 w-full" role="presentation">
+              <div className={cx("h-full transition-[width] duration-modal ease-out", tone.bar)} style={{ width: `${percent}%` }} />
+            </div>
+            <span className={cx("text-caption font-mono tabular-nums", tone.text)}>{percent}% complete</span>
+          </section>
+        </aside>
       </div>
     </>
   );

@@ -21,12 +21,27 @@ export default async function ProductLayout({ children }: { children: ReactNode 
 
   // The badge on Overview is the count of steps waiting on the founder. It belongs in
   // the rail because it is the one number that should reach them without opening a page.
-  const needsYou = overview?.steps.filter((s) => s.included && s.status === "blocked").length ?? 0;
+  const st = overview?.state;
+  const needsYou =
+    (overview?.steps.filter((s) => s.included && s.status === "blocked").length ?? 0) + (st?.openRfi ? 1 : 0);
+
+  // The overview is already fetched for the badge, so the counts are free.
+  const counts: Record<string, number> = st
+    ? {
+        "/content": st.postsPublished + st.postsScheduled + st.postsDraft,
+        "/leads": st.leadsTotal,
+        "/email": st.mailboxes,
+        "/website": st.pages,
+        "/company": st.openRfi ? 1 : 0,
+      }
+    : {};
+
   return (
     <Shell
       businessName={overview?.businessName ?? "Your business"}
       email={viewer.email}
       needsYou={needsYou}
+      counts={counts}
     >
       {children}
     </Shell>

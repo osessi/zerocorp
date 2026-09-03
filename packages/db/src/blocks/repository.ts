@@ -6,7 +6,7 @@ import {
   mailboxes, pages, posts, sites,
 } from "../schema/blocks";
 import { businessProfiles, creditLedger, subscriptions } from "../schema/tenant";
-import { companies, companyRegistrations, formationDocuments, formationOrders, formationRequests, formationRfis } from "../schema/formation";
+import { companies, companyRegistrations, entityTypes, formationDocuments, formationOrders, formationRequests, formationRfis } from "../schema/formation";
 import { memberships, tenants, users } from "../schema/global";
 import type { Tx } from "../types";
 
@@ -17,6 +17,12 @@ import type { Tx } from "../types";
  * tenant filter. The explicit filter is still written on every query: the application
  * never relies on RLS as its only protection, which is the point of having two.
  */
+/** Resolves an entity type id back to the code a founder recognises. */
+async function entityTypeCodeOf(tx: Tx, id: string): Promise<string | null> {
+  const [row] = await tx.select({ code: entityTypes.code }).from(entityTypes).where(eq(entityTypes.id, id)).limit(1);
+  return row?.code ?? null;
+}
+
 export function createBlocksRepository(): BlocksRepository<Tx> {
   return {
     async company(tx, ctx: TenantContext) {
@@ -75,7 +81,17 @@ export function createBlocksRepository(): BlocksRepository<Tx> {
           kind: r.kind, authority: r.authority, identifier: r.identifier, status: r.status,
         })),
         request: request
-          ? { id: request.id, status: request.status, jurisdictionCode: request.jurisdictionCode, entityTypeId: request.entityTypeId }
+          ? {
+              id: request.id,
+              status: request.status,
+              jurisdictionCode: request.jurisdictionCode,
+              entityTypeId: request.entityTypeId,
+              // The names the founder proposed and the structure they chose. The screen
+              // showed neither, so during formation — the period where a customer checks
+              // this page daily — it could not name what was being formed.
+              proposedNames: (request.proposedNames as string[] | null) ?? [],
+              entityTypeCode: request.entityTypeId ? await entityTypeCodeOf(tx, request.entityTypeId) : null,
+            }
           : null,
         orders: orders.map((o) => ({
           id: o.id, status: o.status, providerCode: o.providerCode, rejectionReason: o.rejectionReason,
@@ -228,7 +244,7 @@ export function createBlocksRepository(): BlocksRepository<Tx> {
       return {
         lists: lists.map((l) => ({ id: l.id, name: l.name, source: l.source, leadCount: l.leadCount })),
         recent: recent.map((l) => ({
-          id: l.id, companyName: l.companyName, domain: l.domain, country: l.country,
+          id: l.id, companyName: l.companyName, domain: l.domain, email: l.email, country: l.country,
           industry: l.industry, status: l.status, consentBasis: l.consentBasis,
         })),
         total: count?.n ?? 0,
