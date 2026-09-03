@@ -139,7 +139,7 @@ function StepRow({
          reveal: this is a list you are about to scan, so it should be there by the time
          the eye lands (§10). */
       className={cx(
-        "border-border grid grid-cols-[auto_1fr_auto] items-center gap-x-4 gap-y-1 border-b px-4 py-3 last:border-b-0",
+        "border-border bg-surface grid grid-cols-[auto_1fr_auto] items-center gap-x-4 gap-y-1 border px-4 py-3",
         CONTROL_TRANSITION,
         ENTER,
         anchor ? "bg-surface-sunken" : "hover:bg-accent motion-safe:hover:translate-x-0.5",
@@ -317,7 +317,7 @@ export default async function Page() {
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
           <section className="flex min-w-0 flex-col gap-3">
             <SectionHeader title="What ZeroCorp is building" count={included.length} countTone="processing" />
-            <ul className="border-border border">
+            <ul className="flex flex-col gap-2">
               {overview.steps.map((step, i) => (
                 <StepRow key={step.id} step={step} anchor={step.id === anchorId} state={st} index={i} />
               ))}

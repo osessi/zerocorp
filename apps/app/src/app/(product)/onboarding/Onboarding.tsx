@@ -256,14 +256,14 @@ function Reveal({ state, onEdit }: { state: OnboardingState; onEdit: (i: number)
                 )}
               </div>
 
-              <dl className="border-surface-focal-foreground/15 bg-surface-focal-foreground/[0.03] border">
+              <dl className="flex flex-col gap-2">
                 {REVEAL_GROUPS[group].map((key) => {
                   const values = state.answers[key] ?? [];
                   const stepIndex = ONBOARDING_STEPS.indexOf(key);
                   return (
                     <div
                       key={key}
-                      className="border-surface-focal-foreground/15 hover:bg-surface-focal-foreground/[0.06] flex flex-col gap-2 border-b px-5 py-4 transition-[background-color] duration-normal last:border-b-0 sm:flex-row sm:items-start sm:gap-6"
+                      className="border-surface-focal-foreground/15 bg-surface-focal-foreground/[0.03] hover:bg-surface-focal-foreground/[0.06] flex flex-col gap-2 border px-5 py-4 transition-[background-color] duration-normal sm:flex-row sm:items-start sm:gap-6"
                     >
                       <dt className="text-caption text-surface-focal-foreground/55 sm:w-48 sm:shrink-0">
                         {STEP_COPY[key].title}

@@ -46,7 +46,7 @@ export function Calendar({
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="grid grid-cols-7 gap-px">
+      <div className="grid grid-cols-7 gap-1.5">
         {DAYS.map((d) => (
           <span key={d} className="text-caption text-muted-foreground px-2 py-1 text-center">
             {d}
@@ -54,7 +54,7 @@ export function Calendar({
         ))}
       </div>
 
-      <div className="border-border bg-border grid grid-cols-7 gap-px border">
+      <div className="grid grid-cols-7 gap-1.5">
         {cells.map((date) => {
           const key = date.toISOString().slice(0, 10);
           const entries = byDay.get(key) ?? [];
@@ -65,7 +65,7 @@ export function Calendar({
             <div
               key={key}
               className={cx(
-                "flex min-h-20 flex-col gap-1 p-1.5",
+                "border-border flex min-h-20 flex-col gap-1 border p-1.5",
                 past ? "bg-muted" : "bg-surface",
                 isToday && "bg-accent-highlight/15",
               )}

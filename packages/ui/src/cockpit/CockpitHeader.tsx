@@ -80,13 +80,15 @@ export function CockpitHeader({
         </div>
 
         {/*
-          The figures, large, on the page's own ground. Separated by a rule rather than by
-          three tinted boxes: three cells with three fills read as conditional formatting
-          in a spreadsheet, which is what the previous version looked like.
+          The figures, large, on the page's own ground. Not three tinted boxes: three cells
+          with three fills read as conditional formatting in a spreadsheet, which is what
+          the previous version looked like. Not divided by rules either — a divide-x row
+          sitting under a border-t is two single-side borders, which the standing rule
+          bans. Space does the separating.
         */}
-        <dl className="border-border divide-border flex flex-col divide-y border-t pt-4 sm:flex-row sm:divide-x sm:divide-y-0 sm:pt-4">
-          {metrics.map((m, i) => (
-            <div key={m.label} className={cx("flex flex-1 flex-col gap-0.5 py-2 sm:py-0", i > 0 && "sm:pl-8")}>
+        <dl className="mt-4 flex flex-col gap-4 sm:flex-row sm:gap-10">
+          {metrics.map((m) => (
+            <div key={m.label} className="flex flex-1 flex-col gap-0.5">
               <dd className="flex items-baseline gap-2">
                 <span
                   className={cx(

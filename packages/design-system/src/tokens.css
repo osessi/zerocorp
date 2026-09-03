@@ -90,7 +90,16 @@
 
   /* Status — one system for the whole product. §4.3, VALIDATED. */
   --success: #15803d;
-  --warning: #b45309;
+  /* Gold, not amber. #B45309 with #92400E ink is the pale-amber-panel-with-brown-text
+     pairing every generated interface ships, and it was named as such: "n'utilise plus ce
+     jaune et ce marron de texte caracteristique typique de l'IA". Same hue family, moved
+     from 26deg to 46deg so it reads as gold rather than rust, and the ink dropped to a
+     near-black olive so no text on the product is brown.
+     Measured 2026-09-03 on every ground per §4.4: 5.07 --surface, 4.86 --background,
+     4.65 --muted, 4.57 --secondary, 4.41 --accent, 4.45 --surface-sunken, 4.39 on its own
+     --warning-subtle. 3.31 from --accent-highlight #FACC15, up from 3.28, so §4.8's
+     never-adjacent rule holds on a better margin. */
+  --warning: #8a6a00;
   --info: #2563eb;
   --processing: #00786f;
   --destructive: #dc2626;
@@ -135,8 +144,8 @@
      label. Measured 5.30–6.80:1. */
   --success-subtle: #dcfce7;
   --success-ink: #166534;
-  --warning-subtle: #fef3c7;
-  --warning-ink: #92400e;
+  --warning-subtle: #f7f0c2; /* 1.15 vs the page, up from 1.11 on #FEF3C7. §4.5 floor 1.10 */
+  --warning-ink: #3d3300; /* 12.56 --surface, 11.52 --muted, 10.88 on --warning-subtle */
   --info-subtle: #dbeafe;
   --info-ink: #1d4ed8;
   --processing-subtle: #ccfbf1;
@@ -182,11 +191,44 @@
      larger area, so it needs a lighter ground. 4.53–4.78:1, and still ≥1.05 against the
      page so the wash is seen. */
   --success-wash: #f0fdf4;
-  --warning-wash: #fffbeb;
+  --warning-wash: #fbf7dd; /* 1.08 vs the page, up from 1.01. --warning-ink 11.63 on it */
   --destructive-wash: #fef2f2;
   --info-wash: #eff6ff;
   --processing-wash: #f0fdfa;
   --ai-wash: #f5f3ff;
+
+  /* ---------------------------------------------------------------------------
+     JOURNEY TINTS — the three stages of the product, as grounds. §4.9.
+
+     NOT a sixth, seventh and eighth status tone. The five semantic tones are unchanged
+     and these mean nothing about health: they say WHICH PART OF THE JOURNEY you are in —
+     Build, Launch, Grow, the spine PRODUCT_SPEC.md §29.3 describes. Same register as
+     --accent-highlight (§4.8): a non-semantic family, kept deliberately out of the status
+     vocabulary.
+
+     Where they are allowed: the ground of a navigation GROUP, the ground of a tab BAND,
+     and the label/marker inside one. Nowhere else. They never appear on a chip, a dot, a
+     badge or a state marker — the moment a journey tint marks an OBJECT it is competing
+     with the status system, and the status system wins.
+
+     Their values are their own, not aliases of --success-*/--info-*/--ai-*. A journey
+     tint and a status tone share a hue by accident of the spectrum, not by contract, and
+     retuning one must never move the other.
+
+     Three channels per tone, and the wash never travels alone: -wash is the ground,
+     -edge the border on ALL FOUR SIDES, -ink the label. Measured against #ffffff:
+     wash 1.10 / 1.14 / 1.17, over the §4.5 perceptibility floor even though the edge
+     already exempts them; -ink on its own wash 6.36 / 6.66 / 7.44.
+     --------------------------------------------------------------------------- */
+  --journey-build-wash: #e9f7ef;
+  --journey-build-edge: #b8dfca;
+  --journey-build-ink: #14663a;
+  --journey-launch-wash: #e9f1fd;
+  --journey-launch-edge: #bfd5f6;
+  --journey-launch-ink: #1b48c4;
+  --journey-grow-wash: #f0ebfd;
+  --journey-grow-edge: #d0c2f4;
+  --journey-grow-ink: #5b23bd;
 
   /* -------------------------------------------------------------------------
      Chart series. §4.7, and §24.14 is closed by it.
@@ -268,7 +310,7 @@
   /* Light-mode status colours reach only 3.69–4.10:1 on #0A0A0A: enough for a filled
      badge, not for status text. These lighter values are required on dark. */
   --success: #22c55e;
-  --warning: #f59e0b;
+  --warning: #eab308; /* moved with light: gold, not amber. 10.32 on the page */
   --info: #3b82f6;
   --processing: #2dd4bf;
   --destructive: #ef4444;
@@ -288,7 +330,7 @@
      drops --info-ink to 3.74 and --destructive-ink to 3.66 on its own tint. That is
      arithmetic, not tuning — see §4.5. The open constraint is scoped, not solved. */
   --success-subtle: #0c1f14;
-  --warning-subtle: #241703;
+  --warning-subtle: #221e04; /* 1.18 page, 1.11 on #262626, 1.10 on --surface */
   --info-subtle: #0d1a33;
   --processing-subtle: #082220;
   --destructive-subtle: #2a0e0e;
@@ -296,7 +338,7 @@
 
   /* On a dark wash the bright §4.2 status colour IS the right ink. 4.71–8.95:1. */
   --success-ink: #22c55e;
-  --warning-ink: #f59e0b;
+  --warning-ink: #eab308; /* 8.72 on --warning-subtle */
   --info-ink: #3b82f6;
   --processing-ink: #2dd4bf;
   --destructive-ink: #ef4444;
@@ -314,11 +356,24 @@
   /* One step darker than -subtle, for the same reason: a whole card must stay calm.
      7.36–7.62:1 for body text, ≥1.03 against the page. */
   --success-wash: #08160e;
-  --warning-wash: #181004;
+  --warning-wash: #161303; /* --warning-ink 9.70 on it */
   --destructive-wash: #1c0909;
   --info-wash: #080f1c;
   --processing-wash: #04120f;
   --ai-wash: #12092b;
+
+  /* Journey tints, dark. Same three hues pulled toward the page rather than toward white,
+     and the ink flips to the bright end so it can sit on its own wash. Measured against
+     #0A0A0A: wash 1.14 / 1.14 / 1.12; -ink on its own wash 9.95 / 6.81 / 6.50. */
+  --journey-build-wash: #0c1e14;
+  --journey-build-edge: #20462f;
+  --journey-build-ink: #4ade80;
+  --journey-launch-wash: #0c1a34;
+  --journey-launch-edge: #213b64;
+  --journey-launch-ink: #60a5fa;
+  --journey-grow-wash: #1a1238;
+  --journey-grow-edge: #3a2a69;
+  --journey-grow-ink: #a78bfa;
 
   /* Brighter in dark, same hues, same order. 7.27:1 to 11.86:1 against #0A0A0A. */
   --chart-1: #2dd4bf;
@@ -398,6 +453,15 @@
   --color-info-wash: var(--info-wash);
   --color-processing-wash: var(--processing-wash);
   --color-ai-wash: var(--ai-wash);
+  --color-journey-build-wash: var(--journey-build-wash);
+  --color-journey-build-edge: var(--journey-build-edge);
+  --color-journey-build-ink: var(--journey-build-ink);
+  --color-journey-launch-wash: var(--journey-launch-wash);
+  --color-journey-launch-edge: var(--journey-launch-edge);
+  --color-journey-launch-ink: var(--journey-launch-ink);
+  --color-journey-grow-wash: var(--journey-grow-wash);
+  --color-journey-grow-edge: var(--journey-grow-edge);
+  --color-journey-grow-ink: var(--journey-grow-ink);
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
   --color-chart-3: var(--chart-3);

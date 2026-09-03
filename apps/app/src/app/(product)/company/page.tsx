@@ -1,8 +1,8 @@
 import { redirect } from "next/navigation";
 import { BuildingsIcon, FileTextIcon, QuestionIcon } from "@phosphor-icons/react/dist/ssr";
-import { ButtonLink, StatusBadge, StatusStamp, Tabs } from "@zerocorp/ui";
+import { ButtonLink, StatusBadge, StatusStamp, Tabs, cx } from "@zerocorp/ui";
 import { Intake } from "./Intake";
-import { BigFact, BigFactGrid } from "../ui-facts";
+import { BigFact, BigFactGrid, FACT_TONE } from "../ui-facts";
 
 /** The catalog code, in the words a founder used when they chose it. */
 const ENTITY_LABEL: Record<string, string> = {
@@ -39,6 +39,22 @@ const ORDER_STATUS: Record<string, { label: string; tone: "success" | "processin
   cancelled: { label: "Cancelled", tone: "neutral" },
 };
 
+/**
+ * A colour per STRUCTURE, so four filings do not read as four grey rows.
+ *
+ * Keyed by the catalogue code rather than by position, so adding a fifth structure does
+ * not repaint the other four. The five tones are the §4.3 status hues used here as
+ * CATEGORY colour, which is the same licence `ui-facts` already takes: the tone belongs
+ * to the field, never to the value, so nothing here can be misread as a status.
+ */
+const STRUCTURE_TONE: Record<string, (typeof FACT_TONE)[keyof typeof FACT_TONE]> = {
+  us_llc: FACT_TONE.processing,
+  us_ccorp: FACT_TONE.ai,
+  gb_ltd: FACT_TONE.info,
+  gb_llp: FACT_TONE.success,
+};
+const STRUCTURE_TONE_FALLBACK = FACT_TONE.neutral;
+
 const REGISTRATION_LABEL: Record<string, string> = {
   tax_id: "Tax ID",
   vat: "VAT",
@@ -73,10 +89,20 @@ export default async function Page() {
         banner={
           view.openRfis.length > 0 ? (
             <div className="mx-auto w-full max-w-(--container-content) px-5 py-4 sm:px-8">
-              <section className="border-warning bg-warning-subtle flex flex-col gap-4 border p-5">
+              {/*
+                RED, and dotted.
+
+                This was a filled amber panel with brown headings, which is both the wrong
+                colour and the wrong look: yellow is the non-semantic accent (§4.8) and
+                something the founder must act on is destructive tone. The amber fill with
+                #92400E text was also called out by name as the pairing every generated
+                interface ships. Dotted, because an outline that is waiting for something
+                should look provisional.
+              */}
+              <section className="border-destructive bg-destructive-wash flex flex-col gap-4 border border-dashed p-5">
               <div className="flex items-center gap-3">
-              <QuestionIcon size={20} weight="fill" className="text-warning-ink shrink-0" aria-hidden="true" />
-              <h2 className="text-h4 text-warning-ink">
+              <QuestionIcon size={20} weight="fill" className="text-destructive shrink-0" aria-hidden="true" />
+              <h2 className="text-h4 text-destructive-ink">
               {view.openRfis.length === 1
               ? "One thing is needed before we can file"
               : `${view.openRfis.length} things are needed before we can file`}
@@ -84,13 +110,13 @@ export default async function Page() {
               </div>
               <ul className="flex flex-col gap-3">
               {view.openRfis.map((rfi) => (
-              <li key={rfi.id} className="border-warning/40 bg-surface flex flex-wrap items-center gap-4 border p-4">
+              <li key={rfi.id} className="border-destructive/40 bg-surface flex flex-wrap items-center gap-4 border p-4">
               <span className="text-body-sm min-w-0 flex-1">{rfi.question}</span>
               <ButtonLink href="/help" variant="primary">Send it</ButtonLink>
               </li>
               ))}
               </ul>
-              <p className="text-caption text-warning-ink">
+              <p className="text-caption text-destructive-ink">
               Your filing is paused until this arrives. Nothing else is blocked.
               </p>
               </section>
@@ -145,7 +171,7 @@ export default async function Page() {
                 <BigFact
                 label="Open questions"
                 value={String(view.openRfis.length)}
-                tone={view.openRfis.length > 0 ? "warning" : "success"}
+                tone={view.openRfis.length > 0 ? "danger" : "success"}
                 mono
                 />
                 </BigFactGrid>
@@ -257,36 +283,57 @@ export default async function Page() {
         ]}
       />
 
-      <div className="mx-auto w-full max-w-(--container-content) px-5 pb-10 sm:px-8">
-        <details className="border-border border">
-          <summary className="text-body-sm hover:bg-accent cursor-pointer px-5 py-3 font-medium">
-            What ZeroCorp can form <span className="text-muted-foreground font-mono">{entities.length}</span>
-          </summary>
-          <div className="border-border border-t">
-          <Rows>
-            {entities.map((entity) => (
-              <Row key={`${entity.jurisdictionCode}-${entity.code}`}>
-                <BuildingsIcon size={18} className="text-muted-foreground shrink-0" aria-hidden="true" />
-                <span className="text-body-sm w-40 shrink-0 font-medium">{entity.customerLabel}</span>
-                <span className="text-body-sm text-muted-foreground w-32 shrink-0">
-                  {entity.jurisdictionCode.toUpperCase()}
-                </span>
-                <span className="text-caption text-muted-foreground min-w-0 flex-1">
-                  Typically {entity.typicalDaysMin} to {entity.typicalDaysMax} days
-                </span>
-                {/*
-                  The honesty field, rendered. A founder is never told a filing is
-                  automatic when a ZeroCorp operator does it by hand.
-                */}
-                <StatusBadge tone={entity.automationLevel === "automated" ? "success" : "info"}>
-                  {entity.automationLevel === "automated" ? "Automated" : "Filed by an operator"}
-                </StatusBadge>
-              </Row>
-            ))}
-          </Rows>
-          </div>
-        </details>
+      <div className="mx-auto flex w-full max-w-(--container-content) flex-col gap-4 px-5 pb-10 sm:px-8">
+        <Panel title="What ZeroCorp can form" count={entities.length}>
+          {/*
+            One card per structure, each in its OWN colour.
+
+            It was four rows welded into a bordered slab, in one grey, and a founder
+            comparing an LLC in Wyoming against a Ltd in the UK could not tell the four
+            apart without reading every line. The tone is keyed to the STRUCTURE, so the
+            same structure is the same colour wherever it appears on this screen —
+            including the "Structure" fact above. A colour that tracked the data would be
+            a status; this is a category.
+
+            Separated, not welded. Standing rule.
+          */}
+          <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            {entities.map((entity) => {
+              const t = STRUCTURE_TONE[entity.code] ?? STRUCTURE_TONE_FALLBACK;
+              return (
+                <li
+                  key={`${entity.jurisdictionCode}-${entity.code}`}
+                  className={cx(
+                    "flex flex-col gap-3 border p-4",
+                    "duration-glide ease-glide transition-transform motion-safe:hover:-translate-y-0.5",
+                    t.edge,
+                    t.wash,
+                  )}
+                >
+                  <div className="flex items-center gap-2.5">
+                    <BuildingsIcon size={20} weight="duotone" className={cx("shrink-0", t.ink)} aria-hidden="true" />
+                    <span className={cx("text-h4 leading-none", t.ink)}>{entity.customerLabel}</span>
+                  </div>
+                  <span className={cx("text-caption w-fit border px-2 py-1 font-mono tracking-wide", t.edge, t.ink)}>
+                    {entity.jurisdictionCode.toUpperCase()}
+                  </span>
+                  <span className="text-caption text-muted-foreground">
+                    Typically {entity.typicalDaysMin} to {entity.typicalDaysMax} days
+                  </span>
+                  {/*
+                    The honesty field, rendered. A founder is never told a filing is
+                    automatic when a ZeroCorp operator does it by hand.
+                  */}
+                  <StatusBadge tone={entity.automationLevel === "automated" ? "success" : "info"}>
+                    {entity.automationLevel === "automated" ? "Automated" : "Filed by an operator"}
+                  </StatusBadge>
+                </li>
+              );
+            })}
+          </ul>
+        </Panel>
       </div>
+
     </>
   );
 }

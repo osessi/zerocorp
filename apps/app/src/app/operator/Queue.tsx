@@ -128,7 +128,7 @@ export function Queue({
                   <li
                     key={row.orderId}
                     className={cx(
-                      "border-border flex flex-col gap-3 border-b px-5 py-4 last:border-b-0",
+                      "border-border flex flex-col gap-3 border px-5 py-4",
                       ours ? "bg-surface-sunken" : "hover:bg-accent",
                     )}
                   >
@@ -191,9 +191,9 @@ export function Queue({
           {actions.length === 0 ? (
             <p className="text-body-sm text-muted-foreground">Nothing recorded yet.</p>
           ) : (
-            <ul className="border-border border">
+            <ul className="flex flex-col gap-2">
               {actions.map((a, i) => (
-                <li key={i} className="border-border flex items-center gap-4 border-b px-5 py-3 last:border-b-0">
+                <li key={i} className="border-border flex items-center gap-4 border px-5 py-3">
                   <span className="text-body-sm min-w-0 flex-1 font-mono">{a.action}</span>
                   <span className="text-caption text-muted-foreground truncate">{a.detail ?? ""}</span>
                   <time className="text-caption text-muted-foreground font-mono tabular-nums">

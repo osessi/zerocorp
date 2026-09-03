@@ -193,7 +193,7 @@ export function Intake({
 
           <section className="flex flex-col gap-4">
             <h2 className="text-h4">Choose the structure</h2>
-            <div className="border-border border">
+            <div className="flex flex-col gap-2">
               {entities.map((e) => {
                 const key = `${e.jurisdictionCode}:${e.code}`;
                 const active = choice === key;
@@ -201,7 +201,7 @@ export function Intake({
                   <label
                     key={key}
                     className={cx(
-                      "border-border flex cursor-pointer items-center gap-4 border-b px-5 py-4 transition-[background-color] duration-normal last:border-b-0",
+                      "border-border flex cursor-pointer items-center gap-4 border px-5 py-4 transition-[background-color] duration-normal",
                       active ? "bg-surface-sunken" : "hover:bg-accent",
                     )}
                   >

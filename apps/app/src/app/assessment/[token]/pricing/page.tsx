@@ -55,15 +55,15 @@ export default async function Page({ params }: { params: Promise<{ token: string
         <p className="text-body text-muted-foreground max-w-prose">{proposal.recommendationReason}</p>
       </div>
 
-      <div className="border-border grid grid-cols-1 gap-px border bg-border sm:grid-cols-2">
-        <section className="bg-background flex flex-col gap-2 p-6">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <section className="border-border bg-background flex flex-col gap-2 border p-6">
           <p className="text-overline text-muted-foreground">One-time setup</p>
           <p className="text-h1 font-mono tabular-nums">{formatMoney(setup)}</p>
           <p className="text-body-sm text-muted-foreground">
             {included.length} steps, from where you are today to a first list of prospects.
           </p>
         </section>
-        <section className="bg-background flex flex-col gap-2 p-6">
+        <section className="border-border bg-background flex flex-col gap-2 border p-6">
           <p className="text-overline text-muted-foreground">Then, monthly</p>
           <p className="text-h1 font-mono tabular-nums">
             {formatMoney(subscription)}
@@ -75,7 +75,7 @@ export default async function Page({ params }: { params: Promise<{ token: string
         </section>
       </div>
 
-      <section className="border-border border-t pt-8">
+      <section className="pt-8">
         <h2 className="text-overline text-muted-foreground pb-4">What you approved</h2>
         <ul className="flex flex-col gap-3">
           {included.map((step) => (

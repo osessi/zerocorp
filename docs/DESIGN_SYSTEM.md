@@ -146,7 +146,7 @@ They share the token *architecture*, never the token *values*. See §15 and §16
 | `--ring` | `#00786F` | Focus ring |
 | `--destructive` | `#DC2626` | Destructive actions, errors |
 | `--success` | `#15803D` | Completed, healthy, verified |
-| `--warning` | `#B45309` | Needs attention, degraded, expiring |
+| `--warning` | `#8A6A00` | Needs attention, degraded, expiring |
 | `--info` | `#2563EB` | Neutral information, guidance |
 | `--processing` | `#00786F` | In progress, pending, running |
 
@@ -643,7 +643,7 @@ Numbers are Geist Mono. A tooltip exists to be compared against another tooltip 
 | `--primary-emphasis` | `#2DD4BF` | **PROPOSED** — teal **text**, links and icons on dark only |
 | `--destructive` | `#EF4444` | **PROPOSED** — `#DC2626` reaches only 4.10:1 on `#0A0A0A` |
 | `--success` | `#22C55E` | **PROPOSED** — 8.69:1 · `#15803D` reaches only 3.95:1 |
-| `--warning` | `#F59E0B` | **PROPOSED** — 9.22:1 · `#B45309` reaches only 3.94:1 |
+| `--warning` | `#EAB308` | **PROPOSED** — 10.32:1 · the light `#8A6A00` reaches only 3.91:1 |
 | `--info` | `#3B82F6` | **PROPOSED** — 5.38:1 · `#2563EB` reaches only 3.83:1 |
 | `--processing` | `#2DD4BF` | **PROPOSED** — 10.64:1 · same value as `--primary-emphasis` |
 
@@ -676,7 +676,7 @@ on dark — not a second accent.
 
 ```text
 success      #15803D      completed · healthy · verified
-warning      #B45309      needs attention · degraded · expiring
+warning      #8A6A00      needs attention · degraded · expiring
 info         #2563EB      neutral information · guidance
 processing   #00786F      in progress · pending · running
 destructive  #DC2626      failed · error · destructive action
@@ -708,7 +708,7 @@ Computed against WCAG 2.1. Recorded so nobody re-derives them.
 | `#F0FDFA` on `#00786F` | **5.16:1** | AA text ✓ |
 | `#2563EB` info | **5.17:1** | AA text ✓ |
 | `#15803D` success | **5.02:1** | AA text ✓ |
-| `#B45309` warning | **5.02:1** | AA text ✓ |
+| `#8A6A00` warning | **5.07:1** | AA text ✓ |
 | `#DC2626` destructive | **4.83:1** | AA text ✓ |
 | `#6E6C66` muted-foreground | **5.25:1** | AA text ✓ · and on every other ground, below |
 | `#847F75` input border | **3.98:1** | non-text contrast ✓ · and on every other ground, below |
@@ -721,7 +721,7 @@ Computed against WCAG 2.1. Recorded so nobody re-derives them.
 | Pair | Ratio | Verdict |
 |---|---:|---|
 | `#2DD4BF` processing | **10.64:1** | AA ✓ |
-| `#F59E0B` warning | **9.22:1** | AA ✓ |
+| `#EAB308` warning | **10.32:1** | AA ✓ |
 | `#22C55E` success | **8.69:1** | AA ✓ |
 | `#3B82F6` info | **5.38:1** | AA ✓ |
 | `#EF4444` destructive | **5.26:1** | AA ✓ |
@@ -2569,6 +2569,55 @@ status tones, and those tones already mean something specific.
 
 ---
 
+### 4.9 The warning family is gold, not amber — VALIDATED 2026-09-03
+
+> **`--warning` is `#8A6A00` and `--warning-ink` is `#3D3300`. No text in the product is
+> brown.**
+
+`#B45309` on `#FEF3C7` with `#92400E` text is the pale-amber-panel-with-brown-heading that
+every generated interface ships, and it was named as exactly that. The hue moved from 26°
+to 46° — gold rather than rust — and the ink dropped to a near-black olive, so a warning
+still reads as a warning and none of it reads as machine output.
+
+| token | was | now | measured 2026-09-03 |
+| --- | --- | --- | --- |
+| `--warning` | `#B45309` | `#8A6A00` | 5.07 surface · 4.65 muted · 4.41 accent · 4.39 on its own subtle |
+| `--warning-ink` | `#92400E` | `#3D3300` | 12.56 surface · 11.52 muted · 10.88 on subtle |
+| `--warning-subtle` | `#FEF3C7` | `#F7F0C2` | 1.15 vs the page, up from 1.11 |
+| `--warning-wash` | `#FFFBEB` | `#FBF7DD` | 1.08 vs the page, up from 1.01 |
+
+Separation from `--accent-highlight` `#FACC15` is **3.31**, up from 3.28. §4.8 still forbids
+the two in one component; the margin is simply better than it was.
+
+Dark moved with it: `--warning` and `--warning-ink` to `#EAB308`, `--warning-subtle` to
+`#221E04`, `--warning-wash` to `#161303`.
+
+---
+
+### 21.29 No block is welded to another — VALIDATED 2026-09-03
+
+> **Every card, row and metric is its own object with an edge on four sides. The gap is
+> what separates them.**
+
+Three idioms build the same slab, and all three shipped and were rejected:
+
+```text
+gap-px over a border-coloured ground    a grid whose gutters are drawn as seams
+last:border-b-0                         rows sharing a divider inside one box
+divide-y / divide-x                     the same, spelled with a plugin
+```
+
+A welded grid is also where §21.27 comes back: every seam in it is a `border-b` by another
+name. That is why the two rules keep catching the same commit, and why both are now gates
+rather than conventions — `tests/architecture/design-tokens.test.ts`, *never welds blocks
+into one slab*. It is scoped to shipped surfaces; `apps/app/src/app/design-system` is the
+internal gallery and is exempt by name, with the reason written next to the exemption.
+
+The calendar was the one honest candidate for a mesh and was measured against the rule
+anyway: separated cells read as days, welded cells read as a spreadsheet.
+
+---
+
 ### 21.28 Every region is centred on the workspace — VALIDATED 2026-09-03
 
 > **Nothing spans the raw width of the content area. Every band — a page header, a tab
@@ -2597,6 +2646,18 @@ notice the misalignment; they notice the screen feels unfinished and cannot say 
 
 > Same rule, same reason, as §21.27 on left bars: an element that decides its own edges is
 > an element that disagrees with its neighbours.
+
+**Amended 2026-09-03 — a tab strip is centred, not merely contained.**
+
+The first reading of this rule aligned a `Tabs` strip to the content column and stopped
+there, so on a wide screen the tabs still hugged the left edge of the workspace while
+sitting inside the right container. That was answered with "tu sais ce que veut dire
+centraliser au mieux ?", which settles it: the tablist is centred in the band
+(`justify-center`), and an action, if there is one, is pinned to the trailing edge
+absolutely so it cannot push the tabs off centre.
+
+Containment is the floor. A sub-navigation that names the sections of the workspace sits in
+the middle of it.
 
 ---
 

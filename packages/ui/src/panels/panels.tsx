@@ -129,11 +129,19 @@ export function MetricGrid({
 }) {
   return (
     <div className="flex flex-col gap-3">
-      <div className="border-border grid grid-cols-1 divide-y divide-(--border) border sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+      {/* Separated, never welded: three metrics are three objects, and the gap is what
+          says so. A divide-y grid is the same slab with the seams drawn in. */}
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         {items.map((m) => (
           /* The WHOLE cell carries the tone, not just the icon tile. Three numbers on one
              ground read as one measurement repeated; three grounds read as three facts. */
-          <div key={m.label} className={cx("flex flex-col gap-3 p-4", m.tone ? METRIC_WASH[m.tone] : "")}>
+          <div
+            key={m.label}
+            className={cx(
+              "flex flex-col gap-3 border p-4",
+              m.tone ? METRIC_WASH[m.tone] : "border-border bg-surface",
+            )}
+          >
             {/*
               The label row used to be a grey icon beside grey text, three times over, so
               three different facts arrived with identical weight. The icon now sits in a

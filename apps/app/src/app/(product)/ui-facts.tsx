@@ -17,7 +17,7 @@ import { cx } from "@zerocorp/ui";
  * teal, structure always violet. A colour that changes with the data is a status; this
  * is a category.
  */
-export type FactTone = "processing" | "ai" | "info" | "success" | "warning" | "neutral";
+export type FactTone = "processing" | "ai" | "info" | "success" | "warning" | "danger" | "neutral";
 
 /**
  * A FULL border, on all four sides.
@@ -27,12 +27,15 @@ export type FactTone = "processing" | "ai" | "info" | "success" | "warning" | "n
  * time. A border is on every side or on none — there is now a CI rule so this cannot come
  * back a fourth.
  */
-const TONE: Record<FactTone, { edge: string; ink: string; wash: string }> = {
+export const FACT_TONE: Record<FactTone, { edge: string; ink: string; wash: string }> = {
   processing: { edge: "border-processing", ink: "text-processing-ink", wash: "bg-processing-wash" },
   ai: { edge: "border-ai", ink: "text-ai-ink", wash: "bg-ai-wash" },
   info: { edge: "border-info", ink: "text-info-ink", wash: "bg-info-wash" },
   success: { edge: "border-success", ink: "text-success-ink", wash: "bg-success-wash" },
   warning: { edge: "border-warning", ink: "text-warning-ink", wash: "bg-warning-wash" },
+  /* Something is waiting on the founder. RED, never yellow: yellow is the §4.8
+     non-semantic accent and a blocked filing is not decoration. */
+  danger: { edge: "border-destructive", ink: "text-destructive-ink", wash: "bg-destructive-wash" },
   neutral: { edge: "border-border", ink: "text-foreground", wash: "bg-surface" },
 };
 
@@ -55,7 +58,7 @@ export function BigFact({
   tone?: FactTone;
   mono?: boolean;
 }) {
-  const t = TONE[tone];
+  const t = FACT_TONE[tone];
   return (
     <div className={cx("flex flex-col gap-2 border p-5", t.edge, t.wash)}>
       <span className="text-overline text-muted-foreground">{label}</span>

@@ -83,12 +83,17 @@ export function Tabs({
   return (
     <div className="flex flex-col">
       {/*
-        The BAND spans the width; its CONTENT is centred on the same container as the page
-        body. §21.28. A strip starting at a different x than the table under it makes the
-        screen feel unfinished for a reason nobody can name.
+        The BAND spans the width; the TABS sit in the middle of it. §21.28.
+
+        The first reading of "centralised in the workspace" was "aligned to the content
+        column", so the strip started at the same x as the table under it and still hugged
+        the left edge of a 1500px screen. That was answered with "tu sais ce que veut dire
+        centraliser au mieux ?", which settles it: centred means centred. The tablist is
+        now optically in the centre of the workspace and the action, if there is one, is
+        pinned right without pushing the tabs off centre.
       */}
       <div className="border-border bg-surface sticky top-0 z-20 border-b">
-        <div className="mx-auto flex w-full max-w-(--container-content) items-end justify-between gap-4 overflow-x-auto px-5 sm:px-8">
+        <div className="relative mx-auto flex w-full max-w-(--container-content) items-end justify-center gap-4 overflow-x-auto px-5 sm:px-8">
         <div role="tablist" aria-label="Sections" className="flex items-stretch">
           {tabs.map((tab) => {
             const on = tab.id === current?.id;
@@ -135,7 +140,7 @@ export function Tabs({
             );
           })}
         </div>
-        {action ? <div className="shrink-0 py-2">{action}</div> : null}
+        {action ? <div className="absolute end-5 shrink-0 py-2 sm:end-8">{action}</div> : null}
         </div>
       </div>
 

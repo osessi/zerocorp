@@ -100,9 +100,9 @@ export default async function Page({ params }: { params: Promise<{ token: string
       </Panel>
 
       <Panel icon={WarningIcon} eyebrow="What is missing">
-        <ul className="flex flex-col">
+        <ul className="flex flex-col gap-2">
           {analysis.whatIsMissing.map((gap: AnalysisGap) => (
-            <li key={gap.title} className="border-border flex flex-col gap-2 border-b py-5 last:border-b-0">
+            <li key={gap.title} className="border-border flex flex-col gap-2 border p-5">
               <div className="flex flex-wrap items-center gap-3">
                 <h3 className="text-h4">{gap.title}</h3>
                 <StatusBadge tone={SEVERITY_TONE[gap.severity]}>{SEVERITY_LABEL[gap.severity]}</StatusBadge>

@@ -430,4 +430,67 @@ describe("design tokens — the two systems stay separate", () => {
 
     expect(offenders, offenders.join("\n")).toEqual([]);
   });
+
+  /**
+   * No cards welded together.
+   *
+   * Three idioms build the same slab, and all three have shipped and been rejected:
+   *
+   *   `gap-px` over a border-coloured ground   a grid whose gutters are drawn as seams
+   *   `last:border-b-0`                        rows sharing a divider inside one box
+   *   `divide-y` / `divide-x`                  the same, spelled with a plugin
+   *
+   * The standing rule, given for the third time on 2026-09-03: "je ne veux plus non plus
+   * des cartes de donnees collees a 4, chaque bloc doit etre separe". A block is its own
+   * object with an edge on four sides, and the SPACE between them is what says so.
+   *
+   * Not a taste question. A welded grid is also where single-side borders come back:
+   * every seam in it is a `border-b` or a `divide-y` by another name, which is why this
+   * rule and the one above it keep catching the same commit.
+   *
+   * The calendar was the one honest candidate for a mesh and it was measured against the
+   * rule anyway: separated cells read as days, welded cells read as a spreadsheet.
+   *
+   * §32b demonstration -- restoring `divide-y` on MetricGrid gives:
+   *   AssertionError: packages/ui/src/panels/panels.tsx: divide-y welds blocks together
+   */
+  it("never welds blocks into one slab", () => {
+    expect(UI_SOURCES.length).toBeGreaterThan(20);
+    const WELDS = [
+      [/\bgap-px\b/, "gap-px"],
+      [/\blast:border-[tblr]-0\b/, "last:border-b-0"],
+      [/\bdivide-[xy]\b/, "divide-x/y"],
+    ] as const;
+    const offenders: string[] = [];
+
+    /*
+      SHIPPED surfaces only, and the exemption is named rather than implied.
+
+      `apps/app/src/app/design-system` is the internal gallery: pages whose job is to
+      show what a component looked like, including prototypes kept deliberately as a
+      record of rejected directions. Holding a museum to the rule would mean editing the
+      exhibits. Nothing under it is reachable by a customer.
+
+      Everything a founder can open is in scope, packages/ui included.
+    */
+    const SHIPPED = UI_SOURCES.filter((f) => !f.includes("/app/design-system/"));
+    expect(SHIPPED.length).toBeGreaterThan(20);
+
+    for (const file of SHIPPED) {
+      const body = code(file);
+      const classLists = [
+        ...body.matchAll(/className=\{cx\(([\s\S]*?)\)\}/g),
+        ...body.matchAll(/className="([^"]*)"/g),
+        ...body.matchAll(/className=\{`([^`]*)`\}/g),
+      ].map((m) => m[1] ?? "");
+
+      for (const list of classLists) {
+        for (const [pattern, name] of WELDS) {
+          if (pattern.test(list)) offenders.push(`${file}: ${name} welds blocks together`);
+        }
+      }
+    }
+
+    expect(offenders, offenders.join("\n")).toEqual([]);
+  });
 });

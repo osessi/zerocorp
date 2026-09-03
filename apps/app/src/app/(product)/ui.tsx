@@ -42,10 +42,15 @@ export function Panel({
  *
  * A dashed outline rather than a filled card: it reads as a space waiting to be filled,
  * which is what it is. A solid panel with "no data" in it reads as a thing that broke.
+ *
+ * The interior is SUNKEN, one step down from the page. On white it was a dashed rectangle
+ * around white, which is the same non-shape as the page itself and disappeared entirely.
+ * --surface-sunken is 1.14 against the page: enough to read as a well, not enough to
+ * compete with anything that has content in it.
  */
 export function Empty({ title, body, action }: { title: string; body: string; action?: ReactNode }) {
   return (
-    <div className="border-border flex flex-col items-start gap-3 border border-dashed p-6">
+    <div className="border-border bg-surface-sunken flex flex-col items-start gap-3 border border-dashed p-6">
       <p className="text-body-sm font-medium">{title}</p>
       <p className="text-body-sm text-muted-foreground max-w-prose text-pretty">{body}</p>
       {action}
@@ -63,25 +68,40 @@ export function Fact({ label, value, tone }: { label: string; value: ReactNode; 
   );
 }
 
+/**
+ * Facts side by side, SEPARATED.
+ *
+ * This was a 1px-gap grid over a border-coloured ground, so four facts read as four cells
+ * of one table welded together. Standing rule, given for the third time on 2026-09-03:
+ * every block is its own object and the gap is what says so.
+ */
 export function FactGrid({ children }: { children: ReactNode }) {
-  return <div className="border-border bg-border grid grid-cols-2 gap-px border lg:grid-cols-4">{children}</div>;
+  return <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">{children}</div>;
 }
 
-/** Wraps a Fact so the grid's 1px gaps read as rules rather than gutters. */
+/** One fact, with its own edge on all four sides. */
 export function FactCell({ children }: { children: ReactNode }) {
-  return <div className="bg-background">{children}</div>;
+  return <div className="border-border bg-surface border">{children}</div>;
 }
 
+/**
+ * A list of records, SEPARATED.
+ *
+ * The rows used to share a `border-b` inside one outer box: a slab, and a single-side
+ * border, which is the shape the standing rule bans. Each row is now its own card with an
+ * edge on four sides, and 8px of air between them keeps a long list dense without welding
+ * it. §21.12 RecordCardList.
+ */
 export function Rows({ children }: { children: ReactNode }) {
-  return <ul className="border-border border">{children}</ul>;
+  return <ul className="flex flex-col gap-2">{children}</ul>;
 }
 
 export function Row({ children, muted }: { children: ReactNode; muted?: boolean }) {
   return (
     <li
       className={cx(
-        "border-border hover:bg-accent flex flex-wrap items-center gap-4 border-b px-5 py-4 last:border-b-0",
-        "transition-[background-color] duration-normal ease-out",
+        "border-border bg-surface hover:border-border-hover hover:bg-accent flex flex-wrap items-center gap-4 border px-5 py-3.5",
+        "duration-glide ease-glide transition-[background-color,border-color]",
         muted && "opacity-60",
       )}
     >
