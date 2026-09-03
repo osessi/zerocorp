@@ -163,7 +163,14 @@ export function Shell({
       }
       announcement={
         announcement ? (
-          <>
+          /*
+            Dashed, on all four sides.
+
+            Dotted says "this is provisional, something is still moving" without spending
+            a second solid weight on a bar that already carries a colour and an icon — and
+            it is the treatment asked for, more often than it has been used.
+          */
+          <div className="border-destructive bg-destructive-subtle -mx-2 flex min-w-0 flex-1 items-center gap-3 border border-dashed px-3 py-1.5">
             <WarningIcon size={17} weight="fill" className="text-destructive-ink shrink-0" aria-hidden="true" />
             <p className="text-body-sm text-destructive-ink min-w-0 flex-1 truncate">
               <span className="font-semibold">Waiting on you.</span> {announcement.message}
@@ -171,7 +178,7 @@ export function Shell({
             <ButtonLink href={announcement.href} variant="primary">
               {announcement.action}
             </ButtonLink>
-          </>
+          </div>
         ) : null
       }
       topBar={

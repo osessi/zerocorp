@@ -430,12 +430,17 @@ export function Tabs({
             aria-selected={on}
             onClick={() => onSelect(t.id)}
             className={cx(
-              "text-label -mb-px flex shrink-0 items-center gap-2 border-b-2 py-3",
-              "transition-[color,background-color,border-color] duration-normal ease-out",
+              "text-label relative flex shrink-0 items-center gap-2 py-3",
+              "transition-[color,background-color] duration-normal ease-out",
               "focus-visible:outline-ring focus-visible:outline-2 focus-visible:outline-offset-2",
-              on ? "border-foreground text-foreground" : "text-muted-foreground border-transparent",
+              on ? "text-foreground" : "text-muted-foreground",
             )}
           >
+            {/* The selected rule is a positioned span, not `border-b-2`. A thickened
+                single edge is the banned accent shape wherever it appears, and the CI
+                rule cannot tell a tab underline from a bar down the side of a card. The
+                shipped Tabs component does the same. */}
+            {on ? <span className="bg-foreground absolute inset-x-0 -bottom-px h-0.5" aria-hidden="true" /> : null}
             {t.label}
             {/*
               The count carries the tone of what it counts. Four businesses forming and

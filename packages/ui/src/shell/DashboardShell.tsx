@@ -311,13 +311,17 @@ export function DashboardShell({
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
+        {/*
+          The tone never touches the header's own rule.
+
+          The header keeps a neutral `border-b`, which is structure — a hairline dividing
+          two regions. Adding `border-destructive` beside it put a tone on a single edge
+          for the fifth time, and the CI rule missed it because the two classes were on
+          two different lines of one cx() call. Both are fixed: the announcement carries
+          its own DASHED border on four sides, and the rule now reads a window of lines.
+        */}
         {announcement ?? topBar ? (
-          <header
-            className={cx(
-              "border-border flex h-14 shrink-0 items-center gap-4 border-b px-5 sm:px-8",
-              announcement ? "border-destructive bg-destructive-subtle" : null,
-            )}
-          >
+          <header className="border-border flex h-14 shrink-0 items-center gap-4 border-b px-5 sm:px-8">
             {announcement ?? topBar}
           </header>
         ) : null}

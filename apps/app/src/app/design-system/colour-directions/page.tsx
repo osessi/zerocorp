@@ -162,7 +162,7 @@ function Fragment({ hasAi, hasAction }: { hasAi: boolean; hasAction: boolean }) 
           return (
             <div
               key={t}
-              className="border-border flex gap-3 border border-l-2 p-3"
+              className="border-border flex gap-3 border p-3"
               style={{ borderLeftColor: `var(--p-${t})`, background: `var(--p-${t}-subtle)` }}
             >
               <G size={20} aria-hidden="true" className="mt-0.5 shrink-0" style={{ color: `var(--p-${t}-ink)` }} />
@@ -238,7 +238,7 @@ function Fragment({ hasAi, hasAction }: { hasAi: boolean; hasAction: boolean }) 
         <div className="flex flex-col gap-2">
           <span className="text-overline text-muted-foreground uppercase">Waiting on you</span>
           <div
-            className="border-border flex items-center justify-between gap-3 border border-l-2 p-3"
+            className="border-border flex items-center justify-between gap-3 border p-3"
             style={{ borderLeftColor: "var(--p-action)", background: "var(--p-action-subtle)" }}
           >
             <span className="text-body-sm inline-flex items-center gap-2" style={{ color: "var(--p-action)" }}>

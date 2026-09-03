@@ -377,17 +377,54 @@ describe("design tokens — the two systems stay separate", () => {
     const offenders: string[] = [];
 
     for (const file of UI_SOURCES) {
-      for (const line of code(file).split("\n")) {
-        // A sided border of ANY form — `border-b`, `border-b-2`, `border-l-warning` —
-        // on the same line as a tone colour.
-        //
-        // The first version required a width or a tone suffix, so a bare `border-b`
-        // beside `border-warning` slipped through and shipped as a yellow band across
-        // the top of the dashboard. A rule with a hole is worse than no rule: it was
-        // green while the thing it exists to stop was on screen.
-        if (!/\bborder-[tblr]\b|\bborder-[tblr]-/.test(line)) continue;
-        if (!new RegExp(`\\bborder-(?:[tblr]-)?(?:${TONES})\\b`).test(line)) continue;
-        offenders.push(`${file}: ${line.trim().slice(0, 90)}`);
+      /*
+        One className AT A TIME, however many lines it spans.
+
+        Three holes, each found only after the rule reported green while the banned shape
+        was on screen:
+
+          1. requiring a WIDTH or a tone SUFFIX, so `border-b` beside `border-warning`
+             matched neither
+          2. reading a single line, so a cx() call splitting the sided border and the tone
+             across two lines matched neither
+          3. reading a WINDOW of lines, which then flagged a neutral `border-t` because an
+             unrelated sibling five lines away carried a tone
+
+        The unit that matters is one element's class list. Extracting each `className` and
+        testing it alone has no window to be wrong about.
+
+        A rule with a hole is worse than no rule — CLAUDE_CODE_RULES §32b.
+      */
+      const body = code(file);
+      const classLists = [
+        ...body.matchAll(/className=\{cx\(([\s\S]*?)\)\}/g),
+        ...body.matchAll(/className="([^"]*)"/g),
+        ...body.matchAll(/className=\{`([^`]*)`\}/g),
+      ].map((m) => m[1] ?? "");
+
+      for (const list of classLists) {
+        /*
+          Two shapes, two tests.
+
+          A THICKENED single edge — `border-l-2`, `border-t-4` — is the banned shape on
+          its own, whatever colour it ends up being. That is what makes it read as an
+          accent bar rather than a divider, and it is flagged unconditionally.
+
+          Why unconditionally: the fourth hole in this rule was Alert, whose tone arrives
+          as `TONE_EDGE[tone]` — a variable. No amount of reading the class list finds a
+          colour that is not written in it. The width is the part that is always literal.
+
+          A HAIRLINE single edge (`border-b`) is a divider and legitimate, so it is only
+          an offence when a tone is written beside it.
+        */
+        // -0 is a RESET, not an accent: `lg:border-t-0` removes a border at a breakpoint.
+        if (/\bborder-[tblr]-[1-9]/.test(list)) {
+          offenders.push(`${file}: ${list.replace(/\s+/g, " ").trim().slice(0, 90)}`);
+          continue;
+        }
+        if (!/\bborder-[tblr]\b|\bborder-[tblr]-/.test(list)) continue;
+        if (!new RegExp(`\\bborder-(?:[tblr]-)?(?:${TONES})\\b`).test(list)) continue;
+        offenders.push(`${file}: ${list.replace(/\s+/g, " ").trim().slice(0, 90)}`);
       }
     }
 
