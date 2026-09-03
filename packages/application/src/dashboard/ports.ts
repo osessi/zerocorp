@@ -62,6 +62,8 @@ export interface BusinessState {
   readonly leadsReplied: number;
   readonly leadsQualified: number;
   readonly keywords: number;
+  /** Prospects with no lawful basis. A liability rather than a lead — C2, §29.3 block 9. */
+  readonly leadsNoBasis: number;
   readonly mailboxes: number;
   readonly warmupDay: number | null;
   readonly warmupTotal: number;

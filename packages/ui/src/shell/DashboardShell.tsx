@@ -320,9 +320,18 @@ export function DashboardShell({
           two different lines of one cx() call. Both are fixed: the announcement carries
           its own DASHED border on four sides, and the rule now reads a window of lines.
         */}
-        {announcement ?? topBar ? (
+        {/*
+          When there is an announcement it IS the header, edge to edge.
+
+          It used to sit inside the header's own padding, so a full-width band had a gap
+          on the left and the right and read as a floating strip rather than the top of
+          the workspace. The header drops its padding and its rule; the band supplies both.
+        */}
+        {announcement ? (
+          <div className="shrink-0">{announcement}</div>
+        ) : topBar ? (
           <header className="border-border flex h-14 shrink-0 items-center gap-4 border-b px-5 sm:px-8">
-            {announcement ?? topBar}
+            {topBar}
           </header>
         ) : null}
         <main className="flex min-h-0 flex-1 flex-col overflow-y-auto">{children}</main>

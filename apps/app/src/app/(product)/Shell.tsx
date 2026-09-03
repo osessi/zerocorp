@@ -13,6 +13,7 @@ import {
   GearIcon,
   LifebuoyIcon,
   PaletteIcon,
+  CheckCircleIcon,
   SparkleIcon,
   WarningIcon,
   SignOutIcon,
@@ -65,6 +66,7 @@ export function Shell({
   email,
   needsYou,
   counts,
+  attention,
   announcement,
   children,
 }: {
@@ -72,6 +74,8 @@ export function Shell({
   needsYou: number;
   /** How much of each thing exists. Keyed by href so the nav stays the single list. */
   counts: Record<string, number>;
+  /** Which sections have something waiting on the founder. One meaning, everywhere. */
+  attention: Record<string, boolean>;
   /** The one thing blocking the account, shown on every screen. */
   announcement?: { message: string; href: string; action: string } | null;
   children: ReactNode;
@@ -133,14 +137,10 @@ export function Shell({
       if (item.href === "/dashboard") {
         return needsYou > 0 ? { ...base, badge: needsYou, attention: true } : base;
       }
-      // Company badges only when something is actually waiting, so the number there is
-      // an open question rather than a count of companies.
-      if (item.href === "/company") {
-        const open = counts["/company"] ?? 0;
-        return open > 0 ? { ...base, badge: open, attention: true } : base;
-      }
       const n = counts[item.href] ?? 0;
-      return n > 0 ? { ...base, badge: n } : base;
+      const wants = attention[item.href] ?? false;
+      if (n === 0) return wants ? { ...base, attention: true } : base;
+      return { ...base, badge: n, attention: wants };
     }),
   }));
 
@@ -162,15 +162,19 @@ export function Shell({
         </div>
       }
       announcement={
-        announcement ? (
-          /*
-            Dashed, on all four sides.
+        /*
+          The band always exists, and it says one of two things.
 
-            Dotted says "this is provisional, something is still moving" without spending
-            a second solid weight on a bar that already carries a colour and an icon — and
-            it is the treatment asked for, more often than it has been used.
-          */
-          <div className="border-destructive bg-destructive-subtle -mx-2 flex min-w-0 flex-1 items-center gap-3 border border-dashed px-3 py-1.5">
+          Dashed on all four sides, filling the top of the workspace exactly. An empty
+          strip when nothing is pending would be dead chrome; "nothing is waiting on you"
+          is the answer to the same question a founder opens the product to ask, and it is
+          worth a line.
+
+          Red when something is blocked, green when nothing is. Never yellow — yellow is
+          the non-semantic "look here" accent (§4.8) and this is a status.
+        */
+        announcement ? (
+          <div className="border-destructive bg-destructive-subtle flex h-14 items-center gap-3 border border-dashed px-5 sm:px-8">
             <WarningIcon size={17} weight="fill" className="text-destructive-ink shrink-0" aria-hidden="true" />
             <p className="text-body-sm text-destructive-ink min-w-0 flex-1 truncate">
               <span className="font-semibold">Waiting on you.</span> {announcement.message}
@@ -178,8 +182,17 @@ export function Shell({
             <ButtonLink href={announcement.href} variant="primary">
               {announcement.action}
             </ButtonLink>
+            <IconButton icon={BellIcon} label="Notifications" variant="ghost" />
           </div>
-        ) : null
+        ) : (
+          <div className="border-success bg-success-subtle flex h-14 items-center gap-3 border border-dashed px-5 sm:px-8">
+            <CheckCircleIcon size={17} weight="fill" className="text-success-ink shrink-0" aria-hidden="true" />
+            <p className="text-body-sm text-success-ink min-w-0 flex-1 truncate">
+              <span className="font-semibold">Nothing is waiting on you.</span> ZeroCorp is working through your plan.
+            </p>
+            <IconButton icon={BellIcon} label="Notifications" variant="ghost" />
+          </div>
+        )
       }
       topBar={
         /*

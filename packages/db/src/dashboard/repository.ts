@@ -93,6 +93,7 @@ export function createDashboardRepository(): DashboardRepository<Tx> {
           (select count(*) from leads where tenant_id = ${ctx.tenantId} and status = 'replied')   as leads_replied,
           (select count(*) from leads where tenant_id = ${ctx.tenantId} and status = 'qualified') as leads_qualified,
           (select count(*) from content_keywords where tenant_id = ${ctx.tenantId})               as keywords,
+          (select count(*) from leads where tenant_id = ${ctx.tenantId} and consent_basis is null) as leads_no_basis,
           (select count(*) from mailboxes where tenant_id = ${ctx.tenantId})                      as mailboxes,
           (select count(*) from pages where tenant_id = ${ctx.tenantId})                          as pages,
           (select count(*) from pages where tenant_id = ${ctx.tenantId} and status = 'published') as pages_published
@@ -191,6 +192,7 @@ export function createDashboardRepository(): DashboardRepository<Tx> {
           leadsReplied: n("leads_replied"),
           leadsQualified: n("leads_qualified"),
           keywords: n("keywords"),
+          leadsNoBasis: n("leads_no_basis"),
           mailboxes: n("mailboxes"),
           warmupDay: emailDomain && emailDomain.status !== "not_started" ? emailDomain.day : null,
           warmupTotal: 28,
