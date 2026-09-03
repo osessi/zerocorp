@@ -19,10 +19,13 @@ import {
   SectionHeader,
   StatusBadge,
   StatusStamp,
+  ButtonLink,
+  CONTROL_TRANSITION,
+  ENTER,
   cx,
+  staggerStyle,
   type AgentKey,
 } from "@zerocorp/ui";
-import { ButtonLink } from "@zerocorp/ui";
 import type { BusinessState, PlanStepRow } from "@zerocorp/application";
 import { outcomeFor, waitingFor } from "./outcome";
 import { getDashboardRepository, getUnitOfWork } from "../../../server/container";
@@ -128,10 +131,12 @@ function StepRow({
   step,
   anchor,
   state,
+  index,
 }: {
   step: PlanStepRow;
   anchor: boolean;
   state: BusinessState;
+  index: number;
 }) {
   const Icon = CATEGORY_ICON[step.category] ?? GearIcon;
   const done = step.status === "done";
@@ -142,12 +147,17 @@ function StepRow({
 
   return (
     <li
+      /* The plan settles one row at a time. 40ms — the option stagger, not the 90ms
+         reveal: this is a list you are about to scan, so it should be there by the time
+         the eye lands (§10). */
       className={cx(
         "border-border grid grid-cols-[auto_1fr_auto] items-center gap-x-4 gap-y-1 border-b px-4 py-3 last:border-b-0",
-        "transition-[background-color] duration-normal ease-out",
-        anchor ? "bg-surface-sunken" : "hover:bg-accent",
+        CONTROL_TRANSITION,
+        ENTER,
+        anchor ? "bg-surface-sunken" : "hover:bg-accent motion-safe:hover:translate-x-0.5",
         !step.included && "opacity-55",
       )}
+      style={staggerStyle(index)}
     >
       <StepMarker state={marker} />
 
@@ -303,9 +313,9 @@ export default async function Page() {
         }
         blocked={
           st.openRfi
-            ? { label: st.openRfi }
+            ? { label: st.openRfi, action: <ButtonLink href="/company" variant="primary">Send your passport page</ButtonLink> }
             : blockedStep
-              ? { label: blockedStep.title }
+              ? { label: blockedStep.title, action: <ButtonLink href="/company" variant="primary">Continue</ButtonLink> }
               : undefined
         }
         total={included.length}
@@ -313,10 +323,12 @@ export default async function Page() {
         current={runningIndex >= 0 ? runningIndex : undefined}
         /* The figures live IN the block now. They were a separate tinted row below it,
            which read as conditional formatting and left the block with an empty half. */
+        /* One highlighted figure per screen, never three. The yellow marks where to
+           look, and marking everything marks nothing (§4.8). */
         metrics={[
-          { label: "Launch progress", value: `${percent}%` },
+          { label: "Launch progress", value: `${percent}%`, highlight: needsYou === 0 },
           { label: "Steps done", value: `${done}`, sub: `of ${included.length}` },
-          { label: "Needs you", value: `${needsYou}` },
+          { label: "Needs you", value: `${needsYou}`, highlight: needsYou > 0 },
         ]}
         status={
           overview.companyStatus === "active" && overview.companyName ? (
@@ -342,8 +354,8 @@ export default async function Page() {
           <section className="flex flex-col gap-3">
             <SectionHeader title="What ZeroCorp is building" count={included.length} countTone="processing" />
             <ul className="border-border border">
-              {overview.steps.map((step) => (
-                <StepRow key={step.id} step={step} anchor={step.id === anchorId} state={st} />
+              {overview.steps.map((step, i) => (
+                <StepRow key={step.id} step={step} anchor={step.id === anchorId} state={st} index={i} />
               ))}
             </ul>
           </section>

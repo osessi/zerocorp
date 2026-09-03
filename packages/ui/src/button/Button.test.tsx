@@ -153,7 +153,13 @@ describe("Button — contrast findings that must not be undone", () => {
     // over 150ms carrying the label colour for the first frames. Measured in Chrome
     // 2026-08-31: outline-color was rgb(240,253,250) at 0ms and rgb(0,120,111) at 150ms.
     expect(BUTTON_BASE).not.toContain("transition-colors");
-    expect(BUTTON_BASE).toContain("transition-[color,background-color,border-color]");
+    // The list is explicit, and what matters is what is NOT in it: `outline` and
+    // `outline-color` never appear, so the ring is instant in every state. `transform`
+    // was added 2026-09-03 for the 1px press and hover lift — without it the movement
+    // snapped and the feedback could not be felt.
+    expect(BUTTON_BASE).toMatch(/transition-\[[^\]]*color[^\]]*\]/);
+    expect(BUTTON_BASE).not.toMatch(/transition-\[[^\]]*outline[^\]]*\]/);
+    expect(BUTTON_BASE).toContain("transform");
   });
 
   it("never removes the focus outline", () => {

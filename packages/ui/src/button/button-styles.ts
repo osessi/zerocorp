@@ -7,7 +7,7 @@
  * Every value here is a token. docs/DESIGN_SYSTEM.md §17.
  */
 import type { IconSize } from "../icon";
-import { COLOR_TRANSITION } from "../motion";
+import { CONTROL_TRANSITION } from "../motion";
 
 /**
  * Five variants, a prominence ladder built the way §1 says hierarchy is built —
@@ -39,7 +39,7 @@ export type ButtonSize = "sm" | "md" | "lg";
 export const BUTTON_BASE = [
   "inline-flex shrink-0 items-center justify-center",
   "rounded-none border whitespace-nowrap select-none",
-  COLOR_TRANSITION,
+  CONTROL_TRANSITION,
   "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
   // No disabled: styling here at all. `disabled` and `loading` both set the disabled
   // attribute and must NOT look the same, so both the dimming and the cursor are applied
@@ -50,7 +50,9 @@ export const BUTTON_BASE = [
   // needs a channel of its own that works identically in both themes and in greyscale.
   // 1px, not a bounce — §10 forbids decorative motion. The reduced-motion rule in
   // tokens.css collapses the transition, so it lands instantly for anyone who asked.
-  "active:translate-y-px",
+  // Lift on hover, press on click. One pixel each way, so the control feels like an
+  // object without ever becoming a toy. motion-safe only.
+  "motion-safe:hover:-translate-y-px active:translate-y-px",
 ].join(" ");
 
 /**

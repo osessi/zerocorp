@@ -15,6 +15,7 @@ export * from "./button/index";
 export type { IconSize } from "./icon";
 export * from "./tone";
 export { cx } from "./cx";
+export { COLOR_TRANSITION, CONTROL_TRANSITION } from "./motion";
 export * from "./overlay/index";
 export * from "./feedback/index";
 export * from "./field/index";

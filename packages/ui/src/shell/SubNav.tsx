@@ -1,5 +1,3 @@
-"use client";
-
 import type { ComponentType, ReactNode } from "react";
 import { cx } from "../cx";
 
@@ -16,6 +14,11 @@ import { cx } from "../cx";
  *
  * Anchors, not client state. Every sub-section is a real fragment on the page, so a tab
  * is a link a founder can send to someone, and the browser's own scrolling does the work.
+ *
+ * A SERVER component, deliberately. It was marked "use client" and it has no hooks and no
+ * handlers, so the directive bought nothing — and it broke every screen that used it: a
+ * server page passing an icon COMPONENT across the client boundary throws "Functions
+ * cannot be passed directly to Client Components". Five screens were dead.
  */
 export interface SubNavItem {
   readonly id: string;

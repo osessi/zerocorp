@@ -84,18 +84,61 @@ export function Shell({
     indistinguishable from an empty account. The count is the cheapest possible signal
     that the product is doing something.
   */
+  /*
+    Counts, sub-sections and attention.
+
+    ONE treatment for every count: the first version gave two of them the yellow accent
+    and left the rest grey, which reads as a job left half done. Attention is now the
+    ROW's business — a pulsing dot — and the count keeps one appearance everywhere.
+
+    The sub-sections mirror each screen's own tabs, so the sidebar describes the whole
+    product rather than only its seven front doors.
+  */
+  const SUB: Record<string, { label: string; href: string; count?: number }[]> = {
+    "/company": [
+      { label: "Entity", href: "/company#entity" },
+      { label: "Filing", href: "/company#filing", count: counts["/company"] ?? 0 },
+      { label: "Registrations", href: "/company#registrations" },
+      { label: "Documents", href: "/company#documents" },
+    ],
+    "/website": [
+      { label: "Pages", href: "/website#pages", count: counts["/website"] ?? 0 },
+      { label: "Domain", href: "/website#domain" },
+    ],
+    "/email": [
+      { label: "Authentication", href: "/email#auth" },
+      { label: "Warm-up", href: "/email#warmup" },
+      { label: "Mailboxes", href: "/email#mailboxes", count: counts["/email"] ?? 0 },
+    ],
+    "/content": [
+      { label: "Keywords", href: "/content#keywords" },
+      { label: "Calendar", href: "/content#calendar" },
+      { label: "Articles", href: "/content#articles", count: counts["/content"] ?? 0 },
+    ],
+    "/leads": [
+      { label: "Overview", href: "/leads#overview" },
+      { label: "Lists", href: "/leads#lists" },
+      { label: "Prospects", href: "/leads#leads", count: counts["/leads"] ?? 0 },
+    ],
+  };
+
   const groups = GROUPS.map((group) => ({
     ...group,
     items: group.items.map((item) => {
+      const children = SUB[item.href];
+      const base = children ? { ...item, children } : item;
+
       if (item.href === "/dashboard") {
-        return needsYou > 0 ? { ...item, badge: needsYou, badgeTone: "attention" as const } : item;
+        return needsYou > 0 ? { ...base, badge: needsYou, attention: true } : base;
+      }
+      // Company badges only when something is actually waiting, so the number there is
+      // an open question rather than a count of companies.
+      if (item.href === "/company") {
+        const open = counts["/company"] ?? 0;
+        return open > 0 ? { ...base, badge: open, attention: true } : base;
       }
       const n = counts[item.href] ?? 0;
-      if (n === 0) return item;
-      // Company only ever badges when something is actually waiting, so it is attention
-      // rather than a count: "1" next to Company means one open question, not one company.
-      const tone = item.href === "/company" ? ("attention" as const) : ("count" as const);
-      return { ...item, badge: n, badgeTone: tone };
+      return n > 0 ? { ...base, badge: n } : base;
     }),
   }));
 

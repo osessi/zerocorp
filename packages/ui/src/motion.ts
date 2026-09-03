@@ -21,3 +21,16 @@
  */
 export const COLOR_TRANSITION =
   "transition-[color,background-color,border-color] duration-normal ease-out";
+
+/**
+ * A control that also MOVES.
+ *
+ * `transform` was missing from the transition list, so the 1px press on every button
+ * snapped instead of settling — the feedback existed and could not be felt. Buttons and
+ * rows use this; anything that only changes colour keeps COLOR_TRANSITION.
+ *
+ * Still 1px, still no bounce (§10). The reduced-motion rule in tokens.css collapses the
+ * duration, so it lands instantly for anyone who asked for that.
+ */
+export const CONTROL_TRANSITION =
+  "transition-[color,background-color,border-color,transform,box-shadow] duration-normal ease-out";

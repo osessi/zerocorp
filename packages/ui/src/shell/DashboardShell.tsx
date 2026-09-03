@@ -32,19 +32,21 @@ export interface NavItem {
   readonly label: string;
   readonly href: string;
   readonly icon?: Glyph;
-  /** A count. A dot is a state indicator and never a count — §21.4. */
-  readonly badge?: number;
   /**
-   * What the badge MEANS.
+   * A count. A dot is a state indicator and never a count — §21.4.
    *
-   * `count` is information — how many articles, how many leads. `attention` is the one
-   * that wants you. Yellow marks the second, per §4.8: it is the non-semantic accent
-   * whose whole job is "look here", and using it on every count would make it mean
-   * nothing at all.
+   * ONE treatment for every count in the sidebar. The first version gave two of them the
+   * yellow accent and left the rest grey, which reads as an unfinished job rather than a
+   * distinction — if the emphasis is not applied to all of them it should not be applied
+   * to any. Attention is carried by the ROW, not by recolouring its number.
    */
-  readonly badgeTone?: "count" | "attention";
+  readonly badge?: number;
+  /** Something here wants the founder. Marks the ROW, never the count. */
+  readonly attention?: boolean;
   /** One line under the label, shown only when the sidebar is expanded. */
   readonly hint?: string;
+  /** Sub-sections, revealed under the item while it is the active one. */
+  readonly children?: readonly { readonly label: string; readonly href: string; readonly count?: number }[];
 }
 
 export interface NavGroup {
@@ -79,35 +81,36 @@ function NavRow({
   const Icon = item.icon;
 
   return (
-    <li>
+    <li className="flex flex-col">
       <Link
         href={item.href}
         title={collapsed ? item.label : undefined}
         {...(active ? { "aria-current": "page" } : {})}
         className={cx(
-          "group relative flex items-center gap-3 transition-[color,background-color] duration-normal ease-out",
+          "group relative flex items-center gap-3 border transition-[color,background-color,border-color,transform] duration-normal ease-out",
           "focus-visible:outline-ring focus-visible:outline-2 focus-visible:-outline-offset-2",
-          collapsed ? "h-10 justify-center px-0" : "h-10 px-2",
-          active ? "bg-accent text-foreground" : "text-muted-foreground hover:bg-accent/60 hover:text-foreground",
+          collapsed ? "h-11 justify-center px-0" : "h-11 px-2.5",
+          /*
+            A FULL border on the active row, on all four sides.
+
+            It was a 2px bar on the left edge, and I wrote a comment arguing that §21.27
+            only forbids a bare left bar as a panel's ONLY edge. That was a rationalisation
+            of a rule stated more times than it should have needed. The instruction was
+            explicit: a full outline, a dotted one, or none. This is the full one.
+          */
+          active
+            ? "border-border bg-accent text-foreground"
+            : "border-transparent text-muted-foreground hover:bg-accent/50 hover:text-foreground motion-safe:hover:translate-x-0.5",
         )}
       >
-        {/*
-          The active marker is a 2px bar on the left edge of the ROW, inside a filled
-          row. §21.27 forbids a bare left bar as a panel's only edge; this is not a
-          panel and not its only edge -- the fill is doing the work and the bar is
-          telling you which of the filled rows is the one you are on.
-        */}
-        {active && !collapsed ? (
-          <span className="bg-primary absolute inset-y-0 left-0 w-0.5" aria-hidden="true" />
-        ) : null}
-
         {Icon ? (
           <span
             className={cx(
-              "flex size-7 shrink-0 items-center justify-center border transition-[color,background-color,border-color] duration-normal ease-out",
+              "rounded-sm flex size-7 shrink-0 items-center justify-center border",
+              "transition-[color,background-color,border-color] duration-normal ease-out",
               active
                 ? "border-primary bg-primary text-primary-foreground"
-                : "border-border group-hover:border-input-hover",
+                : "border-border group-hover:border-input-hover group-hover:text-foreground",
             )}
           >
             <Icon size={16} weight="regular" aria-hidden="true" />
@@ -120,19 +123,56 @@ function NavRow({
           </span>
         ) : null}
 
+        {/* Attention marks the ROW, with a dot. The count keeps one treatment everywhere. */}
+        {!collapsed && item.attention ? (
+          <span
+            className="bg-accent-highlight zc-pulse size-2 shrink-0 rounded-full"
+            aria-label="Needs your attention"
+          />
+        ) : null}
+
         {!collapsed && item.badge !== undefined && item.badge > 0 ? (
           <span
             className={cx(
-              "text-caption rounded-sm inline-flex h-5 min-w-5 items-center justify-center px-1.5 font-mono tabular-nums",
-              item.badgeTone === "attention"
-                ? "bg-accent-highlight text-accent-highlight-ink font-semibold"
-                : "bg-muted text-muted-foreground",
+              "text-caption rounded-sm inline-flex h-5 min-w-5 shrink-0 items-center justify-center px-1.5 font-mono tabular-nums",
+              "transition-[background-color] duration-normal",
+              active ? "bg-accent-highlight text-accent-highlight-ink font-semibold" : "bg-muted text-muted-foreground",
             )}
           >
             {item.badge}
           </span>
         ) : null}
       </Link>
+
+      {/*
+        Sub-sections, under the section you are in.
+
+        The sidebar said which of seven screens you were on and nothing else, so the
+        second level of structure existed only as tabs inside the page. Showing it here
+        while the section is active makes the navigation describe the whole product
+        instead of its front doors.
+      */}
+      {active && !collapsed && item.children && item.children.length > 0 ? (
+        <ul className="border-border mt-1 mb-1 ml-5 flex flex-col gap-0.5 border-l pl-3">
+          {item.children.map((child) => (
+            <li key={child.href}>
+              <Link
+                href={child.href}
+                className={cx(
+                  "text-caption text-muted-foreground hover:text-foreground focus-visible:outline-ring",
+                  "flex items-center justify-between gap-2 py-1.5 transition-[color] duration-fast",
+                  "focus-visible:outline-2 focus-visible:-outline-offset-2",
+                )}
+              >
+                <span className="truncate">{child.label}</span>
+                {child.count !== undefined && child.count > 0 ? (
+                  <span className="text-caption text-muted-foreground font-mono tabular-nums">{child.count}</span>
+                ) : null}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      ) : null}
     </li>
   );
 }
@@ -168,17 +208,17 @@ export function DashboardShell({
 
         <nav className="flex flex-1 flex-col gap-6 overflow-y-auto px-3 py-5" aria-label="Main">
           {groups.map((group) => (
-            <div key={group.label} className="flex flex-col gap-1.5">
+            <div key={group.label} className="flex flex-col gap-2">
               {/*
                 The group label disappears when collapsed rather than truncating. A
                 three-letter stump of "LAUNCH" is noise where a gap is a boundary.
               */}
               {!collapsed ? (
-                <p className="text-overline text-muted-foreground px-2 pb-0.5">{group.label}</p>
+                <p className="text-overline text-muted-foreground px-2.5 pb-1">{group.label}</p>
               ) : (
                 <span className="bg-border mx-auto h-px w-6" aria-hidden="true" />
               )}
-              <ul className="flex flex-col gap-0.5">
+              <ul className="flex flex-col gap-1.5">
                 {group.items.map((item) => (
                   <NavRow
                     key={item.href}
@@ -195,7 +235,7 @@ export function DashboardShell({
 
         {footerNav.length > 0 ? (
           <div className="border-border shrink-0 border-t px-3 py-3">
-            <ul className="flex flex-col gap-0.5">
+            <ul className="flex flex-col gap-1.5">
               {footerNav.map((item) => (
                 <NavRow
                   key={item.href}
