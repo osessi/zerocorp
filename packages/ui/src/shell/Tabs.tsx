@@ -48,7 +48,7 @@ export function Tabs({
   action?: ReactNode;
   defaultTab?: string;
   /**
-   * Which stage of the journey this screen is — DESIGN_SYSTEM.md §4.9.
+   * Which stage of the journey this screen is — DESIGN_SYSTEM.md §4.10.
    *
    * The same value the screen's group carries in the sidebar, so the rail and the
    * workspace are one colour system rather than two that happen to touch. Omitted, the

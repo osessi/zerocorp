@@ -29,7 +29,7 @@ import { signOut } from "./actions";
  * not a filing system. A founder reading this rail should be able to see what ZeroCorp
  * does for them, in the order it does it, without opening anything.
  *
- * Each stage carries its own tint — green, blue, violet, DESIGN_SYSTEM.md §4.9. Three
+ * Each stage carries its own tint — green, blue, violet, DESIGN_SYSTEM.md §4.10. Three
  * grey labels over nine grey rows said the same thing, and said it only to whoever read
  * them. The tone is declared ONCE, here, and the same value goes to the screen's tab band
  * so the rail and the workspace are one system. It is not a status: nothing green here

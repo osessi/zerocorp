@@ -1,5 +1,5 @@
 /**
- * Which stage of the journey a group belongs to — DESIGN_SYSTEM.md §4.9.
+ * Which stage of the journey a group belongs to — DESIGN_SYSTEM.md §4.10.
  *
  * The rail used to be nine grey rows under three grey labels, and the labels were the
  * only thing saying that Company and Website are different KINDS of work. A label is

@@ -251,7 +251,8 @@ export function DashboardShell({
       <aside
         className={cx(
           "border-border hidden shrink-0 flex-col border-r transition-[width] duration-emphasis ease-out lg:flex",
-          collapsed ? "w-16" : "w-64",
+          /* 80px folded, not 64: the mark and the chevron both stay on screen. */
+          collapsed ? "w-20" : "w-64",
         )}
       >
         {/*
@@ -267,45 +268,44 @@ export function DashboardShell({
           The mark is the REAL yellow, at full strength. --accent-highlight is the
           non-semantic accent (§4.8) and a brand tile is the one place it can carry the
           whole product's colour without ever being mistaken for a status.
+
+          The chevron is rendered in BOTH states, and it is the same button either way.
+
+          The first fix made the mark itself the way back open, which is a control with no
+          affordance: folded, the only thing on screen was a yellow square, and "click the
+          logo" is not something a product may expect anyone to guess. A collapse toggle
+          that vanishes when collapsed is the one state where it is actually needed. The
+          folded rail is 80px rather than 64px so the mark and the chevron both fit, which
+          is the whole cost of never hiding it.
         */}
         <div
           className={cx(
-            "border-border flex h-14 shrink-0 items-center gap-2.5 border-b",
-            collapsed ? "justify-center px-2" : "px-3",
+            "border-border flex h-14 shrink-0 items-center border-b",
+            collapsed ? "justify-center gap-1.5 px-2" : "gap-2.5 px-3",
           )}
         >
-          {collapsed ? (
-            /* Folded, the mark IS the control. Nothing else fits in 64px, and a rail with
-               no way back open is a trap. */
-            <button
-              type="button"
-              onClick={() => setCollapsed(false)}
-              aria-label="Expand navigation"
-              title="Expand navigation"
-              className="bg-accent-highlight text-accent-highlight-ink focus-visible:outline-ring flex size-9 items-center justify-center text-body-sm font-mono leading-none font-bold focus-visible:outline-2 focus-visible:outline-offset-2"
-            >
-              {brand.charAt(0)}
-            </button>
-          ) : (
-            <>
-              <span
-                className="bg-accent-highlight text-accent-highlight-ink flex size-8 shrink-0 items-center justify-center text-body-sm font-mono leading-none font-bold"
-                aria-hidden="true"
-              >
-                {brand.charAt(0)}
-              </span>
-              <span className="text-label min-w-0 flex-1 truncate tracking-tight">{brand}</span>
-              <button
-                type="button"
-                onClick={() => setCollapsed(true)}
-                aria-label="Collapse navigation"
-                title="Collapse navigation"
-                className="border-border text-muted-foreground hover:border-input-hover hover:text-foreground focus-visible:outline-ring flex size-7 shrink-0 items-center justify-center border transition-[color,border-color] duration-normal focus-visible:outline-2 focus-visible:outline-offset-2"
-              >
-                <CaretLeftIcon size={12} aria-hidden="true" />
-              </button>
-            </>
-          )}
+          <span
+            className="bg-accent-highlight text-accent-highlight-ink flex size-8 shrink-0 items-center justify-center text-body-sm font-mono leading-none font-bold"
+            aria-hidden="true"
+          >
+            {brand.charAt(0)}
+          </span>
+          {!collapsed ? (
+            <span className="text-label min-w-0 flex-1 truncate tracking-tight">{brand}</span>
+          ) : null}
+          <button
+            type="button"
+            onClick={() => setCollapsed((c) => !c)}
+            aria-label={collapsed ? "Expand navigation" : "Collapse navigation"}
+            title={collapsed ? "Expand navigation" : "Collapse navigation"}
+            className="border-border text-muted-foreground hover:border-input-hover hover:text-foreground focus-visible:outline-ring flex size-7 shrink-0 items-center justify-center border transition-[color,border-color] duration-normal focus-visible:outline-2 focus-visible:outline-offset-2"
+          >
+            <CaretLeftIcon
+              size={12}
+              className={cx("transition-transform duration-emphasis", collapsed && "rotate-180")}
+              aria-hidden="true"
+            />
+          </button>
         </div>
 
         <nav className="flex flex-1 flex-col gap-4 overflow-y-auto px-2.5 py-4" aria-label="Main">

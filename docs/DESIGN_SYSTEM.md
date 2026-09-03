@@ -2600,6 +2600,67 @@ Dark moved with it: `--warning` and `--warning-ink` to `#EAB308`, `--warning-sub
 
 ---
 
+### 4.10 Journey tints — the three stages, as grounds — VALIDATED 2026-09-03
+
+> **Build is green, Launch is blue, Grow is violet. They are grounds and labels.
+> They are never statuses, and they never mark an object.**
+
+The rail was nine grey rows under three grey labels. The labels were the only thing
+saying that Company and Website are different KINDS of work, and a label is read once and
+then skipped forever. A ground is seen without being read.
+
+Each navigation group now sits on its own tinted block — a wash, an edge on all four
+sides, and its label in the tone's ink — and the screens inside a stage carry the same
+tint in their tab band. The rail and the workspace stop being two colour systems that
+happen to touch at a hairline.
+
+| stage | wash | edge | ink | dark wash / edge / ink |
+| --- | --- | --- | --- | --- |
+| Build | `#E9F7EF` | `#B8DFCA` | `#14663A` | `#0C1E14` · `#20462F` · `#4ADE80` |
+| Launch | `#E9F1FD` | `#BFD5F6` | `#1B48C4` | `#0C1A34` · `#213B64` · `#60A5FA` |
+| Grow | `#F0EBFD` | `#D0C2F4` | `#5B23BD` | `#1A1238` · `#3A2A69` · `#A78BFA` |
+
+Measured against `#FFFFFF`: wash 1.10 / 1.14 / 1.17. Against `#0A0A0A`: 1.14 / 1.14 / 1.12.
+Every one clears the §4.5 perceptibility floor of 1.10 on its own, even though the
+four-sided edge already exempts it. Ink on its own wash: 6.36 / 6.66 / 7.44 in light,
+9.95 / 6.81 / 6.50 in dark.
+
+**Not a sixth, seventh and eighth status tone.** The five semantic tones are unchanged and
+still own health. Nothing green here means healthy; nothing violet means anything at all
+about a machine. Same register as `--accent-highlight` (§4.8): a family kept deliberately
+outside the status vocabulary.
+
+**Their values are their own.** They are not aliases of `--success-*`, `--info-*` or
+`--ai-*`. A journey tint and a status tone share a hue by accident of the spectrum, not by
+contract, and retuning one must never move the other.
+
+Where they are allowed, and nowhere else:
+
+```text
+the GROUND of a navigation group        the LABEL of that group
+the GROUND of a tab band                the SELECTED tab's underline and label
+the edge of a count chip inside one
+```
+
+The moment a journey tint marks an OBJECT — a dot, a badge, a state — it is making a
+status claim whether it meant to or not, and the status system wins.
+
+Two consequences the implementation had to honour:
+
+- **The band's own rule stays neutral.** A tone on a single edge is the accent bar this
+  codebase has rejected four times. The tone lives in the fill and in the tab's underline,
+  which are the tab's anatomy, not a border pretending to be structure.
+- **A chip must read on both grounds it lands on** — the group's wash, and the
+  `--background` pane of the row or tab that is selected. A fill alone can only do one of
+  the two, so the chip carries a four-sided edge in the tone and a `--background` fill.
+
+Selection is a **pane of the page**, not a darker grey. `bg-accent` is a neutral `#EFEFEF`
+and dropping it onto a green wash reads as dirt; the active row lifts to `--background`
+and takes the group's edge, which is the same move a tab makes.
+
+Collapsed, the label goes and the tint stays. The grey hairline that used to stand in for
+the label said only "a boundary"; the ground says *which* boundary.
+
 ### 21.30 A control never lives on a seam — VALIDATED 2026-09-03
 
 > **No control is positioned half inside one region and half inside another.**
@@ -2615,6 +2676,16 @@ decided by a region that does not know it exists. The control moved **inside** t
 header row, where it is a normal 28px button in normal flow.
 
 > If a control needs to sit between two regions, it belongs to one of them. Pick one.
+
+**Amended the same day — and it is rendered in every state it controls.**
+
+The first fix made the brand mark itself the way back open, so the folded rail showed a
+yellow square and nothing else. "Click the logo" is not something a product may expect
+anyone to guess, and a collapse toggle that disappears when collapsed is missing from the
+one state where it is the only thing needed. The folded rail is 80px rather than 64px so
+the mark and the chevron both fit; that width is the entire cost of never hiding it.
+
+> A control that changes a state must be visible in every state it can produce.
 
 ---
 
