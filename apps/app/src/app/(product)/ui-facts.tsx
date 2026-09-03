@@ -19,6 +19,14 @@ import { cx } from "@zerocorp/ui";
  */
 export type FactTone = "processing" | "ai" | "info" | "success" | "warning" | "neutral";
 
+/**
+ * A FULL border, on all four sides.
+ *
+ * The first version put a 2px coloured bar on the top edge only. That is the same shape
+ * as the left bar §21.27 bans, rotated ninety degrees, and it was rejected for the third
+ * time. A border is on every side or on none — there is now a CI rule so this cannot come
+ * back a fourth.
+ */
 const TONE: Record<FactTone, { edge: string; ink: string; wash: string }> = {
   processing: { edge: "border-processing", ink: "text-processing-ink", wash: "bg-processing-wash" },
   ai: { edge: "border-ai", ink: "text-ai-ink", wash: "bg-ai-wash" },
@@ -43,7 +51,7 @@ export function BigFact({
 }) {
   const t = TONE[tone];
   return (
-    <div className={cx("flex flex-col gap-1.5 border-t-2 p-4", t.edge, t.wash)}>
+    <div className={cx("flex flex-col gap-1.5 border p-4", t.edge, t.wash)}>
       <span className="text-overline text-muted-foreground">{label}</span>
       <span className={cx("text-h3 leading-tight", mono && "font-mono tabular-nums", t.ink)}>{value}</span>
       {hint ? <span className="text-caption text-muted-foreground">{hint}</span> : null}

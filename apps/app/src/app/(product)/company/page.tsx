@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { BuildingsIcon, FileTextIcon, QuestionIcon } from "@phosphor-icons/react/dist/ssr";
-import { ButtonLink, PageHeader, StatusBadge, StatusStamp, Tabs } from "@zerocorp/ui";
+import { ButtonLink, StatusBadge, StatusStamp, Tabs } from "@zerocorp/ui";
 import { Intake } from "./Intake";
 import { BigFact, BigFactGrid } from "../ui-facts";
 
@@ -60,54 +60,7 @@ export default async function Page() {
 
   return (
     <>
-      <PageHeader
-        title="Company"
-        subtitle={view.company?.legalName ?? "No company yet"}
-        meta={
-          view.company ? (
-            <StatusBadge tone={view.company.status === "active" ? "success" : "processing"}>
-              {view.company.status === "active" ? "Active" : "Being formed"}
-            </StatusBadge>
-          ) : status ? (
-            <StatusBadge tone={status.tone}>{status.label}</StatusBadge>
-          ) : (
-            <StatusBadge tone="neutral">Not started</StatusBadge>
-          )
-        }
-      />
 
-      {/*
-        The blocking question sits ABOVE the tabs, not inside one.
-
-        It is what stops the filing, so it must be visible whichever tab you are on —
-        putting it behind "Filing" would hide the thing the screen exists to tell you
-        from anyone who happened to land on Documents.
-      */}
-      {view.openRfis.length > 0 ? (
-        <div className="mx-auto w-full max-w-(--container-content) px-5 pt-6 sm:px-8">
-          <section className="border-warning bg-warning-subtle flex flex-col gap-4 border p-5">
-            <div className="flex items-center gap-3">
-              <QuestionIcon size={20} weight="fill" className="text-warning-ink shrink-0" aria-hidden="true" />
-              <h2 className="text-h4 text-warning-ink">
-                {view.openRfis.length === 1
-                  ? "One thing is needed before we can file"
-                  : `${view.openRfis.length} things are needed before we can file`}
-              </h2>
-            </div>
-            <ul className="flex flex-col gap-3">
-              {view.openRfis.map((rfi) => (
-                <li key={rfi.id} className="border-warning/40 bg-surface flex flex-wrap items-center gap-4 border p-4">
-                  <span className="text-body-sm min-w-0 flex-1">{rfi.question}</span>
-                  <ButtonLink href="/help" variant="primary">Send it</ButtonLink>
-                </li>
-              ))}
-            </ul>
-            <p className="text-caption text-warning-ink">
-              Your filing is paused until this arrives. Nothing else is blocked.
-            </p>
-          </section>
-        </div>
-      ) : null}
 
       {/*
         REAL tabs, one panel at a time.
@@ -117,6 +70,33 @@ export default async function Page() {
         else, which is the whole point of a second level.
       */}
       <Tabs
+        banner={
+          view.openRfis.length > 0 ? (
+            <div className="mx-auto w-full max-w-(--container-content) px-5 py-4 sm:px-8">
+              <section className="border-warning bg-warning-subtle flex flex-col gap-4 border p-5">
+              <div className="flex items-center gap-3">
+              <QuestionIcon size={20} weight="fill" className="text-warning-ink shrink-0" aria-hidden="true" />
+              <h2 className="text-h4 text-warning-ink">
+              {view.openRfis.length === 1
+              ? "One thing is needed before we can file"
+              : `${view.openRfis.length} things are needed before we can file`}
+              </h2>
+              </div>
+              <ul className="flex flex-col gap-3">
+              {view.openRfis.map((rfi) => (
+              <li key={rfi.id} className="border-warning/40 bg-surface flex flex-wrap items-center gap-4 border p-4">
+              <span className="text-body-sm min-w-0 flex-1">{rfi.question}</span>
+              <ButtonLink href="/help" variant="primary">Send it</ButtonLink>
+              </li>
+              ))}
+              </ul>
+              <p className="text-caption text-warning-ink">
+              Your filing is paused until this arrives. Nothing else is blocked.
+              </p>
+              </section>
+            </div>
+          ) : null
+        }
         defaultTab={view.openRfis.length > 0 ? "filing" : view.company ? "entity" : "filing"}
         tabs={[
           {

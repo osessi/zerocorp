@@ -106,7 +106,11 @@ export const TONE_SURFACE: Record<StatusTone, string> = {
 };
 
 /**
- * Tone as a left edge — a 2px rule, never a tinted fill.
+ * Tone as a border — ALL FOUR SIDES.
+ *
+ * It was `border-l-{tone}`: a 2px bar down the left edge of an Alert and a Toast. That is
+ * exactly the shape §21.27 bans, and it was rejected three separate times before this.
+ * A border is on every side or on none. A CI rule now enforces it.
  *
  * A rule keeps the surface readable: a tinted panel changes the background every piece of
  * text inside it sits on, which is why `-wash` exists as a separate, card-safe step (§4.6).
@@ -116,13 +120,13 @@ export const TONE_SURFACE: Record<StatusTone, string> = {
  * matching stale refusals in §21.0 and §21.18.
  */
 export const TONE_EDGE: Record<StatusTone, string> = {
-  success: "border-l-success",
-  processing: "border-l-processing",
-  warning: "border-l-warning",
-  danger: "border-l-destructive",
-  info: "border-l-info",
-  neutral: "border-l-muted-foreground",
-  ai: "border-l-ai",
+  success: "border-success",
+  processing: "border-processing",
+  warning: "border-warning",
+  danger: "border-destructive",
+  info: "border-info",
+  neutral: "border-muted-foreground",
+  ai: "border-ai",
 };
 
 /**

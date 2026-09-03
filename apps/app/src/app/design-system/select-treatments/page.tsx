@@ -79,9 +79,10 @@ function TreatmentB() {
             key={r.label}
             className={cx(
               ROW_BASE,
-              "border border-l-2 pl-7",
-              // transparent, not absent — otherwise every row shifts 2px on selection
-              on ? "border-l-primary" : "border-l-transparent",
+              "border pl-7",
+              // A full border in the tone, not a bar on the left edge. Transparent rather
+              // than absent when unselected, so no row shifts when selection moves.
+              on ? "border-primary" : "border-transparent",
               on && "font-medium",
               (r.state === "cursor" || r.state === "both") && "bg-accent",
               r.state === "disabled" ? "text-muted-foreground" : "text-foreground",

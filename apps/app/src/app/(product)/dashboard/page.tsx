@@ -10,15 +10,13 @@ import {
   MagnifyingGlassIcon,
   PaletteIcon,
   UsersThreeIcon,
+  WarningIcon,
 } from "@phosphor-icons/react/dist/ssr";
 import {
   AGENTS,
   ActivityPanel,
-  CockpitHeader,
   EmptyState,
   SectionHeader,
-  StatusBadge,
-  StatusStamp,
   ButtonLink,
   CONTROL_TRANSITION,
   ENTER,
@@ -29,6 +27,7 @@ import {
 import type { BusinessState, PlanStepRow } from "@zerocorp/application";
 import { outcomeFor, waitingFor } from "./outcome";
 import { PipelineChart, PublishingChart } from "./Charts";
+import { Kpi, KpiRow } from "./Kpi";
 import { getDashboardRepository, getUnitOfWork } from "../../../server/container";
 import { getViewer } from "../../../server/session";
 
@@ -268,7 +267,6 @@ export default async function Page() {
     fetched, so the screen could not know.
   */
   const blockedStep = included.find((s) => s.status === "blocked");
-  const runningIndex = included.findIndex((s) => s.status === "in_progress");
   const needsYou = included.filter((s) => s.status === "blocked").length + (overview.state.openRfi ? 1 : 0);
   const anchorId =
     blockedStep?.id ??
@@ -303,54 +301,57 @@ export default async function Page() {
     /* A viewport-height column: the cockpit is fixed, the grid below it takes the rest
        and its panels scroll inside themselves. */
     <div className="flex min-h-0 flex-1 flex-col">
-      <CockpitHeader
-        /* The company name, not the business description: `businessName` holds the
-           founder's own sentence about what they do, which the command bar already
-           shows, and printing it twice made the block read as an echo. */
-        eyebrow={overview.companyName ?? "Your business"}
-        headline={
-          needsYou === 0
-            ? "ZeroCorp is building your business. Nothing needs you right now."
-            : `${needsYou} steps are waiting on you`
-        }
-        blocked={
-          st.openRfi
-            ? { label: st.openRfi, action: <ButtonLink href="/company" variant="primary">Send your passport page</ButtonLink> }
-            : blockedStep
-              ? { label: blockedStep.title, action: <ButtonLink href="/company" variant="primary">Continue</ButtonLink> }
-              : undefined
-        }
-        total={included.length}
-        completed={done}
-        current={runningIndex >= 0 ? runningIndex : undefined}
-        /* The figures live IN the block now. They were a separate tinted row below it,
-           which read as conditional formatting and left the block with an empty half. */
-        /* One highlighted figure per screen, never three. The yellow marks where to
-           look, and marking everything marks nothing (§4.8). */
-        metrics={[
-          { label: "Launch progress", value: `${percent}%`, highlight: needsYou === 0 },
-          { label: "Steps done", value: `${done}`, sub: `of ${included.length}` },
-          { label: "Needs you", value: `${needsYou}`, highlight: needsYou > 0 },
-        ]}
-        status={
-          overview.companyStatus === "active" && overview.companyName ? (
-            <StatusStamp milestone="formed" />
-          ) : (
-            <StatusBadge tone="processing">Company forming</StatusBadge>
-          )
-        }
-      />
-
-      {/* `w-full` is load-bearing. The shell centres its children, so the focal header —
-          which is w-full — filled 1184px while this div shrink-wrapped to 958, putting the
-          two left edges 113px apart. Same container, same padding, same edge. */}
       {/*
-        Two columns, not one.
+        The blocking question, and nothing else above the fold that is not a number.
 
-        A single 1200px column with rows this light cannot look dense: everything is
-        alone on its line and the rail content — the numbers, the plan, the brand — got
-        pushed below the fold where nobody scrolled to it.
+        The cockpit block spent 240px on an eyebrow, a sentence, a progress bar and three
+        figures — and the figures, the only part read at a glance, were the smallest thing
+        on it. Replaced by four KPI cards. What is genuinely urgent gets a band; what is
+        merely status is a number.
       */}
+      {st.openRfi ? (
+        <div className="border-warning bg-warning-subtle border-b">
+          <div className="mx-auto flex w-full max-w-(--container-content) flex-wrap items-center gap-4 px-5 py-3 sm:px-8">
+            <WarningIcon size={18} weight="fill" className="text-warning-ink shrink-0" aria-hidden="true" />
+            <p className="text-body-sm text-warning-ink min-w-0 flex-1">
+              <span className="font-semibold">Waiting on you.</span> {st.openRfi}
+            </p>
+            <ButtonLink href="/company" variant="primary">Send your passport page</ButtonLink>
+          </div>
+        </div>
+      ) : null}
+
+      <div className="mx-auto w-full max-w-(--container-content) px-5 pt-5 sm:px-8">
+        <KpiRow>
+          <Kpi
+            label="Launch progress"
+            value={`${percent}%`}
+            note={`${done} of ${included.length} steps complete`}
+            delta={{ text: `${included.length - done} left`, direction: done === included.length ? "flat" : "up" }}
+          />
+          <Kpi
+            label="Articles published"
+            value={String(st.postsPublished)}
+            {...(st.postsScheduled > 0 ? { sub: `+${st.postsScheduled} scheduled` } : {})}
+            note="Search follows consistency, not volume"
+            delta={{ text: `${st.postsDraft} drafts`, direction: st.postsDraft > 0 ? "up" : "flat" }}
+          />
+          <Kpi
+            label="Prospects found"
+            value={String(st.leadsTotal)}
+            {...(st.leadsReplied > 0 ? { sub: `${st.leadsReplied} replied` } : {})}
+            note={st.leadsQualified > 0 ? `${st.leadsQualified} qualified so far` : "Discovery is running"}
+            delta={{ text: `${st.leadsReplied} replies`, direction: st.leadsReplied > 0 ? "up" : "flat" }}
+          />
+          <Kpi
+            label="Needs you"
+            value={String(needsYou)}
+            note={needsYou > 0 ? "Everything else is running" : "Nothing is blocked"}
+            highlight={needsYou > 0}
+          />
+        </KpiRow>
+      </div>
+
       {/*
         A dashboard, not a document.
 
@@ -391,19 +392,6 @@ export default async function Page() {
               <ButtonLink href="/company" variant="primary">Send it</ButtonLink>
             </section>
           ) : null}
-
-          <section className="flex min-h-0 flex-col gap-3">
-            <SectionHeader title="Recent activity" count={events.length} countTone="ai" />
-            {events.length === 0 ? (
-              <EmptyState
-                title="Nothing has happened yet"
-                body="As soon as ZeroCorp starts working, every action shows up here with the agent that took it."
-                action={<ButtonLink href="/company">Start your company</ButtonLink>}
-              />
-            ) : (
-              <ActivityPanel events={events} />
-            )}
-          </section>
 
           <section className="border-border flex shrink-0 flex-col border">
             <div className="border-border bg-muted border-b px-4 py-2.5">
@@ -465,6 +453,28 @@ export default async function Page() {
               <div className={cx("h-full transition-[width] duration-modal ease-out", tone.bar)} style={{ width: `${percent}%` }} />
             </div>
             <span className={cx("text-caption font-mono tabular-nums", tone.text)}>{percent}% complete</span>
+          </section>
+
+          {/*
+            Activity last, and bounded.
+
+            It sat second with `min-h-0` and no scroll container, so it overflowed its box
+            and the numbers panel painted straight through it. A flex child that can grow
+            without a scroller does not shrink, it overlaps.
+          */}
+          <section className="flex shrink-0 flex-col gap-3">
+            <SectionHeader title="Recent activity" count={events.length} countTone="ai" />
+            {events.length === 0 ? (
+              <EmptyState
+                title="Nothing has happened yet"
+                body="Every action shows up here with the agent that took it."
+                action={<ButtonLink href="/company">Start your company</ButtonLink>}
+              />
+            ) : (
+              <div className="border-border max-h-80 overflow-y-auto border p-3">
+                <ActivityPanel events={events} />
+              </div>
+            )}
           </section>
         </aside>
       </div>

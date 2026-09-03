@@ -33,7 +33,7 @@ export function Alert({ tone, title, children, action, className }: AlertProps) 
       */
       role={isAssertive(tone) ? "alert" : "status"}
       className={cx(
-        "border-border flex gap-3 border border-l-2 p-3",
+        "flex gap-3 border p-3",
         TONE_EDGE[tone],
         TONE_SURFACE[tone],
         className,

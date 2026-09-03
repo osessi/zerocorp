@@ -356,4 +356,36 @@ describe("design tokens — the two systems stay separate", () => {
 
     expect(offenders, offenders.join("\n")).toEqual([]);
   });
+
+  /**
+   * No accent bar on one edge. Ever.
+   *
+   * A 2px coloured rule down the left of a panel, or across its top, was rejected three
+   * separate times — §21.27 for the left, and again when the same shape came back rotated
+   * ninety degrees on a fact card. A border is on all four sides or on none.
+   *
+   * The rule targets a SIDED border carrying a TONE, not `border-b` on a header: a
+   * hairline dividing two regions is structure and always has been. What is banned is
+   * decoration pretending to be structure.
+   *
+   * §32b demonstration — restoring `border-l-2 border-warning` on Alert gives:
+   *   AssertionError: packages/ui/src/feedback/Alert.tsx: border-l-2 ... border-warning
+   */
+  it("never puts a tone-coloured border on a single edge", () => {
+    expect(UI_SOURCES.length).toBeGreaterThan(20);
+    const TONES = "success|warning|info|processing|destructive|ai|primary";
+    const offenders: string[] = [];
+
+    for (const file of UI_SOURCES) {
+      for (const line of code(file).split("\n")) {
+        // A sided border with a width, on the same line as a tone colour.
+        const sided = /border-[tblr]-(?:[0-9]+|(?:success|warning|info|processing|destructive|ai|primary))\b/.exec(line);
+        if (!sided) continue;
+        if (!new RegExp(`border-(?:[tblr]-)?(?:${TONES})\\b`).test(line)) continue;
+        offenders.push(`${file}: ${line.trim().slice(0, 90)}`);
+      }
+    }
+
+    expect(offenders, offenders.join("\n")).toEqual([]);
+  });
 });

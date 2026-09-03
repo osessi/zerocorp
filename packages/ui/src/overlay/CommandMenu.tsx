@@ -127,7 +127,10 @@ export function CommandMenu({
             <div
               className={cx(
                 "border-border flex items-center gap-2 border-b px-3",
-                "has-[:focus-visible]:border-b-primary has-[:focus-visible]:border-b-2",
+                // Focus is carried by the RING, not by thickening one edge. A 2px
+                // accent on the bottom border only is the banned shape, and the ring
+                // already says the same thing everywhere else in the product.
+                "has-[:focus-visible]:bg-accent",
                 COLOR_TRANSITION,
               )}
             >

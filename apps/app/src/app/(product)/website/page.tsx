@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { BrowserIcon, GlobeHemisphereWestIcon } from "@phosphor-icons/react/dist/ssr";
-import { ButtonLink, EmptyState, PageHeader, StatusBadge, StatusDot, Tabs } from "@zerocorp/ui";
+import { ButtonLink, EmptyState, StatusBadge, StatusDot, Tabs } from "@zerocorp/ui";
 import { getBlocksRepository, getUnitOfWork } from "../../../server/container";
 import { getViewer } from "../../../server/session";
 import { BuildButton } from "../BuildButton";
@@ -25,16 +25,6 @@ export default async function Page() {
 
   return (
     <>
-      <PageHeader
-        title="Website"
-        subtitle={view.domain?.hostname ?? "No domain yet"}
-        meta={
-          <StatusBadge tone={view.site?.status === "published" ? "success" : "neutral"}>
-            {view.site?.status === "published" ? "Live" : view.site ? "Draft" : "Not started"}
-          </StatusBadge>
-        }
-        actions={<BuildButton action={buildWebsite} label="Build my website" busyLabel="Building" />}
-      />
 
       <Tabs
         defaultTab={view.pages.length > 0 ? "pages" : "domain"}

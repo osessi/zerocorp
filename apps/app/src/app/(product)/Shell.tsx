@@ -60,14 +60,29 @@ const FOOTER = [
   { label: "Help", href: "/help", icon: LifebuoyIcon },
 ];
 
+/** The name of the screen you are on. One list, matched by prefix. */
+function screenTitle(pathname: string): string {
+  const map: [string, string][] = [
+    ["/dashboard", "Overview"],
+    ["/onboarding", "Tell us about your business"],
+    ["/company", "Company"],
+    ["/brand", "Brand"],
+    ["/website", "Website"],
+    ["/email", "Email"],
+    ["/content", "Content"],
+    ["/leads", "Customers"],
+    ["/settings", "Settings"],
+    ["/help", "Help"],
+  ];
+  return map.find(([href]) => pathname.startsWith(href))?.[1] ?? "ZeroCorp";
+}
+
 export function Shell({
-  businessName,
   email,
   needsYou,
   counts,
   children,
 }: {
-  businessName: string;
   email: string;
   needsYou: number;
   /** How much of each thing exists. Keyed by href so the nav stays the single list. */
@@ -161,7 +176,15 @@ export function Shell({
       }
       topBar={
         <>
-          <span className="text-body-sm truncate font-medium">{businessName}</span>
+          {/*
+            The SCREEN's name, not the business description.
+
+            It printed `businessName`, which is seeded from the assessment headline — a
+            positioning sentence — so every page in the product was topped by "I design
+            brand identities for early-stage software companies." That is not a title, it
+            is a paragraph, and it said the same thing on all seven screens.
+          */}
+          <span className="text-body-sm truncate font-medium">{screenTitle(pathname)}</span>
           <div className="ml-auto flex items-center gap-1">
             <IconButton icon={BellIcon} label="Notifications" variant="ghost" />
           </div>

@@ -187,15 +187,19 @@ describe("CommandMenu — a combobox, not a list of buttons", () => {
     expect(screen.queryByText("Actions")).toBeNull();
   });
 
-  it("indicates focus on the header rule, not as a ring around the input", async () => {
+  it("indicates focus with a surface change, not a ring around the input", async () => {
     // The input is auto-focused and keeps DOM focus for the palette's whole life —
     // Combobox drives the list through aria-activedescendant. A ring that is always on
     // indicates nothing; it just draws a teal box around the search field.
+    //
+    // It used to thicken the bottom border to 2px in the primary colour. That is a
+    // single-edge accent, which the design system bans outright — see the CI rule in
+    // tests/architecture. A tinted surface says the same thing on all four sides.
     render(<CommandMenu items={COMMANDS} open onOpenChange={() => {}} />);
     const input = await screen.findByRole("combobox");
     const row = input.parentElement;
-    expect(row?.className).toContain("has-[:focus-visible]:border-b-primary");
-    expect(row?.className).toContain("has-[:focus-visible]:border-b-2");
+    expect(row?.className).toContain("has-[:focus-visible]:bg-accent");
+    expect(row?.className).not.toContain("border-b-2");
   });
 
   it("hides that ring without removing it", async () => {

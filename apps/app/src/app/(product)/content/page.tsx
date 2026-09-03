@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { ArticleIcon, MagnifyingGlassIcon } from "@phosphor-icons/react/dist/ssr";
-import { ButtonLink, PageHeader, StatusBadge, StatusDot, Tabs } from "@zerocorp/ui";
+import { ButtonLink, StatusBadge, StatusDot, Tabs } from "@zerocorp/ui";
 import { ArticleIcon as ArticlesIcon, CalendarBlankIcon, MagnifyingGlassIcon as KeywordsIcon } from "@phosphor-icons/react/dist/ssr";
 import { Calendar } from "./Calendar";
 import { getBlocksRepository, getUnitOfWork } from "../../../server/container";
@@ -26,24 +26,14 @@ export default async function Page() {
     getBlocksRepository().content(tx, viewer.ctx),
   );
 
-  const published = view.posts.filter((p) => p.status === "published").length;
 
   const scheduled = view.posts.filter((p) => p.status === "scheduled").length;
 
   return (
     <>
-      <PageHeader
-        title="Content"
-        subtitle="What you want to be found for, and what gets written about it"
-        meta={
-          <span className="text-body-sm text-muted-foreground font-mono tabular-nums">
-            {published} published
-          </span>
-        }
-        actions={<BuildButton action={buildContentPlan} label="Build my content plan" busyLabel="Planning" />}
-      />
 
       <Tabs
+        action={<BuildButton action={buildContentPlan} label="Build my content plan" busyLabel="Planning" />}
         defaultTab="articles"
         tabs={[
           {

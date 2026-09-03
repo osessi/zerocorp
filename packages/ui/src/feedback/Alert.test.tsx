@@ -82,14 +82,20 @@ describe("Alert — the body is not tinted", () => {
     expect(screen.getByText(/Northwind Studio LLC must file/).className).toContain("text-foreground");
   });
 
-  it("carries both a left rule and its own tint", () => {
-    // This test used to assert the opposite, on the grounds that there was no tint scale
-    // and that a tinted panel changes the ground every piece of text inside it sits on.
-    // Direction B answered both: the scale exists (§4.5), and the -ink role handles the
-    // changed ground. Reversed 2026-08-31 by decision, not by drift.
+  it("carries a full border in its tone, and its own tint", () => {
+    // Two reversals recorded here, both by decision rather than drift.
+    //
+    // 2026-08-31: it used to assert there was NO tint, on the grounds that no tint scale
+    // existed and that a tinted panel changes the ground its text sits on. §4.5 answered
+    // both — the scale exists, and the -ink role handles the changed ground.
+    //
+    // 2026-09-03: the tone was a 2px rule on the LEFT edge. A single-edge accent was
+    // rejected three separate times; a border is on all four sides or on none, and a CI
+    // rule now enforces it.
     const { container } = render(<Alert tone="info" title="Note" />);
     const cls = (container.firstChild as HTMLElement).className;
-    expect(cls).toContain("border-l-info");
+    expect(cls).toContain("border-info");
+    expect(cls).not.toContain("border-l-");
     expect(cls).toContain("bg-info-subtle");
     // The solid fill still belongs to nothing on an Alert — a filled panel would out-shout
     // the page it is reporting on.

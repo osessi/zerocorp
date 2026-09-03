@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { EnvelopeSimpleIcon } from "@phosphor-icons/react/dist/ssr";
-import { Avatar, EmptyState, PageHeader, SegmentedProgress, StatusBadge, StatusDot, Tabs } from "@zerocorp/ui";
+import { Avatar, EmptyState, SegmentedProgress, StatusBadge, StatusDot, Tabs } from "@zerocorp/ui";
 import { BigFact, BigFactGrid } from "../ui-facts";
 import { ShieldCheckIcon, ThermometerSimpleIcon } from "@phosphor-icons/react/dist/ssr";
 import { getBlocksRepository, getUnitOfWork } from "../../../server/container";
@@ -26,15 +26,6 @@ export default async function Page() {
 
   return (
     <>
-      <PageHeader
-        title="Email"
-        subtitle={view.domain?.hostname ?? "No sending domain yet"}
-        meta={
-          <StatusBadge tone={view.domain?.warmupStatus === "complete" ? "success" : "neutral"}>
-            {view.domain ? view.domain.warmupStatus.replace(/_/g, " ") : "Not started"}
-          </StatusBadge>
-        }
-      />
 
       <Tabs
         tabs={[

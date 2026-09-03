@@ -38,7 +38,6 @@ export default async function ProductLayout({ children }: { children: ReactNode 
 
   return (
     <Shell
-      businessName={overview?.businessName ?? "Your business"}
       email={viewer.email}
       needsYou={needsYou}
       counts={counts}

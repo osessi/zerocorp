@@ -40,17 +40,26 @@ export function Tabs({
   tabs,
   action,
   defaultTab,
+  banner,
 }: {
   tabs: readonly TabDef[];
   action?: ReactNode;
   defaultTab?: string;
+  /**
+   * Shown under the strip, on every tab.
+   *
+   * For the thing that is true whichever tab you are on — a blocking question, a
+   * compliance warning. Burying that inside one tab is how it goes unread by anyone who
+   * happened to land on another.
+   */
+  banner?: ReactNode;
 }) {
   const [active, setActive] = useState(defaultTab ?? tabs[0]?.id ?? "");
   const current = tabs.find((t) => t.id === active) ?? tabs[0];
 
   return (
     <div className="flex flex-col">
-      <div className="border-border bg-surface flex items-end justify-between gap-4 overflow-x-auto border-b">
+      <div className="border-border bg-surface sticky top-0 z-20 flex items-end justify-between gap-4 overflow-x-auto border-b">
         <div role="tablist" aria-label="Sections" className="flex items-stretch">
           {tabs.map((tab) => {
             const on = tab.id === current?.id;
@@ -92,6 +101,8 @@ export function Tabs({
         </div>
         {action ? <div className="shrink-0 py-2 pr-4">{action}</div> : null}
       </div>
+
+      {banner ? <div className="border-border border-b">{banner}</div> : null}
 
       <div role="tabpanel" className="zc-enter">
         {current?.content}

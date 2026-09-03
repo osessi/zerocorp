@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { ListBulletsIcon, WarningIcon } from "@phosphor-icons/react/dist/ssr";
-import { Alert, Avatar, ButtonLink, PageHeader, StatusBadge, StatusDot, initialsOf , Tabs } from "@zerocorp/ui";
+import { Alert, Avatar, ButtonLink, StatusBadge, StatusDot, initialsOf , Tabs } from "@zerocorp/ui";
 import { DownloadSimpleIcon, ListBulletsIcon as ListsIcon, UsersThreeIcon as PeopleIcon } from "@phosphor-icons/react/dist/ssr";
 import { getBlocksRepository, getUnitOfWork } from "../../../server/container";
 import { getViewer } from "../../../server/session";
@@ -44,31 +44,23 @@ export default async function Page() {
 
   return (
     <>
-      <PageHeader
-        title="Customers"
-        subtitle="Companies that match who you sell to"
-        meta={
-          <span className="text-body-sm text-muted-foreground font-mono tabular-nums">
-            {view.total} found
-          </span>
-        }
-        actions={<BuildButton action={defineTarget} label="Define my target" busyLabel="Defining" />}
-      />
 
-      {/* Compliance sits ABOVE the tabs: a row without a lawful basis is a liability
-          whichever tab you happen to be on, and it is excluded from the export. */}
-      {withoutBasis > 0 ? (
-        <div className="mx-auto w-full max-w-(--container-content) px-5 pt-6 sm:px-8">
-          <Alert tone="warning" title="Some records have no lawful basis recorded">
-            {withoutBasis} of these were stored without a reason we may hold them. A prospect row
-            without one is a liability rather than a lead, and it is left out of the export.
-          </Alert>
-        </div>
-      ) : null}
 
       <Tabs
+        banner={
+          withoutBasis > 0 ? (
+            <div className="mx-auto w-full max-w-(--container-content) px-5 py-4 sm:px-8">
+              <Alert tone="warning" title="Some records have no lawful basis recorded">
+              {withoutBasis} of these were stored without a reason we may hold them. A prospect row
+              without one is a liability rather than a lead, and it is left out of the export.
+              </Alert>
+            </div>
+          ) : null
+        }
         action={
-          view.recent.length > 0 ? (
+          <div className="flex items-center gap-2">
+            <BuildButton action={defineTarget} label="Define my target" busyLabel="Defining" />
+            {view.recent.length > 0 ? (
             /* A real link, not a script-driven save: the browser performs the GET itself,
                which also means it works from a bookmark. */
             <a
@@ -77,7 +69,8 @@ export default async function Page() {
             >
               <DownloadSimpleIcon size={16} aria-hidden="true" /> Export CSV
             </a>
-          ) : null
+            ) : null}
+          </div>
         }
         tabs={[
           {

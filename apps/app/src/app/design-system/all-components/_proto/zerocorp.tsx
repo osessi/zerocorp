@@ -252,7 +252,7 @@ export function AIReviewDemo() {
           </span>
           <StatusBadge tone="warning">Needs review</StatusBadge>
         </div>
-        <blockquote className="border-primary text-body text-foreground border border-l-2 p-3">
+        <blockquote className="border-primary bg-processing-wash text-body text-foreground border p-3">
           Launch your US company from anywhere — filed, banked and online in nine days.
         </blockquote>
         <div className="border-border flex flex-col gap-1 border-t pt-3">

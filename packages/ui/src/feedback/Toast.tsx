@@ -52,7 +52,7 @@ function ToastList() {
             */
             role={isAssertive(tone) ? "alert" : "status"}
             className={cx(
-              "border-input shadow-floating flex w-80 max-w-[calc(100vw-2rem)] gap-3 border border-l-2 p-3",
+              "shadow-floating flex w-80 max-w-[calc(100vw-2rem)] gap-3 border p-3",
               TONE_EDGE[tone],
               TONE_SURFACE[tone],
               COLOR_TRANSITION,
