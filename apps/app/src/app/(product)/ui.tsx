@@ -1,15 +1,31 @@
 import type { ReactNode } from "react";
-import { cx } from "@zerocorp/ui";
+import {
+  EmptyState,
+  GhostRows,
+  Panel as UiPanel,
+  Row as UiRow,
+  Rows as UiRows,
+  cx,
+} from "@zerocorp/ui";
 
 /**
  * The shared furniture of a product page.
  *
- * Local to (product) rather than promoted into @zerocorp/ui. A component earns a place
- * in the design system by being used by more than one surface; promoting on first use
- * fills the library with things nobody else wants and makes them expensive to change.
+ * ---------------------------------------------------------------------------
+ * 2026-09-04 — these are now ADAPTERS, not implementations.
+ *
+ * Every one of them used to hold its own markup, which is how seven screens ended up
+ * with one skeleton: `Panel` was always `text-h3` plus `gap-4`, `Row` was always
+ * `px-5 py-3.5` with a four-side border, `FactGrid` was always 1/2/4 columns, and no
+ * call site could vary any of it because there was nothing to vary.
+ *
+ * They delegate to @zerocorp/ui now. Kept as a thin layer only so the screens that have
+ * not been rewritten by hand still get the new treatment; each one should be replaced
+ * with its @zerocorp/ui equivalent at the next edit to its screen, and this file deleted.
+ * ---------------------------------------------------------------------------
  */
 
-/** A titled block. `SectionHeader` is §21.6 and still PROPOSED, so this stays here. */
+/** A titled block. Delegates to the four-slot Panel. */
 export function Panel({
   title,
   count,
@@ -22,90 +38,84 @@ export function Panel({
   children: ReactNode;
 }) {
   return (
-    <section className="flex flex-col gap-4">
-      <div className="flex flex-wrap items-baseline justify-between gap-4">
-        <div className="flex items-baseline gap-3">
-          <h2 className="text-h3">{title}</h2>
-          {count !== undefined ? (
-            <span className="text-body-sm text-muted-foreground font-mono tabular-nums">{count}</span>
-          ) : null}
-        </div>
+    <UiPanel>
+      <UiPanel.Header title={title} count={count}>
         {action}
-      </div>
-      {children}
-    </section>
+      </UiPanel.Header>
+      <UiPanel.Body>{children}</UiPanel.Body>
+    </UiPanel>
   );
 }
 
 /**
  * Nothing here yet, said honestly.
  *
- * A dashed outline rather than a filled card: it reads as a space waiting to be filled,
- * which is what it is. A solid panel with "no data" in it reads as a thing that broke.
+ * The dashed well is gone. It is the real thing at 20% opacity behind the message now —
+ * an empty screen shows the SHAPE of what will fill it rather than a rectangle with a
+ * dashed edge, which reads as content that failed to load.
  *
- * The interior is SUNKEN, one step down from the page. On white it was a dashed rectangle
- * around white, which is the same non-shape as the page itself and disappeared entirely.
- * --surface-sunken is 1.14 against the page: enough to read as a well, not enough to
- * compete with anything that has content in it.
+ * `cause` defaults to `first-run` because that is what every existing call site means;
+ * a screen that can also be filtered should pass `filtered` explicitly.
  */
 export function Empty({ title, body, action }: { title: string; body: string; action?: ReactNode }) {
   return (
-    <div className="border-border bg-surface-sunken flex flex-col items-start gap-3 border border-dashed p-6">
-      <p className="text-body-sm font-medium">{title}</p>
-      <p className="text-body-sm text-muted-foreground max-w-prose text-pretty">{body}</p>
-      {action}
-    </div>
+    <EmptyState
+      cause="first-run"
+      title={title}
+      body={body}
+      {...(action ? { action } : {})}
+      ghost={<GhostRows rows={5} />}
+    />
   );
 }
 
 /** A label and a value. Values that are numbers use mono, and are never black. */
 export function Fact({ label, value, tone }: { label: string; value: ReactNode; tone?: string }) {
   return (
-    <div className="flex flex-col gap-1 p-5">
+    <div className="flex flex-col gap-1.5 p-4">
       <span className="text-overline text-muted-foreground">{label}</span>
       <span className={cx("text-body", tone)}>{value}</span>
     </div>
   );
 }
 
-/**
- * Facts side by side, SEPARATED.
- *
- * This was a 1px-gap grid over a border-coloured ground, so four facts read as four cells
- * of one table welded together. Standing rule, given for the third time on 2026-09-03:
- * every block is its own object and the gap is what says so.
- */
+/** Facts side by side, separated. Every block is its own object and the gap says so. */
 export function FactGrid({ children }: { children: ReactNode }) {
-  return <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">{children}</div>;
+  return (
+    <div className="grid grid-cols-1 gap-(--gap-block) sm:grid-cols-2 lg:grid-cols-4">{children}</div>
+  );
 }
 
-/** One fact, with its own edge on all four sides. */
+/** One fact, with its own edge. */
 export function FactCell({ children }: { children: ReactNode }) {
   return <div className="border-border bg-surface border">{children}</div>;
 }
 
-/**
- * A list of records, SEPARATED.
- *
- * The rows used to share a `border-b` inside one outer box: a slab, and a single-side
- * border, which is the shape the standing rule bans. Each row is now its own card with an
- * edge on four sides, and 8px of air between them keeps a long list dense without welding
- * it. §21.12 RecordCardList.
- */
+/** A list of records. 2px apart, because the list is one object. */
 export function Rows({ children }: { children: ReactNode }) {
-  return <ul className="flex flex-col gap-2">{children}</ul>;
+  return <UiRows>{children}</UiRows>;
 }
 
-export function Row({ children, muted }: { children: ReactNode; muted?: boolean }) {
+/**
+ * One record.
+ *
+ * No border at rest; the border arrives on hover as an inset outline. The standing rule
+ * was amended on 2026-09-04 with the reasoning that satisfies its own intent most
+ * completely: a row with no edge cannot weld to its neighbour.
+ */
+export function Row({
+  children,
+  muted,
+  waiting,
+}: {
+  children: ReactNode;
+  muted?: boolean;
+  /** This row is waiting on the reader. A tinted ground, not a louder badge. */
+  waiting?: boolean;
+}) {
   return (
-    <li
-      className={cx(
-        "border-border bg-surface hover:border-border-hover hover:bg-accent flex flex-wrap items-center gap-4 border px-5 py-3.5",
-        "duration-glide ease-glide transition-[background-color,border-color]",
-        muted && "opacity-60",
-      )}
-    >
+    <UiRow {...(muted ? { muted } : {})} {...(waiting ? { waiting } : {})}>
       {children}
-    </li>
+    </UiRow>
   );
 }

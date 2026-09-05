@@ -155,10 +155,10 @@ export function Onboarding({ initial }: { initial: OnboardingState }) {
                   )}
                 >
                   {answered && !active ? (
-                    <CheckIcon size={15} weight="bold" className="text-success mt-0.5 shrink-0" aria-hidden="true" />
+                    <CheckIcon size={16} weight="bold" className="text-success mt-0.5 shrink-0" aria-hidden="true" />
                   ) : (
                     <RowIcon
-                      size={15}
+                      size={16}
                       className={cx("mt-0.5 shrink-0", active ? "text-primary" : "text-muted-foreground")}
                       aria-hidden="true"
                     />
@@ -210,7 +210,7 @@ export function Onboarding({ initial }: { initial: OnboardingState }) {
         */}
         <div className="grid gap-3 sm:grid-cols-2">
           <p className="border-processing bg-processing-subtle text-processing-ink text-body-sm flex gap-2 border px-4 py-3">
-            <SparkleIcon size={15} className="mt-0.5 shrink-0" aria-hidden="true" />
+            <SparkleIcon size={16} className="mt-0.5 shrink-0" aria-hidden="true" />
             {copy.why}
           </p>
           <div className="border-border bg-surface-sunken flex flex-col gap-1.5 border px-4 py-3">
@@ -361,7 +361,7 @@ function Reveal({ state, onEdit }: { state: OnboardingState; onEdit: (i: number)
                           <ul className="flex flex-col gap-1">
                             {values.map((v) => (
                               <li key={v} className="text-body-sm flex items-start gap-2">
-                                <CheckIcon size={14} className="text-primary-emphasis mt-1 shrink-0" aria-hidden="true" />
+                                <CheckIcon size={16} className="text-primary-emphasis mt-1 shrink-0" aria-hidden="true" />
                                 {v}
                               </li>
                             ))}

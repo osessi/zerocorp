@@ -621,6 +621,28 @@ Numbers are Geist Mono. A tooltip exists to be compared against another tooltip 
 
 ---
 
+#### 4.7.1 Ink on a series — VALIDATED 2026-09-03
+
+> **`--chart-N-ink` is the colour of text sitting ON series N. One ink for all five does
+> not exist.**
+
+The five series are chosen to be told apart, not to share a luminance, so a single label
+colour cannot clear 4.5:1 on all of them. White measures 5.36 / 7.10 / 5.17 / **4.09** /
+6.04 on the light series — the gold fails — and anything dark enough to fix the gold fails
+on the teal and the violet. The shadcn radial block gets away with one white because its
+five colours are one blue ramp.
+
+| | 1 teal | 2 violet | 3 blue | 4 gold | 5 pink |
+| --- | --- | --- | --- | --- | --- |
+| light ink | `#FFFFFF` | `#FFFFFF` | `#FFFFFF` | `#0A0A0A` | `#FFFFFF` |
+| measured | 5.36 | 7.10 | 5.17 | 4.84 | 6.04 |
+| dark ink | `#0A0A0A` | `#0A0A0A` | `#0A0A0A` | `#0A0A0A` | `#0A0A0A` |
+| measured | 10.64 | 7.27 | 7.79 | 12.93 | 7.48 |
+
+`seriesInk(slot)` in `@zerocorp/ui` is the only way to read them. It is for text on a
+FILL — a label inside a bar or an arc. Text beside a chart is `--foreground` like any
+other text.
+
 ### 4.2 Dark mode — PARTIALLY VALIDATED
 
 | Token | Value | Status |
@@ -2637,9 +2659,13 @@ saying that Company and Website are different KINDS of work, and a label is read
 then skipped forever. A ground is seen without being read.
 
 Each navigation group now sits on its own tinted block — a wash, an edge on all four
-sides, and its label in the tone's ink — and the screens inside a stage carry the same
-tint in their tab band. The rail and the workspace stop being two colour systems that
-happen to touch at a hairline.
+sides, and its label in the tone's ink.
+
+**The rail only.** The tints were run across the workspace's tab band once and taken
+straight back out on 2026-09-03: *"je t'ai demandé de changer la couleur de la sidebar,
+pas celle du header associé dans l'espace de travail"*. A tinted strip at the top of the
+workspace is a second colour system arguing with the content beneath it. The band stays
+`--surface` and its marker stays the brand teal.
 
 | stage | wash | edge | ink | dark wash / edge / ink |
 | --- | --- | --- | --- | --- |
@@ -2665,21 +2691,22 @@ Where they are allowed, and nowhere else:
 
 ```text
 the GROUND of a navigation group        the LABEL of that group
-the GROUND of a tab band                the SELECTED tab's underline and label
-the edge of a count chip inside one
+the ACTIVE row's edge and icon tile     the edge of a count chip inside one
 ```
 
 The moment a journey tint marks an OBJECT — a dot, a badge, a state — it is making a
 status claim whether it meant to or not, and the status system wins.
 
-Two consequences the implementation had to honour:
+One consequence the implementation had to honour: **a chip must read on both grounds it
+lands on** — the group's wash, and the `--background` pane of the row that is selected. A
+fill alone can only do one of the two, so the chip carries a four-sided edge in the tone
+over a `--background` fill.
 
-- **The band's own rule stays neutral.** A tone on a single edge is the accent bar this
-  codebase has rejected four times. The tone lives in the fill and in the tab's underline,
-  which are the tab's anatomy, not a border pretending to be structure.
-- **A chip must read on both grounds it lands on** — the group's wash, and the
-  `--background` pane of the row or tab that is selected. A fill alone can only do one of
-  the two, so the chip carries a four-sided edge in the tone and a `--background` fill.
+A label in the rail gets about 127px. Every entry is one or two words, and the one that
+was not — "Tell us about your business" — ran under the chevron slot and butted the
+group's edge, which stopped being subtle the moment the group HAD an edge. It is "Your
+business" now. An ellipsis in a navigation rail is a label that failed, not a label that
+fits.
 
 Selection is a **pane of the page**, not a darker grey. `bg-accent` is a neutral `#EFEFEF`
 and dropping it onto a green wash reads as dirt; the active row lifts to `--background`
@@ -2687,6 +2714,88 @@ and takes the group's edge, which is the same move a tab makes.
 
 Collapsed, the label goes and the tint stays. The grey hairline that used to stand in for
 the label said only "a boundary"; the ground says *which* boundary.
+
+### 4.11 The figure ink is true black — VALIDATED 2026-09-03
+
+> **`--figure-ink` is `#000000` in light and `#FFFFFF` in dark. It is for the display
+> figure on a KPI card and for nothing else.**
+
+`--foreground` is `#14181B` and the blue cast in it is deliberate: body text at that value
+is easier to read across a paragraph than pure black. A KPI figure is not a paragraph. It
+is one number at display size, and beside white it reads grey. Asked for on 2026-09-03 —
+*"en vrai noir"* — and it is a real distinction rather than a rounding: **21.00** against
+the page where `--foreground` reaches **16.87**.
+
+Scope is the whole point. A second near-black for prose would be a fork of the type
+colour, and the product would then have two answers to "what colour is text".
+
+**The figure is black on all four cards, including the blocked one.** Attention marks the
+CARD — a destructive edge on four sides and its label in `--destructive-ink` — never the
+number. That rule was written for the sidebar counts (§21.4) and it is the same rule here:
+a red number beside three black ones is not one metric emphasised, it is four metrics that
+disagree about what a number looks like.
+
+### 21.32 A chart is a region, not a card — VALIDATED 2026-09-03
+
+> **`ChartFrame` is bordered DASHED on all four sides.**
+
+A card holds a fact that is finished. A chart holds a region that data is drawn *into*, and
+the dashed edge says so — the same distinction the announcement band draws, one register
+down. The tone is what keeps the two apart: the band's dashes carry `--destructive` or
+`--success`, the frame's carry `--border`.
+
+Four sides, because that is the only shape a border may take here. The rules **inside** the
+frame stay solid: the header rule and the legend rule divide two regions, which is
+structure, and structure is not drawn in dashes.
+
+Two consequences, both found by looking at the screen:
+
+- **No series, no legend strip.** `series={[]}` used to render an empty bordered band 45px
+  tall — a rule and some padding around nothing — on every chart that labels itself another
+  way. A frame that draws a region for content it does not have is chrome.
+- **Frames sharing a grid row end on the same line.** `h-full` on the frame, `flex-1` on
+  the plot region. The radial's legend wraps to three rows in a quarter-width column and
+  Publishing's fits on one, so one outline stopped 44px above the other. The chart keeps
+  its own height and centres in whatever it is given rather than stretching to fill a gap.
+
+**The chart row stands on the same four columns as the cards above it** — same `gap-4`,
+same `xl:grid-cols-4`. A row at `gap-6` over a row at `gap-4` is four columns that agree
+about nothing.
+
+**A label belongs ON the arc, and the ink belongs to the series.** It was moved to the
+legend for one revision and that was wrong — *"on passe pas sa souris avant de les voir"*.
+A name you have to hover for is a name the chart does not carry.
+
+The reason it was moved is real; the fix was a better one. A label sitting on an arc must
+clear 4.5:1 against the colour under it, and one white does not: it measures
+5.36 / 7.10 / 5.17 / **4.09** / 6.04 on the light series, and `--chart-4` is gold. The
+shadcn block reaches for `mix-blend-luminosity`, which is a way of not measuring. So §4.7
+grew `--chart-N-ink` — the ink is a property of the SERIES. See §4.7.
+
+Three things the implementation had to get right, and each was wrong first:
+
+- **A polar label list hands you a `viewBox`, not an `x` and a `y`.** Reading `props.x`
+  gave `NaN` on all five and the browser said so. A chart that renders is not a chart that
+  is right.
+- **Anchor at the arc's START, running the way the arc runs.** Centred on the axis, half of
+  every label sat on the grey track outside its own bar — white on `--surface-sunken`,
+  which is no contrast at all.
+- **Give the scale headroom so no arc closes the circle.** Without an explicit domain the
+  largest value sweeps a full turn: a ring with no beginning and no end, which reads as
+  decoration, while everything else looks like a fraction of nothing. *"pourquoi tout à la
+  même demi cercle aussi. et les autres un cercle complet"* is a scale problem, not a data
+  problem. 15% of headroom keeps every arc open.
+
+**The count rides with the name.** A radial has one honest flaw: arc *length* grows with
+radius, so an outer ring at the same angle looks longer than an inner one. The angle is the
+quantity and it is drawn correctly — two areas sweep past 180°, three do not — but nobody
+reads an angle. The number on the arc means the chart never has to be trusted about a
+comparison it draws imperfectly.
+
+**Panels sharing a grid row end on the same line**, and that is not only for charts. The
+plan list and the two stacked panels beside it were asked for explicitly. A grid row already
+stretches its cells; what it cannot do is decide which box in each column absorbs the slack,
+so one box per column takes `flex-1` and the taller column sets the height for both.
 
 ### 21.31 Reference material never looks like the customer's own data — VALIDATED 2026-09-03
 
@@ -3489,7 +3598,237 @@ Also resolved 2026-08-31: the animated focus ring — `COLOR_TRANSITION` replace
 | 16 | **`--primary-hover` and `--destructive-hover`** (§4.1) — PROPOSED, deliberately not validated yet | Any future filled surface with a hover state |
 | 20 | **Plan steps have no colour scale.** There are nine plan categories and six status tones, and the status tones already mean something specific: `warning` is "a person must act", `danger` is "it came back". Reusing them to mark a plan phase would overload a vocabulary the rest of the product depends on. The plan editor ships with a plain `text-overline` phase label. A dedicated scale for the five phases is a design decision, not a gap to fill with a guess | The plan editor, and every later screen that shows plan progress |
 | 21 | **`ai` is a token but not a `StatusTone`.** `--ai` exists in `tokens.css` (§4.5) and the dashboard prototype uses it, but `packages/ui/src/tone.ts` has six tones and `ai` is not one. Promoting it means adding it to `TONE_GLYPH`, `TONE_INK`, `TONE_SURFACE`, `TONE_EDGE` and deciding whether it is assertive | Any product screen wanting the AI tone |
+| 22 | **The Icon Dictionary is advisory.** `Icon` enforces the SIZE and a test proves it, but nothing enforces the GLYPH: 39 files still import `@phosphor-icons/react` directly, so a screen can pick any icon for any concept. The lint rule that would close this was specified on 2026-09-04 and not built | Any screen adding an icon |
 | 19 | **Should the primary Button be black rather than teal?** The reference reserves colour entirely for status and data, and fills its primary actions with black. Not prototyped — it is more radical than any of the three directions | `Button`, and the product's whole sense of where the brand lives |
+
+---
+
+## §25 — The visual architecture pass. Decided 2026-09-04, VALIDATED.
+
+Four rulings, taken after the reference study in
+[`docs/studies/2026-09-04-visual-architecture.md`](./studies/2026-09-04-visual-architecture.md).
+The study read Twenty, Macro, Midday and Dub. Nothing was copied from any of them:
+Twenty's `twenty-front` is AGPL-3.0, Macro's `apps/web` is all-rights-reserved, Midday is
+AGPL-3.0 and Dub is AGPL-3.0-or-later. Every rebuilt component names its source in a
+comment.
+
+### §25.1 — The light ground recedes. `--background: #FAFAF9`.
+
+`#FCFCFB` was measured and rejected on 2026-09-02 because it pushed three tints under the
+§4.5 perceptibility floor. That rejection was correct on its premise, and the premise
+changed: **it assumed tints sit on the page.** The composition architecture puts them on
+cards, and a card is still `#FFFFFF`, so every tint is measured against white exactly as
+before and none of them moved.
+
+Re-measured across eight candidates:
+
+| Page | vs `--surface` | vs `--surface-sunken` |
+|---|---|---|
+| `#FFFFFF` (was) | 1.000 | 1.140 |
+| `#FCFCFB` (rejected) | 1.027 | 1.110 |
+| **`#FAFAF9` (shipped)** | **1.044** | **1.091** |
+| `#F9F8F6` | 1.061 | 1.074 |
+| `#F5F4F0` | 1.101 | 1.035 |
+
+For scale: Dub reads 1.044, Twenty 1.026, Midday 1.090.
+
+**The §4.5 floor of 1.10 is not the test here, and applying it was the error in the first
+pass.** 1.10 governs a TINT: a small patch that must be recognised as carrying a hue. A
+page-to-card step is two large adjacent fields, which the eye resolves at far lower
+ratios. That is why every reference product sits at 1.03 to 1.09 and none looks flat.
+
+Warm, not neutral. `#FAFAFA` measures identically and the neutral ramp is already warm
+(`--muted-foreground #6E6C66`, `--input #847F75`), so a neutral page would be the only
+cool surface in the product.
+
+> **The rule this produces: a tint may sit on `--surface`, never on `--background`.**
+> Measured on the page, eleven of the fifteen tints fall under their floor.
+
+Every text and control token was re-measured on the new page. All pass. The tone colours
+(`--success`, `--warning`, `--info`, `--processing`, `--destructive`, `--ai`) are borders
+and fills, so their floor is 3:1, and the lowest reads 3.91.
+
+### §25.2 — Rows carry no border at rest. The standing rule is amended.
+
+> "No single-side borders: four sides, dotted, or none."
+
+The rule was given to stop rows welding into a slab, and that reason was right. Every row
+therefore carried a four-side border, which is why nine rows read as nine cards.
+
+**The rule now resolves to NONE for a row in a list**, and this satisfies its own intent
+more completely than four sides ever did:
+
+> **A row with no edge cannot weld to its neighbour.**
+
+The hover border is an OUTLINE, not a border: drawn inside the row's box at `-1px`
+offset, occupying no layout, and only one row can carry it at a time, so a seam between
+two rows cannot exist. Observed in Twenty, which renders hover and focus chrome in a
+portal for the same reason.
+
+The rule is unchanged everywhere else. A CARD still owns four sides; §21.27 still forbids
+a tone colour on a single edge; the dotted exception still stands and the rail's child
+connector uses it.
+
+### §25.3 — Phosphor stays, and every locked decision now needs a mechanism.
+
+Tabler was requested on licence grounds. Both Tabler and Phosphor are MIT, so licence
+decided nothing. What decided it: Tabler is drawn on a 24px grid with a 2px stroke and
+renders heavy at our 20px standard, where Phosphor is drawn on 256 and scales cleanly.
+
+The audit that settled it counted every icon call site in the product:
+
+| Size | Count | On scale |
+|---:|---:|---|
+| 16 | 65 | yes |
+| 12 | 31 | yes |
+| **14** | **30** | **no** |
+| 20 | 21 | yes — the "locked standard" |
+| **17** | **15** | **no** |
+| **18** | **6** | **no** |
+| 24 | 4 | yes |
+| **15** | **3** | **no** |
+| 32 | 1 | yes |
+| **22** | **1** | **no** |
+| **13** | **1** | **no** |
+
+**56 of 178 call sites, 31%, used a size not in the scale. The locked 20px standard was
+used 21 times and the dominant size in the product was 16 followed by 14, which is not on
+the scale at all.** 42 files imported Phosphor directly, bypassing the `IconSize` union
+entirely.
+
+Swapping icon sets would have fixed none of that.
+
+> ### The general rule
+>
+> **A standard nothing enforces is not locked, it is decorative.
+> Every locked decision needs a mechanism that makes violating it fail.**
+
+**Shipped 2026-09-04:**
+
+1. `Icon` takes `size?: IconSize`, so `size={17}` does not compile.
+2. **All 44 remaining off-scale call sites were migrated** (14/15/17/18 → 16, 13 → 12,
+   22 → 24). The product now uses 16, 12, 20, 24 and 32 and nothing else.
+3. `design-tokens.test.ts` asserts the scale, so a regression fails CI rather than review.
+4. The Icon Dictionary (§11b) names one glyph per product concept with "use when" and
+   "avoid when".
+
+**NOT shipped, and this is the honest state:** a lint rule forbidding
+`import … from "@phosphor-icons/react"` outside `packages/ui`. **39 files still import it
+directly.** The size is now enforced by test regardless of import path, so the gap is
+narrower than it was, but the dictionary is still advisory: a screen can pick any glyph
+for any concept. Recorded as §24 item 22 rather than left as a claim nothing backs.
+
+#### The enforcement sweep this produced
+
+Every locked decision in this document, checked for a mechanism:
+
+| Decision | Mechanism | Holding? |
+|---|---|---|
+| No hard-coded hex in a className or style | `design-tokens.test.ts` | **YES.** All 21 hex matches in the codebase are in comments |
+| No arbitrary px in a Tailwind bracket | `design-tokens.test.ts` | **YES** — it caught 7 of mine in this very pass |
+| No `transition-colors` | `design-tokens.test.ts` | **YES** — caught 1 of mine |
+| No `outline-none` | `design-tokens.test.ts` | **YES** — caught 1 of mine |
+| No inline pixel style | `design-tokens.test.ts` | **YES** — caught 1 of mine |
+| No tone colour on a single edge | `design-tokens.test.ts` | **YES** — caught 1 of mine |
+| No `-subtle` tint without a tone edge | `design-tokens.test.ts` | **YES** — caught 1 of mine |
+| No em dash in shipped copy | `copy.test.ts` | **YES** — caught 3 of mine |
+| No runtime-built Tailwind class | `design-tokens.test.ts` | YES |
+| No welded slabs | `design-tokens.test.ts` | YES |
+| **Icon size scale (§11)** | **none until 2026-09-04.** Now `design-tokens.test.ts` | **FIXED** — 44 call sites migrated, test added |
+| **One container width per screen** | **none** | **NO — see §25.4** |
+| **Two densities for rows (§21.8)** | **none, and no values existed** | **NO — was one density, 52px, everywhere** |
+
+The token layer was audited hard and holds. **The layout and composition layer had no
+enforcement of any kind**, which is the same failure as the icon scale and it is why
+seven screens shared one skeleton.
+
+### §25.4 — Three page widths, chosen per screen.
+
+One container applied everywhere is what made seven screens one screen. Measured before
+the pass: the byte-identical line
+
+```text
+mx-auto flex w-full max-w-(--container-content) flex-col gap-8 px-5 py-8 sm:px-8
+```
+
+appeared **15 times across 5 of the 7 screens**.
+
+```text
+reading  --container-reading  768px   centred   one subject, read top to bottom
+work     --container-work    1280px   centred   panels and grids
+full     viewport, gutters only                 scanned, not read: tables
+```
+
+`Page` takes `width` as a REQUIRED prop with no default. A default is how one width ended
+up on every screen: nobody chose it, they passed nothing.
+
+As shipped: Overview `work`, Customers/Prospects `full`, Content/Articles `full`,
+Website/Domain `reading`, everything else `work`.
+
+### §25.5 — Vertical rhythm: 2 / 16 / 40.
+
+Was 8 / 16 / 32, a 1:2:4 ratio with every step within one doubling of its neighbour,
+which is why an evenly spaced page read as mush. Twenty runs 2px between siblings against
+16px between groups.
+
+```text
+--gap-row      2px    between rows in ONE list      the list is one object
+--gap-block   16px    between blocks in a section   they are siblings
+--gap-section 40px    between sections              different subjects
+```
+
+### §25.6 — Motion is a vocabulary of JOBS, not a list of durations.
+
+"150ms ease-out" is not a decision anyone can review. "A tab body arrives" is.
+
+| Job | Duration | Curve | Status |
+|---|---|---|---|
+| `press` | 100ms | glide | had it |
+| **`hover-in`** | **0ms** | — | **changed from 260ms** |
+| **`hover-out`** | **150ms** | out | **changed from 260ms** |
+| `tab-switch` | 200ms | out | new |
+| `panel-open` | 200ms | glide | new |
+| `row-expand` | 200ms | out | new, Base UI Collapsible |
+| `enter` | 250ms | out | had it, unused |
+| `stagger` | 40ms/item, **cap 8** | — | cap is new |
+| `value-change` | 320ms | glide | new |
+| `skeleton` | 150ms | out | new |
+
+**Hover is asymmetric and that is the single most-felt change in the pass.** A hover that
+fades in feels laggy: the cursor is already there, so the feedback is late by definition.
+A hover that fades out feels smooth. Instant on, 150ms off.
+
+Chrome arrives (100–160ms), content settles (200–320ms). Measured across all four
+references without exception.
+
+### §25.7 — Empty states are three states, by CAUSE.
+
+| Cause | Means | Action |
+|---|---|---|
+| `first-run` | there has never been data | the primary action |
+| `filtered` | a filter matched nothing | clear the filter |
+| `complete` | the queue is finished | **none** |
+
+The old `EmptyState` REQUIRED an action, on the reasoning that an empty state without one
+is a dead end. That is right for two causes and wrong for the third: an operator whose
+queue is empty has finished, and offering a remedy tells them something broke when nothing
+did. `complete` renders no action even if one is passed.
+
+Behind the message sits **the real skeleton at `opacity-20 blur-[7px]`** (`.zc-ghost`), so
+an empty screen shows the SHAPE of what will fill it. Zero assets, zero licence. Plus
+Macro's fixed 28% top spacer, so every empty title in the product lands on one baseline.
+
+### §25.8 — Illustration: we own none.
+
+Empty states are the real thing at 20% opacity, drawn from the product's own vocabulary.
+No asset, no licence entry, no attribution, automatic dark mode, and a new state takes
+fifteen minutes.
+
+The entire illustration budget is **four commissioned milestone pieces**: company formed,
+EIN issued, site live, first customer. Specified in
+[`docs/design-refs/`](./design-refs/README.md), slots left empty, nothing blocked on them.
+
+---
 
 ---
 

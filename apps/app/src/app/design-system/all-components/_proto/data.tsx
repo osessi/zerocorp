@@ -48,7 +48,7 @@ export function CardDemo() {
         <span className="text-overline text-muted-foreground uppercase">Metric</span>
         <span className="text-display-l text-foreground font-mono">1 240</span>
         <span className="text-caption text-success inline-flex items-center gap-1">
-          <ArrowUpIcon size={14} aria-hidden="true" /> 18% vs last month
+          <ArrowUpIcon size={16} aria-hidden="true" /> 18% vs last month
         </span>
       </div>
       <div className="border-border border border-dashed p-4">
@@ -209,7 +209,7 @@ export function TimelineDemo() {
             <li key={e.title} className="flex gap-3">
               <div className="flex flex-col items-center">
                 <span className="border-border bg-background flex size-6 shrink-0 items-center justify-center border">
-                  <Glyph size={14} weight="regular" aria-hidden="true" className={TONE_INK[e.tone]} />
+                  <Glyph size={16} weight="regular" aria-hidden="true" className={TONE_INK[e.tone]} />
                 </span>
                 {!last ? <span className="bg-border w-px flex-1" /> : null}
               </div>
@@ -299,7 +299,7 @@ export function MetricGridDemo() {
           )}
         >
           <span className="text-overline text-muted-foreground flex items-center gap-2 uppercase">
-            {(() => { const I = Icon as typeof BuildingsIcon; return <I size={14} aria-hidden="true" />; })()}
+            {(() => { const I = Icon as typeof BuildingsIcon; return <I size={16} aria-hidden="true" />; })()}
             {label as string}
           </span>
           <span className="text-h2 text-foreground font-mono">{value as string}</span>

@@ -17,8 +17,46 @@
    Semantic colours — light. DESIGN_SYSTEM.md §4.1, VALIDATED.
    --------------------------------------------------------------------------- */
 :root {
-  --background: #ffffff;
+  /* The page RECEDES; the card stays white. Decided 2026-09-04, §4.1b.
+
+     #FCFCFB was measured and rejected on 2026-09-02 because it pushed success-,
+     warning- and processing-subtle under the §4.5 perceptibility floor. That rejection
+     was correct and it rested on a premise the composition architecture changes: it
+     assumed TINTS SIT ON THE PAGE. They now sit on cards, and a card is still #FFFFFF,
+     so every tint is measured against white exactly as before and nothing moved.
+
+     Re-measured 2026-09-04 across eight candidates. #FAFAF9 buys 1.044 against
+     --surface, against 1.027 for the rejected #FCFCFB. For scale: Dub reads 1.044,
+     Twenty 1.026, Midday 1.090. This sits mid-range for the category.
+
+     The §4.5 floor of 1.10 is NOT the test here, and applying it was the error in the
+     first pass. 1.10 governs a TINT: a small patch that has to be recognised as
+     carrying a hue. A page-to-card step is two large adjacent fields, which the eye
+     resolves at far lower ratios — which is why every reference product sits at
+     1.03–1.09 and none of them looks flat.
+
+     The consequence is a RULE, not a value: a tint may sit on --surface and never on
+     --background. Measured on the page, eleven of the fifteen tints fall under their
+     floor. Enforced by tests/architecture/design-tokens.test.ts.
+
+     Warm, not neutral. #FAFAFA measures identically (1.044) and the neutral ramp is
+     already warm — --muted-foreground #6E6C66 and --input #847F75 both carry it — so a
+     neutral page would be the only cool surface in the product. */
+  --background: #fafaf9;
   --foreground: #14181b;
+
+  /* The FIGURE ink — true black, and the only true black in the product.
+
+     --foreground is #14181B, which carries a blue cast on purpose: body text at that
+     value is easier to read across a long paragraph than pure black. A KPI figure is not
+     a paragraph. It is one number, set at display size, and next to white it wants to be
+     as present as type can be. Asked for on 2026-09-03 — "en vrai noir" — and it is a
+     real distinction rather than a rounding: 21.00 against the page where --foreground
+     reaches 16.87.
+
+     It is for the DISPLAY FIGURE on a KPI card and nothing else. Body text stays
+     --foreground; a second near-black for prose would be a fork of the type colour. */
+  --figure-ink: #000000;
 
   --primary: #00786f;
   --primary-foreground: #f0fdfa;
@@ -80,6 +118,17 @@
      They are NOT interchangeable. */
   --border: #e5e5e5;
   --border-hover: #d3d3d3;
+  /* The CARD edge. §9b, 2026-09-04.
+
+     --border at #E5E5E5 measures 1.26 against --surface, which is right for a divider
+     inside a panel and too faint for the edge of an object sitting on the page: four
+     stat cards read as four faint rectangles rather than as four objects.
+
+     #B5B1A8 measures 2.14 on --surface and 2.05 on --background. Deliberately BELOW the
+     3:1 of --input: an --input edge says "this is a control you operate", and a card is
+     not. Warm, on the neutral ramp, so it belongs to the same family as
+     --muted-foreground and --input rather than being a cool grey dropped in. */
+  --border-card: #b5b1a8;
   /* #949494 was recorded at 3.03:1 on WHITE and never measured on a raised surface. It
      sat at 2.78:1 on --muted: every control in a muted well was below SC 1.4.11 from the
      day the token was written. #847F75 is measured on all four: 3.98 --surface,
@@ -211,9 +260,14 @@
      badge or a state marker — the moment a journey tint marks an OBJECT it is competing
      with the status system, and the status system wins.
 
-     Their values are their own, not aliases of --success-*/--info-*/--ai-*. A journey
-     tint and a status tone share a hue by accident of the spectrum, not by contract, and
-     retuning one must never move the other.
+     Their values are their own. They are NOT aliases of the success, info or ai
+     families. A journey tint and a status tone share a hue by accident of the spectrum,
+     not by contract, and retuning one must never move the other.
+
+     (Written without a `-success-<star>/` glob on purpose: that spelling contains the
+     comment terminator, so the block closed early and CSS silently swallowed the first
+     declaration after it. --journey-build-wash was undefined for exactly as long as this
+     sentence had a slash in it.)
 
      Three channels per tone, and the wash never travels alone: -wash is the ground,
      -edge the border on ALL FOUR SIDES, -ink the label. Measured against #ffffff:
@@ -253,6 +307,24 @@
   --chart-3: #2563eb;
   --chart-4: #997a00;
   --chart-5: #be185d;
+
+  /* INK ON A SERIES. One per series, because one ink for all five does not exist.
+
+     A label sitting on an arc has to clear 4.5:1 against the colour under it, and the
+     five §4.7 hues are chosen to be told apart rather than to share a luminance. White
+     measures 5.36 / 7.10 / 5.17 / 4.09 / 6.04 on the light series: --chart-4 is gold and
+     it fails, and no amount of choosing a different single value fixes it — anything dark
+     enough for the gold fails on the teal and the violet. The shadcn reference gets away
+     with one white because its five colours are one blue ramp; ours are five hues.
+
+     So the ink is a property OF THE SERIES, not of the chart. Measured on their own
+     series: 5.36 / 7.10 / 5.17 / 4.84 / 6.04 in light, and 10.64 / 7.27 / 7.79 / 12.93 /
+     7.48 in dark, where every series is bright and every ink is the near-black. */
+  --chart-1-ink: #ffffff;
+  --chart-2-ink: #ffffff;
+  --chart-3-ink: #ffffff;
+  --chart-4-ink: #0a0a0a;
+  --chart-5-ink: #ffffff;
   --chart-grid: #e5e5e5;
   --chart-axis: #707070;
 }
@@ -264,6 +336,8 @@
 .dark {
   --background: #0a0a0a;
   --foreground: #fafafa;
+  /* True white in dark, for the same reason and with the same scope. 21.00 on #0A0A0A. */
+  --figure-ink: #ffffff;
 
   --secondary: #262626;
   --secondary-foreground: #fafafa;
@@ -381,6 +455,12 @@
   --chart-3: #60a5fa;
   --chart-4: #facc15;
   --chart-5: #f472b6;
+  /* In dark every series is the bright end of its hue, so every ink is the near-black. */
+  --chart-1-ink: #0a0a0a;
+  --chart-2-ink: #0a0a0a;
+  --chart-3-ink: #0a0a0a;
+  --chart-4-ink: #0a0a0a;
+  --chart-5-ink: #0a0a0a;
   --chart-grid: #262626;
   --chart-axis: #a3a3a3;
 }
@@ -393,6 +473,7 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-figure-ink: var(--figure-ink);
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
   --color-secondary: var(--secondary);
@@ -467,6 +548,11 @@
   --color-chart-3: var(--chart-3);
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
+  --color-chart-1-ink: var(--chart-1-ink);
+  --color-chart-2-ink: var(--chart-2-ink);
+  --color-chart-3-ink: var(--chart-3-ink);
+  --color-chart-4-ink: var(--chart-4-ink);
+  --color-chart-5-ink: var(--chart-5-ink);
   --color-chart-grid: var(--chart-grid);
   --color-chart-axis: var(--chart-axis);
 }
@@ -585,14 +671,110 @@
   --ease-glide: cubic-bezier(0.32, 0.72, 0, 1);
   --duration-glide: 260ms;
 
+  /* ---------------------------------------------------------------------------
+     HOVER IS ASYMMETRIC. §10b, 2026-09-04.
+
+     A hover that fades IN feels laggy; a hover that fades OUT feels smooth. The cursor
+     is already there — the feedback is late by definition if it takes 260ms to arrive,
+     and 260ms was what every row in the product used in BOTH directions.
+
+     Observed in Macro, which writes the same idea as
+     `transition: background-color var(--transition); &:hover { transition: none; }`.
+     The pattern is Bucket 3; nothing was copied.
+
+     0ms in, 150ms out. Applies to the hover GROUND only. A hover that also MOVES keeps
+     --duration-glide, because movement under a cursor still wants mass.
+     --------------------------------------------------------------------------- */
+  --duration-hover-in: 0ms;
+  --duration-hover-out: 150ms;
+
+  /* Chrome arrives; content settles. Measured across all four references: overlays run
+     100–160ms and content runs 200–320ms, without exception. */
+  --duration-overlay: 150ms; /* menus, tooltips, dialog grounds */
+  --duration-content: 200ms; /* panels, expansion, tab bodies */
+  --duration-value: 320ms; /* a number changing under the reader */
+
+  /* The stagger, and its CAP. An 80-row list at 40ms per row takes 3.2 seconds to
+     appear, which is not a reveal, it is a wait. Twenty and Midday both cap. */
+  --stagger-step: 40ms;
+  --stagger-cap: 8;
+
   /* -------------------------------------------------------------------------
      Layout and breakpoints — §12, VALIDATED.
      ------------------------------------------------------------------------- */
-  --container-content: 1280px;
+  /* THREE widths, chosen per screen. §12b, 2026-09-04.
+
+     One container applied everywhere is what made seven screens one screen. The
+     byte-identical container line appeared 15 times across 5 of the 7 files. A screen
+     now declares which of these it is, and that declaration is part of its design.
+
+       reading  a single subject, read top to bottom. Onboarding, a form, a summary.
+       work     panels and grids. Most screens.
+       full     scanned, not read. Tables, calendars. Gutters only, no centre column. */
+  --container-reading: 768px;
+  --container-work: 1280px;
+  --container-content: 1280px; /* retained: --container-work under its old name */
+
   --spacing-gutter-mobile: 16px;
   --spacing-gutter-tablet: 24px;
   --spacing-gutter-desktop: 32px;
-  --spacing-sidebar: 240px;
+
+  /* The rail is an ICON RAIL that expands on hover. §21.3b, 2026-09-04.
+     240px held open on every screen spent 168px on labels that are legible from their
+     icons. Rebuilt from the pattern in Midday (AGPL-3.0, not copied). */
+  --spacing-sidebar: 240px; /* expanded */
+  --spacing-sidebar-rail: 72px; /* at rest */
+
+  /* Row heights. §21.8, closing §24 item 12. Two densities, not one.
+     52px for everything is what made a nine-row list feel like nine cards. */
+  --row-compact: 36px;
+  --row-comfortable: 48px;
+  --row-nav: 40px;
+  --row-nav-child: 32px;
+  --row-tabstrip: 44px;
+
+  /* COLUMN WIDTHS. §21.8b, 2026-09-04.
+
+     Declared once, so a screen cannot invent `w-52`. leads/page.tsx had w-52, w-44 and
+     w-12 written inline before the typed-cell pass, which is three widths nobody chose
+     and no other screen could match.
+
+     The shape follows Midday's transaction table, not its numbers: identity columns are
+     FIXED and narrow, content columns are ELASTIC, and nothing is under 100px. */
+  --cell-stamp: 110px;
+  --cell-identity: 200px;
+  --cell-identity-wide: 280px;
+  --cell-numeric: 110px;
+  --cell-status: 140px;
+  /* The ACTION column is fixed, and that is the whole point of it.
+
+     It was `ml-auto` with no width, so its box grew with its label — "Open" measured
+     69px and "Review" 81px. The identity column is flex-1, so it absorbed the 12px
+     difference and every column on a draft row sat 12px left of the same column on a
+     published row. Measured on seeded Content data, 2026-09-04.
+
+     A column whose position depends on the length of a word in a different column is not
+     a column. */
+  --cell-action: 112px;
+
+  /* An empty state reserves the height its filled counterpart would take, so a screen
+     does not jump when the first record lands. */
+  --empty-min-height: 320px;
+  /* A scrolling panel body inside a page that also scrolls. Bounded so the panel does
+     not grow the page, generous enough that scrolling is rare. */
+  --panel-scroll-max: 560px;
+
+  /* -------------------------------------------------------------------------
+     Vertical rhythm — §6b, 2026-09-04.
+
+     The three gaps were 8 / 16 / 32: a 1:2:4 ratio, every step within one doubling of
+     its neighbour, which is why an evenly spaced page read as mush rather than as
+     structure. Twenty runs 2px between siblings against 16px between groups, an 8:1
+     ratio, and the grouping is unmistakable at a glance.
+     ------------------------------------------------------------------------- */
+  --gap-row: 2px; /* between rows in ONE list. The list is one object */
+  --gap-block: 16px; /* between blocks in one section. They are siblings */
+  --gap-section: 40px; /* between sections. Different subjects */
 
   --breakpoint-sm: 640px;
   --breakpoint-lg: 1024px;
@@ -649,6 +831,42 @@
     to   { opacity: 1; }
   }
 
+  /* A tab body arriving. Downward travel, because the strip is above it and the body
+     should read as coming FROM the tab that was clicked. §10b, 2026-09-04. */
+  @keyframes zc-tab {
+    from { opacity: 0; transform: translateY(-8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* A side panel entering from the right edge. */
+  @keyframes zc-panel {
+    from { transform: translateX(100%); }
+    to   { transform: translateX(0); }
+  }
+
+  /* A NUMBER CHANGING, not a number appearing.
+
+     The 4px blur is the load-bearing part. Without it a value swap reads as two
+     different numbers replacing each other; with it, it reads as one number changing,
+     which is what actually happened. Observed in Midday (AGPL-3.0) as a framer variant;
+     rebuilt here as a keyframe on our own tokens. */
+  @keyframes zc-value {
+    from { opacity: 0; transform: translateY(6px); filter: blur(4px); }
+    to   { opacity: 1; transform: translateY(0); filter: blur(0); }
+  }
+
+  /* The ghost skeleton behind an empty state. Not motion — a resting treatment — but it
+     lives here because it is the counterpart of the skeleton-to-content crossfade.
+     Rebuilt from the pattern in Midday (AGPL-3.0, not copied): the real column-derived
+     skeleton, blurred and dimmed, so an empty screen shows the SHAPE of what will fill
+     it rather than a blank rectangle. */
+  .zc-ghost {
+    opacity: 0.2;
+    filter: blur(7px);
+    pointer-events: none;
+    user-select: none;
+  }
+
   /* A step validating. Scale is small: 0.7 reads as a pop, 0.92 reads as a click. */
   @keyframes zc-pop {
     from { opacity: 0; transform: scale(0.92); }
@@ -692,6 +910,18 @@
 
   .zc-enter-fade {
     animation: zc-fade var(--duration-emphasis) var(--ease-out) both;
+  }
+
+  .zc-tab-enter {
+    animation: zc-tab var(--duration-content) var(--ease-out) both;
+  }
+
+  .zc-panel-enter {
+    animation: zc-panel var(--duration-content) var(--ease-glide) both;
+  }
+
+  .zc-value-change {
+    animation: zc-value var(--duration-value) var(--ease-glide) both;
   }
 
   .zc-pulse {

@@ -12,10 +12,26 @@
  * without a licence review and adaptation to ZeroCorp tokens.
  */
 export * from "./button/index";
-export type { IconSize } from "./icon";
+export type { IconSize, IconWeight } from "./icon";
+export { ICON_SIZE, ICON_SIZE_DEFAULT } from "./icon";
+export * from "./icon/index";
 export * from "./tone";
 export { cx } from "./cx";
-export { COLOR_TRANSITION, CONTROL_TRANSITION } from "./motion";
+export {
+  COLOR_TRANSITION,
+  CONTROL_TRANSITION,
+  HOVER_GROUND,
+  HOVER_LIFT,
+  OVERLAY_ENTER,
+  CONTENT_ENTER,
+  TAB_ENTER,
+  PANEL_ENTER,
+  VALUE_CHANGE,
+  SKELETON_SETTLE,
+  ENTER,
+  STAGGER_CAP,
+  staggerStyle,
+} from "./motion";
 export * from "./overlay/index";
 export * from "./feedback/index";
 export * from "./field/index";
@@ -27,4 +43,7 @@ export * from "./avatar/index";
 export * from "./cockpit/index";
 export * from "./panels/index";
 export * from "./chart/index";
+export * from "./data/index";
+export * from "./table/index";
+export * from "./empty/index";
 export * from "./audio/index";

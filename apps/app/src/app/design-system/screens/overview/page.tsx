@@ -57,14 +57,14 @@ export default function OverviewScreen() {
             {
               label: "Monthly recurring revenue",
               value: money(mrr),
-              icon: <CurrencyDollarIcon size={14} />,
+              icon: <CurrencyDollarIcon size={16} />,
               tone: "success",
               delta: { text: "18% vs last month", direction: "up" },
             },
             {
               label: "Active businesses",
               value: String(BUSINESSES.length),
-              icon: <BuildingsIcon size={14} />,
+              icon: <BuildingsIcon size={16} />,
               tone: "info",
               delta: { text: "2 this month", direction: "up" },
             },
@@ -72,7 +72,7 @@ export default function OverviewScreen() {
               label: "Formations in flight",
               value: String(inFlight.length),
               sub: `of ${BUSINESSES.length}`,
-              icon: <StackIcon size={14} />,
+              icon: <StackIcon size={16} />,
               // Violet, not teal. MRR was green and this was teal, which sit next to each
               // other and read as the same card twice. Violet also matches what the badge
               // says: a formation in flight is mostly the collecting stage, which is violet.
@@ -82,7 +82,7 @@ export default function OverviewScreen() {
           ]}
           link={
             <Link href="/design-system/screens/businesses" className="text-body-sm text-foreground focus-visible:outline-ring inline-flex w-fit items-center gap-1 focus-visible:outline-2 focus-visible:outline-offset-2">
-              Go to businesses <ArrowRightIcon size={14} />
+              Go to businesses <ArrowRightIcon size={16} />
             </Link>
           }
         />

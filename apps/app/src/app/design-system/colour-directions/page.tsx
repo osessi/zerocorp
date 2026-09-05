@@ -97,7 +97,7 @@ function Fragment({ hasAi, hasAction }: { hasAi: boolean; hasAction: boolean }) 
                   background: `var(--p-${t}-subtle)`,
                 }}
               >
-                <G size={14} weight="regular" aria-hidden="true" />
+                <G size={16} weight="regular" aria-hidden="true" />
                 {LABEL[t]}
               </span>
             );

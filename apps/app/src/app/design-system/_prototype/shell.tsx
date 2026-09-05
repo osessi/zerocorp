@@ -184,7 +184,7 @@ function TopCommandBar() {
         <span className="bg-border mx-2 h-6 w-px" aria-hidden="true" />
         <button className="hover:bg-accent focus-visible:outline-ring flex items-center gap-2 py-1 pr-2 pl-1 transition-[color,background-color,border-color] duration-normal focus-visible:outline-2 focus-visible:-outline-offset-2" aria-label="Account">
           <Avatar initials="OK" size="sm" />
-          <CaretDownIcon size={14} className="text-muted-foreground" />
+          <CaretDownIcon size={16} className="text-muted-foreground" />
         </button>
       </div>
     </header>

@@ -107,10 +107,16 @@ export function Queue({
         ) : null}
 
         {rows.length === 0 ? (
+          /*
+            `complete`, not `first-run`. An operator whose queue is empty has FINISHED,
+            and offering them a remedy tells them something went wrong when nothing did.
+            The cause prop makes that a typed distinction rather than a copy decision, and
+            `complete` renders no action even if one is passed. §21.14.
+          */
           <EmptyState
+            cause="complete"
             title="Nothing in the queue"
             body="Every formation is either finished or cancelled. New requests appear here the moment a founder submits one."
-            action={<Button onClick={() => router.refresh()}>Check again</Button>}
           />
         ) : (
           <section className="flex flex-col gap-4">
@@ -142,7 +148,7 @@ export function Queue({
 
                       {row.openRfis > 0 ? (
                         <span className="text-caption text-warning-ink inline-flex items-center gap-1">
-                          <QuestionIcon size={14} weight="fill" aria-hidden="true" />
+                          <QuestionIcon size={16} weight="fill" aria-hidden="true" />
                           {row.openRfis} open
                         </span>
                       ) : null}
@@ -155,7 +161,7 @@ export function Queue({
                           age >= 7 ? "text-warning-ink" : "text-muted-foreground",
                         )}
                       >
-                        <ClockIcon size={14} aria-hidden="true" />
+                        <ClockIcon size={16} aria-hidden="true" />
                         {age}d
                       </span>
                     </div>

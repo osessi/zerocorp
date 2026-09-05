@@ -100,7 +100,7 @@ export function BreadcrumbDemo() {
                   </a>
                 )}
                 {!last ? (
-                  <CaretRightIcon size={14} className="text-muted-foreground shrink-0" aria-hidden="true" />
+                  <CaretRightIcon size={16} className="text-muted-foreground shrink-0" aria-hidden="true" />
                 ) : null}
               </li>
             );

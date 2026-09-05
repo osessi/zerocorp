@@ -1,6 +1,14 @@
 import { redirect } from "next/navigation";
 import { EnvelopeSimpleIcon } from "@phosphor-icons/react/dist/ssr";
-import { Avatar, EmptyState, SegmentedProgress, StatusBadge, StatusDot, Tabs } from "@zerocorp/ui";
+import {
+  Avatar,
+  EmptyState,
+  Page,
+  SegmentedProgress,
+  StatusBadge,
+  StatusDot,
+  Tabs,
+} from "@zerocorp/ui";
 import { BigFact, BigFactGrid } from "../ui-facts";
 import { ShieldCheckIcon, ThermometerSimpleIcon } from "@phosphor-icons/react/dist/ssr";
 import { getBlocksRepository, getUnitOfWork } from "../../../server/container";
@@ -9,13 +17,13 @@ import { dnsRecordsFor } from "@zerocorp/domain";
 import { Empty, Panel, Row, Rows } from "../ui";
 import { SetUpEmail } from "./SetUpEmail";
 
-export const metadata = { title: "Email — ZeroCorp" };
+export const metadata = { title: "Email · ZeroCorp" };
 
 /** Warm-up is a calendar process, not a flag. It runs for weeks and its shape is a ramp. */
 const WARMUP_DAYS = 28;
 
 
-export default async function Page() {
+export default async function EmailPage() {
   const viewer = await getViewer();
   if (!viewer) redirect("/signin");
 
@@ -28,14 +36,13 @@ export default async function Page() {
     <>
 
       <Tabs
-        tone="launch"
         tabs={[
           {
             id: "auth",
             label: "Authentication",
-            icon: <ShieldCheckIcon size={17} aria-hidden="true" />,
+            icon: <ShieldCheckIcon size={16} aria-hidden="true" />,
             content: (
-              <div className="mx-auto flex w-full max-w-(--container-content) flex-col gap-8 px-5 py-8 sm:px-8">
+              <Page width="work">
                 {view.domain ? (
                   <>
                     {/*
@@ -51,21 +58,18 @@ export default async function Page() {
                       <BigFact
                         label="SPF"
                         value={view.domain.spfStatus}
-                        tone={view.domain.spfStatus === "verified" ? "success" : "warning"}
                       />
                       <BigFact
                         label="DKIM"
                         value={view.domain.dkimStatus}
-                        tone={view.domain.dkimStatus === "verified" ? "success" : "warning"}
                       />
                       <BigFact
                         label="DMARC"
                         value={view.domain.dmarcStatus}
-                        tone={view.domain.dmarcStatus === "verified" ? "success" : "warning"}
                       />
                       <BigFact
                         label="Reputation"
-                        value={view.domain.reputationScore === null ? "—" : String(view.domain.reputationScore)}
+                        value={view.domain.reputationScore === null ? "Not set" : String(view.domain.reputationScore)}
                         tone="processing"
                         mono
                       />
@@ -95,23 +99,24 @@ export default async function Page() {
                   </>
                 ) : (
                   <EmptyState
+                    cause="first-run"
                     icon={EnvelopeSimpleIcon}
                     title="No sending domain yet"
                     body="Warm-up is a calendar process, not a switch: volume climbs over about four weeks so providers learn the domain sends real mail. Starting it early is the whole game."
                     action={<SetUpEmail />}
                   />
                 )}
-              </div>
+              </Page>
             ),
           },
           {
             id: "warmup",
             label: "Warm-up",
-            icon: <ThermometerSimpleIcon size={17} aria-hidden="true" />,
+            icon: <ThermometerSimpleIcon size={16} aria-hidden="true" />,
             count: view.domain?.warmupDay ?? undefined,
             attention: view.domain?.warmupStatus === "warming",
             content: (
-              <div className="mx-auto flex w-full max-w-(--container-content) flex-col gap-8 px-5 py-8 sm:px-8">
+              <Page width="work">
                 {view.domain && view.domain.warmupStatus !== "not_started" ? (
                   /* Dotted, not another grey box. A warm-up is a process still running,
                      and a dashed edge says "in progress" without spending a colour. */
@@ -141,16 +146,16 @@ export default async function Page() {
                     body="It starts as soon as the domain is authenticated, and runs while the rest of the plan is being built."
                   />
                 )}
-              </div>
+              </Page>
             ),
           },
           {
             id: "mailboxes",
             label: "Mailboxes",
-            icon: <EnvelopeSimpleIcon size={17} aria-hidden="true" />,
+            icon: <EnvelopeSimpleIcon size={16} aria-hidden="true" />,
             count: view.mailboxes.length,
             content: (
-              <div className="mx-auto flex w-full max-w-(--container-content) flex-col gap-8 px-5 py-8 sm:px-8">
+              <Page width="work">
                 <Panel title="Mailboxes" count={view.mailboxes.length}>
                   {view.mailboxes.length === 0 ? (
                     <Empty title="No mailboxes yet" body="Addresses are created once the domain is authenticated." />
@@ -162,7 +167,6 @@ export default async function Page() {
                             initials={box.address.slice(0, 2).toUpperCase()}
                             name={box.address}
                             size="sm"
-                            tone={box.status === "active" ? "success" : "processing"}
                           />
                           <span className="text-body-sm min-w-0 flex-1 font-mono">{box.address}</span>
                           <span className="text-caption text-muted-foreground font-mono tabular-nums">{box.dailyLimit}/day</span>
@@ -172,7 +176,7 @@ export default async function Page() {
                     </Rows>
                   )}
                 </Panel>
-              </div>
+              </Page>
             ),
           },
         ]}

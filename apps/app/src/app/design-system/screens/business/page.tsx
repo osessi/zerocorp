@@ -207,7 +207,7 @@ export default function BusinessScreen() {
                           urgent ? "text-warning-ink" : "text-muted-foreground",
                         )}
                       >
-                        {urgent ? <ClockIcon size={14} weight="regular" aria-hidden="true" /> : null}
+                        {urgent ? <ClockIcon size={16} weight="regular" aria-hidden="true" /> : null}
                         Due {t.due}
                       </span>
                     </div>
@@ -234,7 +234,7 @@ export default function BusinessScreen() {
                     {/* Filled check on its own tint: history is done, and should read as
                         settled rather than as a second list of open work. */}
                     <span className="bg-success-subtle border-success text-success-ink flex size-6 shrink-0 items-center justify-center border">
-                      <CheckCircleIcon size={14} weight="fill" />
+                      <CheckCircleIcon size={16} weight="fill" />
                     </span>
                     <div className="flex min-w-0 flex-col gap-1">
                       <h3 className="text-body text-muted-foreground line-through">{t.title}</h3>

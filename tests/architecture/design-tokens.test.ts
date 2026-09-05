@@ -213,6 +213,48 @@ describe("design tokens — no arbitrary visual values", () => {
     expect(offenders).toEqual([]);
   });
 
+  it("never closes a CSS comment in the middle of a line", () => {
+    /*
+      The comment terminator is the comment terminator wherever it appears, prose or not.
+
+      A docblock explaining that the journey tints are not aliases of the success and info
+      families spelled those families as globs, with a slash between them. That slash
+      followed a star, so the comment CLOSED there. Everything after it became garbage,
+      the parser discarded until it could recover, and it swallowed exactly one
+      declaration: `--journey-build-wash`. The token was undefined, the utility resolved to
+      transparent, and NOTHING saw it — the file parses, the build is green, every test
+      passes, and the colour is simply absent from the screen. Found by reading
+      getComputedStyle in a browser on 2026-09-03, which is the only place it was visible.
+
+      A legitimate terminator is the last thing on its line. That is the whole rule, and in
+      a stylesheet it has no exceptions.
+
+      Same trap, one language over: writing this docblock with the offending spelling in it
+      broke the TEST FILE, which is as good a demonstration as §32b ever gets.
+    */
+    const offenders: string[] = [];
+    const END = "*" + "/";
+    for (const file of [TOKEN_LAYER, ...UI_SOURCES].filter((f) => f.endsWith(".css"))) {
+      readFileSync(join(ROOT, file), "utf8")
+        .split("\n")
+        .forEach((line, i) => {
+          /*
+            The FIRST terminator must be the last thing on the line.
+
+            `endsWith` alone had the same kind of hole the rules above kept growing: a line
+            that closes a comment early AND happens to close again at its end passes it,
+            which is precisely the shape a prose glob followed by more prose produces.
+            Checking the first occurrence has nowhere to hide.
+          */
+          const at = line.indexOf(END);
+          if (at !== -1 && at + END.length !== line.trimEnd().length) {
+            offenders.push(`${file}:${i + 1} closes a comment mid-line: ${JSON.stringify(line.trim().slice(0, 70))}`);
+          }
+        });
+    }
+    expect(offenders, offenders.join("\n")).toEqual([]);
+  });
+
   it("keeps every raw value inside the token layer", () => {
     const tokens = readFileSync(join(ROOT, TOKEN_LAYER), "utf8");
     // Sanity: the validated palette really is where it claims to be.
@@ -511,6 +553,34 @@ describe("design tokens — the two systems stay separate", () => {
    * §32b demonstration -- restoring bg-accent-highlight/15 on the calendar gives:
    *   AssertionError: .../content/Calendar.tsx: accent-highlight/15 is a fifth yellow
    */
+  /**
+   * §11 / §25.3 — the icon scale, ENFORCED.
+   *
+   * The rule this test exists to prove, written after the 2026-09-04 audit:
+   *
+   *   > A standard nothing enforces is not locked, it is decorative.
+   *   > Every locked decision needs a mechanism that makes violating it fail.
+   *
+   * The `IconSize` union has existed since the icon layer was written and enforced
+   * nothing, because nothing was required to pass through it. Counted on 2026-09-04:
+   * 56 of 178 call sites (31%) used a size not on the scale, and the "locked" 20px
+   * standard was the fifth most common value in its own product. The dominant size was
+   * 16, followed by 14, which is not on the scale at all.
+   *
+   * A type is not a mechanism when every call site can route around it.
+   */
+  it("uses only sizes on the §11 icon scale", () => {
+    const SCALE = new Set([12, 16, 20, 24, 32, 40]);
+    const offenders: string[] = [];
+    for (const file of UI_SOURCES) {
+      for (const hit of code(file).match(/size=\{(\d+)\}/g) ?? []) {
+        const value = Number(hit.replace(/\D/g, ""));
+        if (!SCALE.has(value)) offenders.push(`${relative(ROOT, file)} → ${hit}`);
+      }
+    }
+    expect(offenders, offenders.join("\n")).toEqual([]);
+  });
+
   it("never dilutes the mark into a fifth yellow", () => {
     const SHIPPED = UI_SOURCES.filter((f) => !f.includes("/app/design-system/"));
     expect(SHIPPED.length).toBeGreaterThan(20);

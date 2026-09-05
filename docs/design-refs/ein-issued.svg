@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 240" width="320" height="240" role="img" aria-label="Geometry study: EIN issued">
+  <title>Milestone 2 — EIN issued</title>
+  <desc>Geometry study, not final art. A number plate set in mono. Build tint.</desc>
+  <rect width="320" height="240" fill="#FAFAF9"/>
+  <g fill="none" stroke="#14181B" stroke-width="1.5">
+    <rect x="56" y="84" width="208" height="72" fill="#FFFFFF"/>
+    <rect x="48" y="76" width="208" height="72" fill="#E9F7EF"/>
+    <path d="M48 100h208M48 124h208" stroke="#B8DFCA"/>
+  </g>
+  <text x="152" y="120" font-family="ui-monospace,monospace" font-size="26" letter-spacing="4" fill="#000000" text-anchor="middle">88-3021994</text>
+  <g fill="none" stroke="#14663A" stroke-width="1.5">
+    <path d="M232 168l0 24M220 180l24 0"/>
+  </g>
+  <text x="160" y="228" font-family="ui-monospace,monospace" font-size="9" fill="#6E6C66" text-anchor="middle">GEOMETRY STUDY / GEIST MONO / NOT FINAL ART</text>
+</svg>

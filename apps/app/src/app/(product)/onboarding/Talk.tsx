@@ -9,7 +9,14 @@ import {
   StopIcon,
 } from "@phosphor-icons/react/dist/ssr";
 import { ONBOARDING_STEPS } from "@zerocorp/contracts";
-import { AudioVisualizer, Button, cx, useSpeech } from "@zerocorp/ui";
+import {
+  AudioVisualizer,
+  Button,
+  WaveVisualizer,
+  cx,
+  useMicAnalyser,
+  useSpeech,
+} from "@zerocorp/ui";
 import { STEP_COPY } from "./copy";
 import { extractFromTranscript } from "./actions";
 
@@ -59,6 +66,10 @@ export function Talk({ onExtracted, onSkip }: { onExtracted: (heard: string[]) =
     onTranscript: (t) => setText((prev) => (prev ? `${prev} ${t}` : t)),
   });
   const listening = speech.state === "listening";
+  /* The signal, separate from the words. `useSpeech` owns the recogniser and exposes no
+     audio, so the visualiser needs its own capture. One browser permission, two
+     consumers — see useMicAnalyser. */
+  const mic = useMicAnalyser(listening);
   const enough = text.trim().length >= 20;
   const progress = Math.min(1, text.trim().length / ENOUGH);
 
@@ -114,7 +125,18 @@ export function Talk({ onExtracted, onSkip }: { onExtracted: (heard: string[]) =
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-3xl flex-col items-center gap-10 px-5 py-12 sm:px-8">
+    /*
+      THREE COLUMNS, 2026-09-04.
+
+      Everything was stacked on one axis, so the brief and the length meter sat 900px
+      below the microphone they describe — a founder recording had to scroll away from
+      the control to read what it was for.
+
+      Brief left, microphone centre, meter right. The two notes now flank the thing they
+      annotate and are readable without leaving it. Below `lg` they fall back under the
+      recorder, because at that width three columns would be three narrow ones.
+    */
+    <div className="mx-auto flex w-full max-w-6xl flex-col items-center gap-10 px-5 py-12 sm:px-8">
       {/*
         Centred on the workspace, one column, everything on the axis.
 
@@ -133,7 +155,47 @@ export function Talk({ onExtracted, onSkip }: { onExtracted: (heard: string[]) =
       </header>
 
       {!typing ? (
-        <div className="flex flex-col items-center gap-5">
+        <div className="grid w-full items-start gap-6 lg:grid-cols-[minmax(0,17rem)_minmax(0,1fr)_minmax(0,17rem)]">
+          <div className="order-2 lg:order-1">
+          {/*
+            The eight fields, named.
+
+            Not a progress checklist. Nothing here can honestly tick until the model has
+            read the transcript, and a list that ticks on keyword presence would be
+            guessing out loud. It is a brief: these are the things worth covering, so a
+            founder who dries up after two sentences has somewhere to look.
+          */}
+          <div className="border-border bg-surface-sunken flex flex-col gap-4 border p-5">
+            <div className="flex items-baseline justify-between gap-3">
+              <h2 className="text-label">What this fills in</h2>
+              <span className="text-caption text-muted-foreground font-mono tabular-nums">
+                {ONBOARDING_STEPS.length}
+              </span>
+            </div>
+            <ul className="flex flex-col gap-2.5">
+              {ONBOARDING_STEPS.map((key) => {
+                const Icon = STEP_COPY[key].icon;
+                return (
+                  <li key={key} className="flex items-start gap-2.5">
+                    <Icon
+                      size={16}
+                      className="text-primary mt-0.5 shrink-0"
+                      aria-hidden="true"
+                    />
+                    <span className="text-body-sm text-foreground min-w-0">
+                      {STEP_COPY[key].title}
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+            <p className="text-caption text-muted-foreground">
+              Anything ZeroCorp does not hear, it asks for rather than guesses.
+            </p>
+          </div>
+          </div>
+
+          <div className="order-1 flex flex-col items-center gap-3 lg:order-2">
           {/*
             The visualiser IS the control.
 
@@ -156,24 +218,38 @@ export function Talk({ onExtracted, onSkip }: { onExtracted: (heard: string[]) =
             onClick={() => (listening ? speech.stop() : speech.start())}
             disabled={!speech.supported}
             aria-label={listening ? "Stop recording" : "Start recording"}
+            /*
+              A BAND, not a disc. 2026-09-04.
+
+              The wave was drawn inside a 256px round button, so a signal that wants
+              horizontal room was boxed into a circle and the rest of the disc was dead
+              space with a clock 170px below it. The control is now the full width of its
+              column: the wave runs edge to edge and the microphone sits on it.
+            */
             className={cx(
-              "group focus-visible:outline-ring duration-glide ease-glide relative flex size-64 items-center justify-center rounded-full transition-transform focus-visible:outline-2 focus-visible:outline-offset-4",
-              speech.supported ? "motion-safe:hover:scale-[1.02]" : "cursor-not-allowed opacity-50",
+              "group focus-visible:outline-ring relative flex h-44 w-full items-center justify-center focus-visible:outline-2 focus-visible:outline-offset-4",
+              speech.supported ? "" : "cursor-not-allowed opacity-50",
             )}
           >
-            <AudioVisualizer
-              variant="aura"
-              state={listening ? "listening" : "idle"}
-              size="xl"
-              color={listening ? "--destructive" : "--primary"}
-              barCount={32}
-              lineWidth={2}
-              label={listening ? "Your voice, live" : "Not recording"}
-              className="absolute inset-0 h-full w-full"
-            />
+            {/*
+              A continuous WAVE, driven by the live microphone.
+
+              The aura was a ring of bars, which reads as a meter rather than as a voice.
+              Three phase-shifted sines summed under a travelling envelope never repeat
+              within a session, so it reads as a signal instead of as a loop.
+            */}
+            <span className="absolute inset-0 flex items-center">
+              <WaveVisualizer
+                analyser={mic}
+                state={listening ? "listening" : "idle"}
+                height={176}
+                colorVar={listening ? "--destructive" : "--primary"}
+              />
+            </span>
             <span
               className={cx(
-                "duration-glide ease-glide relative flex size-14 items-center justify-center rounded-full transition-[background-color,color]",
+                "duration-glide ease-glide relative flex size-16 items-center justify-center rounded-full transition-[background-color,color,transform]",
+                "motion-safe:group-hover:scale-105",
                 listening
                   ? "bg-destructive text-destructive-foreground"
                   : "bg-primary text-primary-foreground",
@@ -198,6 +274,47 @@ export function Talk({ onExtracted, onSkip }: { onExtracted: (heard: string[]) =
                     ? "Paused. Press again to add more."
                     : "Press to start."}
             </p>
+          </div>
+          </div>
+
+          <div className="order-3">
+          {/*
+            Enough to work with.
+
+            A founder recording into a void has no way to know when to stop, so they
+            either stop too early or keep going long past the point of diminishing return.
+            The threshold is the length below which extraction is not worth running, said
+            plainly rather than enforced silently by a disabled button.
+          */}
+          <div className="border-border flex flex-col gap-3 border p-5">
+            <div className="flex items-baseline justify-between gap-3">
+              <h2 className="text-label">Enough to work with</h2>
+              <span className="text-caption text-muted-foreground font-mono tabular-nums">
+                {Math.round(progress * 100)}%
+              </span>
+            </div>
+            <div
+              className="bg-muted h-1.5 w-full"
+              role="progressbar"
+              aria-valuenow={Math.round(progress * 100)}
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-label="Transcript length against what extraction needs"
+            >
+              <div
+                className={cx(
+                  "duration-glide ease-glide h-full transition-[width]",
+                  progress >= 1 ? "bg-success" : "bg-primary",
+                )}
+                style={{ width: `${progress * 100}%` }}
+              />
+            </div>
+            <p className="text-caption text-muted-foreground">
+              {progress >= 1
+                ? "That is plenty. Keep going if you want to, or read it back."
+                : "About a minute of talking. Shorter works, it just leaves more to correct."}
+            </p>
+          </div>
           </div>
         </div>
       ) : null}
@@ -259,83 +376,6 @@ export function Talk({ onExtracted, onSkip }: { onExtracted: (heard: string[]) =
         </Button>
       </div>
 
-      {/* ── What the minute is for, UNDER the thing it annotates ─────────────── */}
-      <div className="grid w-full gap-3 sm:grid-cols-2">
-          {/*
-            The eight fields, named.
-
-            Not a progress checklist. Nothing here can honestly tick until the model has
-            read the transcript, and a list that ticks on keyword presence would be
-            guessing out loud. It is a brief: these are the things worth covering, so a
-            founder who dries up after two sentences has somewhere to look.
-          */}
-          <div className="border-border bg-surface-sunken flex flex-col gap-4 border p-5">
-            <div className="flex items-baseline justify-between gap-3">
-              <h2 className="text-label">What this fills in</h2>
-              <span className="text-caption text-muted-foreground font-mono tabular-nums">
-                {ONBOARDING_STEPS.length}
-              </span>
-            </div>
-            <ul className="flex flex-col gap-2.5">
-              {ONBOARDING_STEPS.map((key) => {
-                const Icon = STEP_COPY[key].icon;
-                return (
-                  <li key={key} className="flex items-start gap-2.5">
-                    <Icon
-                      size={16}
-                      className="text-primary mt-0.5 shrink-0"
-                      aria-hidden="true"
-                    />
-                    <span className="text-body-sm text-foreground min-w-0">
-                      {STEP_COPY[key].title}
-                    </span>
-                  </li>
-                );
-              })}
-            </ul>
-            <p className="text-caption text-muted-foreground">
-              Anything ZeroCorp does not hear, it asks for rather than guesses.
-            </p>
-          </div>
-
-          {/*
-            Enough to work with.
-
-            A founder recording into a void has no way to know when to stop, so they
-            either stop too early or keep going long past the point of diminishing return.
-            The threshold is the length below which extraction is not worth running, said
-            plainly rather than enforced silently by a disabled button.
-          */}
-          <div className="border-border flex flex-col gap-3 border p-5">
-            <div className="flex items-baseline justify-between gap-3">
-              <h2 className="text-label">Enough to work with</h2>
-              <span className="text-caption text-muted-foreground font-mono tabular-nums">
-                {Math.round(progress * 100)}%
-              </span>
-            </div>
-            <div
-              className="bg-muted h-1.5 w-full"
-              role="progressbar"
-              aria-valuenow={Math.round(progress * 100)}
-              aria-valuemin={0}
-              aria-valuemax={100}
-              aria-label="Transcript length against what extraction needs"
-            >
-              <div
-                className={cx(
-                  "duration-glide ease-glide h-full transition-[width]",
-                  progress >= 1 ? "bg-success" : "bg-primary",
-                )}
-                style={{ width: `${progress * 100}%` }}
-              />
-            </div>
-            <p className="text-caption text-muted-foreground">
-              {progress >= 1
-                ? "That is plenty. Keep going if you want to, or read it back."
-                : "About a minute of talking. Shorter works, it just leaves more to correct."}
-            </p>
-          </div>
-      </div>
-    </div>
+</div>
   );
 }

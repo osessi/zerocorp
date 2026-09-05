@@ -68,14 +68,14 @@ export default function DocumentsScreen() {
             {
               label: "Documents owed",
               value: String(counts.owed),
-              icon: <WarningCircleIcon size={14} />,
+              icon: <WarningCircleIcon size={16} />,
               tone: "danger",
               delta: { text: "blocks the Wyoming filing", direction: "down" },
             },
             {
               label: "Pending review",
               value: String(counts.pending),
-              icon: <ClockIcon size={14} />,
+              icon: <ClockIcon size={16} />,
               tone: "warning",
               delta: { text: "oldest waiting 2 days", direction: "flat" },
             },
@@ -83,12 +83,12 @@ export default function DocumentsScreen() {
               label: "Accepted",
               value: String(counts.accepted),
               sub: `of ${DOCUMENTS.length}`,
-              icon: <FileTextIcon size={14} />,
+              icon: <FileTextIcon size={16} />,
               tone: "success",
               delta: { text: "3 this week", direction: "up" },
             },
           ]}
-          link={<button className="text-body-sm text-foreground focus-visible:outline-ring inline-flex w-fit items-center gap-1 focus-visible:outline-2 focus-visible:outline-offset-2">Go to formation <ArrowRightIcon size={14} /></button>}
+          link={<button className="text-body-sm text-foreground focus-visible:outline-ring inline-flex w-fit items-center gap-1 focus-visible:outline-2 focus-visible:outline-offset-2">Go to formation <ArrowRightIcon size={16} /></button>}
         />
 
         <section className="flex flex-col gap-4">

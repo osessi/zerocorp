@@ -87,7 +87,7 @@ export function BusinessStatusDemo() {
           <div key={s.label} className="border-border flex flex-col gap-3 border p-4">
             <div className="flex items-center justify-between gap-2">
               <span className="text-overline text-muted-foreground inline-flex items-center gap-2 uppercase">
-                <Icon size={14} aria-hidden="true" />
+                <Icon size={16} aria-hidden="true" />
                 {s.label}
               </span>
               <IconButton label={`Open ${s.label}`} icon={ArrowSquareOutIcon} size="sm" />

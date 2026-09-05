@@ -216,7 +216,7 @@ function StepCard({ step, index, phase }: { step: PlanStep; index: number; phase
               phase.hoverFill,
             )}
           >
-            <Icon size={22} weight="regular" aria-hidden="true" />
+            <Icon size={24} weight="regular" aria-hidden="true" />
           </span>
 
           {/* Large, faint, and out of the reading path. It orders the plan without
@@ -276,7 +276,6 @@ export function PlanResult({ output }: { output: ArchitectOutput }) {
             <Metric
               label="Entity"
               value={plan.recommendedEntityTypeCode ?? "None"}
-              tone={plan.recommendedEntityTypeCode ? "text-chart-1" : "text-muted-foreground"}
             />
           </div>
           <div className="bg-background">
@@ -353,7 +352,7 @@ export function PlanResult({ output }: { output: ArchitectOutput }) {
       {/* ── What happens next ──────────────────────────────────────────── */}
       <section className="border-border flex flex-wrap items-center gap-x-6 gap-y-2 border-t pt-6">
         <span className="text-body-sm text-muted-foreground flex items-center gap-2">
-          <CheckIcon size={14} className="text-chart-1" aria-hidden="true" />
+          <CheckIcon size={16} className="text-chart-1" aria-hidden="true" />
           Approve the plan, see the price, then we build it
         </span>
       </section>

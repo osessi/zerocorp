@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 240" width="320" height="240" role="img" aria-label="Geometry study: company formed">
+  <title>Milestone 1 — Company formed</title>
+  <desc>Geometry study, not final art. Filed document with a seal. Build tint.</desc>
+  <rect width="320" height="240" fill="#FAFAF9"/>
+  <g fill="none" stroke="#14181B" stroke-width="1.5" stroke-linecap="butt" stroke-linejoin="miter">
+    <rect x="96" y="52" width="128" height="152" fill="#E9F7EF"/>
+    <rect x="86" y="42" width="128" height="152" fill="#FFFFFF"/>
+    <path d="M104 70h92M104 86h92M104 102h64M104 118h92M104 134h48"/>
+    <path d="M170 42l44 0 0 44" stroke-width="1.5"/>
+    <path d="M170 42l0 44 44 0" />
+  </g>
+  <g fill="none" stroke="#14663A" stroke-width="1.5">
+    <circle cx="112" cy="168" r="18"/>
+    <path d="M104 168l6 6 12-12"/>
+  </g>
+  <text x="160" y="228" font-family="ui-monospace,monospace" font-size="9" fill="#6E6C66" text-anchor="middle">GEOMETRY STUDY / BUILD TINT / NOT FINAL ART</text>
+</svg>

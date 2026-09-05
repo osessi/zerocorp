@@ -55,7 +55,7 @@ export default async function Page() {
           <Rows>
             {view.members.map((member) => (
               <Row key={member.email}>
-                <UserIcon size={18} className="text-muted-foreground shrink-0" aria-hidden="true" />
+                <UserIcon size={16} className="text-muted-foreground shrink-0" aria-hidden="true" />
                 <span className="text-body-sm min-w-0 flex-1 truncate">{member.email}</span>
                 <StatusBadge tone={member.role === "owner" ? "processing" : "neutral"}>{member.role}</StatusBadge>
               </Row>

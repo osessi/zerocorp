@@ -45,6 +45,28 @@ export interface Series {
 export const seriesColor = (slot: SeriesKey) => `var(--chart-${slot})`;
 
 /**
+ * Ink for text sitting ON a series — §4.7.
+ *
+ * One ink for all five does not exist. White measures 5.36 / 7.10 / 5.17 / 4.09 / 6.04 on
+ * the light series, and --chart-4 is gold: it fails 4.5:1, and anything dark enough to fix
+ * it fails on the teal and the violet. The shadcn radial block gets away with one white
+ * because its five colours are one blue ramp; ours are five hues, chosen to be told apart
+ * rather than to share a luminance.
+ *
+ * So the ink belongs to the SERIES. Written out rather than interpolated for the same
+ * reason class names are: a value assembled at runtime is a value nobody can grep for.
+ */
+const SERIES_INK: Record<SeriesKey, string> = {
+  1: "var(--chart-1-ink)",
+  2: "var(--chart-2-ink)",
+  3: "var(--chart-3-ink)",
+  4: "var(--chart-4-ink)",
+  5: "var(--chart-5-ink)",
+};
+
+export const seriesInk = (slot: SeriesKey) => SERIES_INK[slot];
+
+/**
  * The stroke pattern is OPTIONAL and off by default.
  *
  * The first version dashed every series on every chart, on the grounds that colour cannot
@@ -105,7 +127,19 @@ export function ChartFrame({
   children: ReactNode;
 }) {
   return (
-    <figure className="border-border flex flex-col border">
+    /*
+      DASHED, on all four sides.
+
+      A chart is not a card. A card holds a fact that is finished; a chart holds a region
+      the data is drawn INTO, and the dashed edge says so — the same distinction the
+      announcement band draws, one register down. Asked for on 2026-09-03 for both charts
+      on the Command Center, so it belongs to the frame rather than to either of them.
+
+      Four sides, because that is the only shape a border is allowed to take here. The
+      rules INSIDE the frame stay solid: the header rule and the legend rule divide two
+      regions, which is structure, and structure is not drawn in dashes.
+    */
+    <figure className="border-border flex h-full flex-col border border-dashed">
       <div className="border-border bg-muted flex flex-wrap items-center justify-between gap-3 border-b px-4 py-3">
         <figcaption className="flex flex-col gap-0.5">
           <span className="text-label text-foreground">{title}</span>
@@ -114,31 +148,47 @@ export function ChartFrame({
         {action}
       </div>
 
-      <div className="p-4">{children}</div>
+      {/*
+        `h-full` on the frame and `flex-1` here, so two frames sharing a grid row end on
+        the same line.
+
+        They did not: the radial's legend wraps to three rows in a quarter-width column
+        and Publishing's fits on one, so one outline stopped 44px above the other. A grid
+        row already stretches its cells — the frame just has to accept the height and give
+        it to the region that can absorb it. The chart itself keeps its own height and
+        CENTRES in whatever it is given, rather than stretching a 200px plot to fill a gap.
+      */}
+      <div className="flex flex-1 flex-col justify-center p-4">{children}</div>
 
       {/*
         The legend is not decoration, it is the second channel made visible: each entry
         shows the SWATCH and the STROKE, so a reader who cannot separate two hues still
         has the dash pattern. Rendering a legend without the pattern would defeat it.
+
+        No series, no strip. `series={[]}` used to render an empty bordered band 45px
+        tall — a rule and some padding around nothing, on every chart that labels itself
+        another way. A frame that draws a region for content it does not have is chrome.
       */}
-      <div className="border-border flex flex-wrap items-center gap-x-5 gap-y-2 border-t px-4 py-3">
-        {series.map((s) => (
-          <span key={s.key} className="text-caption text-muted-foreground inline-flex items-center gap-2">
-            <svg width="18" height="10" aria-hidden="true" className="shrink-0">
-              <line
-                x1="0"
-                y1="5"
-                x2="18"
-                y2="5"
-                stroke={seriesColor(s.slot)}
-                strokeWidth="2"
-                strokeDasharray={DASH[s.pattern]}
-              />
-            </svg>
-            {s.label}
-          </span>
-        ))}
-      </div>
+      {series.length > 0 ? (
+        <div className="border-border flex flex-wrap items-center gap-x-5 gap-y-2 border-t px-4 py-3">
+          {series.map((s) => (
+            <span key={s.key} className="text-caption text-muted-foreground inline-flex items-center gap-2">
+              <svg width="18" height="10" aria-hidden="true" className="shrink-0">
+                <line
+                  x1="0"
+                  y1="5"
+                  x2="18"
+                  y2="5"
+                  stroke={seriesColor(s.slot)}
+                  strokeWidth="2"
+                  strokeDasharray={DASH[s.pattern]}
+                />
+              </svg>
+              {s.label}
+            </span>
+          ))}
+        </div>
+      ) : null}
 
       {footer ? (
         <div className="border-border text-caption text-muted-foreground border-t px-4 py-3">{footer}</div>

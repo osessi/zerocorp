@@ -66,7 +66,7 @@ export default function BusinessesScreen() {
             ))}
           </div>
           <Button><FunnelIcon size={16} /> Filter <span className="bg-primary text-primary-foreground text-caption inline-flex size-4 items-center justify-center">1</span></Button>
-          <Button>Options <CaretDownIcon size={14} /></Button>
+          <Button>Options <CaretDownIcon size={16} /></Button>
         </div>
 
         {/* Table */}
@@ -151,11 +151,11 @@ export default function BusinessesScreen() {
 
         {/* Pagination — centred, active page filled */}
         <div className="flex items-center justify-center gap-2 pt-6">
-          <Button><CaretLeftIcon size={14} /> Previous</Button>
+          <Button><CaretLeftIcon size={16} /> Previous</Button>
           {["1", "2", "…", "5"].map((p, i) => (
             <button key={i} className={cx("text-label focus-visible:outline-ring size-9 transition-[color,background-color,border-color] duration-normal focus-visible:outline-2 focus-visible:outline-offset-2", p === "1" ? "bg-primary text-primary-foreground border-primary border" : "hover:bg-accent text-muted-foreground")}>{p}</button>
           ))}
-          <Button>Next <CaretRightIcon size={14} /></Button>
+          <Button>Next <CaretRightIcon size={16} /></Button>
         </div>
       </div>
     </>

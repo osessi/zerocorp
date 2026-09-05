@@ -201,7 +201,7 @@ function NavRow({
             )}
           >
             <CaretRightIcon
-              size={13}
+              size={12}
               weight="bold"
               aria-hidden="true"
               className={cx("transition-transform duration-glide ease-glide", open && "rotate-90")}

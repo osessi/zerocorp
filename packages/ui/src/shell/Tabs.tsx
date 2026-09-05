@@ -2,7 +2,6 @@
 
 import { useEffect, useState, type ReactNode } from "react";
 import { cx } from "../cx";
-import { JOURNEY_TABS, NEUTRAL_TABS, type JourneyTone } from "./journey";
 
 /**
  * Real sub-navigation. One panel at a time.
@@ -41,20 +40,11 @@ export function Tabs({
   tabs,
   action,
   defaultTab,
-  tone,
   banner,
 }: {
   tabs: readonly TabDef[];
   action?: ReactNode;
   defaultTab?: string;
-  /**
-   * Which stage of the journey this screen is — DESIGN_SYSTEM.md §4.10.
-   *
-   * The same value the screen's group carries in the sidebar, so the rail and the
-   * workspace are one colour system rather than two that happen to touch. Omitted, the
-   * strip is neutral and the marker is the brand teal.
-   */
-  tone?: JourneyTone;
   /**
    * Shown under the strip, on every tab.
    *
@@ -65,7 +55,6 @@ export function Tabs({
   banner?: ReactNode;
 }) {
   const [active, setActive] = useState(defaultTab ?? tabs[0]?.id ?? "");
-  const t = tone ? JOURNEY_TABS[tone] : NEUTRAL_TABS;
 
   /*
     The URL fragment selects a tab.
@@ -103,7 +92,15 @@ export function Tabs({
         now optically in the centre of the workspace and the action, if there is one, is
         pinned right without pushing the tabs off centre.
       */}
-      <div className={cx("border-border sticky top-0 z-20 border-b", t.band)}>
+      {/*
+        The band stays NEUTRAL, deliberately.
+
+        The journey tints were run across it once and taken straight back out: "je t'ai
+        demandé de changer la couleur de la sidebar, pas celle du header associé dans
+        l'espace de travail". The rail is where the journey lives. A tinted strip at the
+        top of the workspace is a second colour system arguing with the content under it.
+      */}
+      <div className="border-border bg-surface sticky top-0 z-20 border-b">
         <div className="relative mx-auto flex w-full max-w-(--container-content) items-end justify-center gap-4 overflow-x-auto px-5 sm:px-8">
         <div role="tablist" aria-label="Sections" className="flex items-stretch">
           {tabs.map((tab) => {
@@ -126,20 +123,15 @@ export function Tabs({
                   // tabs were genuinely hard to hit.
                   "h-12 px-5 transition-[color,background-color] duration-normal ease-out",
                   "focus-visible:outline-2 focus-visible:-outline-offset-2",
-                  // Selected lifts OFF the tinted band onto --background, which is what
-                  // makes it a tab rather than a highlighted word.
-                  on ? t.active : t.rest,
+                  on
+                    ? "text-foreground font-medium"
+                    : "text-muted-foreground hover:text-foreground hover:bg-accent/50",
                 )}
               >
                 {tab.icon}
                 {tab.label}
                 {tab.count !== undefined && tab.count > 0 ? (
-                  <span
-                    className={cx(
-                      "text-caption rounded-sm inline-flex h-5 min-w-5 items-center justify-center px-1.5 font-mono tabular-nums",
-                      t.count,
-                    )}
-                  >
+                  <span className="text-caption bg-muted text-muted-foreground rounded-sm inline-flex h-5 min-w-5 items-center justify-center px-1.5 font-mono tabular-nums">
                     {tab.count}
                   </span>
                 ) : null}
@@ -151,9 +143,7 @@ export function Tabs({
                 {/* The selected marker is a 2px rule on the BOTTOM edge of a tab strip —
                     which is what a tab is. §21.27 is about a bar down the left side of a
                     panel; this is the underline that makes a tab a tab. */}
-                {on ? (
-                  <span className={cx("absolute inset-x-0 -bottom-px h-0.5", t.marker)} aria-hidden="true" />
-                ) : null}
+                {on ? <span className="bg-primary absolute inset-x-0 -bottom-px h-0.5" aria-hidden="true" /> : null}
               </button>
             );
           })}

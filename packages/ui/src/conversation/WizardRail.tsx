@@ -132,7 +132,7 @@ export function WizardRail({
                   carry.
                 */}
                 {Icon ? (
-                  <Icon size={14} weight="regular" aria-hidden="true" />
+                  <Icon size={16} weight="regular" aria-hidden="true" />
                 ) : (
                   <span className="text-caption font-mono tabular-nums" aria-hidden="true">
                     {i + 1}

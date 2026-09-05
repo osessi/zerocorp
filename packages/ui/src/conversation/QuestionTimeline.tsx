@@ -128,7 +128,7 @@ export function QuestionTimeline({
               {marker}
               {text}
               <PencilSimpleIcon
-                size={14}
+                size={16}
                 aria-hidden="true"
                 className={cx(
                   "text-muted-foreground mt-1 opacity-0 transition-[opacity] duration-normal ease-out",

@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 240" width="320" height="240" role="img" aria-label="Geometry study: site live">
+  <title>Milestone 3 — Site live</title>
+  <desc>Geometry study, not final art. Browser frame with a live cursor. Launch tint.</desc>
+  <rect width="320" height="240" fill="#FAFAF9"/>
+  <g fill="none" stroke="#14181B" stroke-width="1.5">
+    <rect x="56" y="60" width="216" height="140" fill="#E9F1FD"/>
+    <rect x="48" y="52" width="216" height="140" fill="#FFFFFF"/>
+    <path d="M48 76h216"/>
+    <path d="M64 64h8M80 64h8M96 64h8"/>
+    <path d="M68 96h80M68 112h176M68 128h176M68 144h120"/>
+  </g>
+  <g fill="none" stroke="#1B48C4" stroke-width="1.5">
+    <path d="M196 148l0 32 8-8 6 12 6-3-6-12 11 0z" fill="#FFFFFF"/>
+  </g>
+  <text x="160" y="228" font-family="ui-monospace,monospace" font-size="9" fill="#6E6C66" text-anchor="middle">GEOMETRY STUDY / LAUNCH TINT / NOT FINAL ART</text>
+</svg>

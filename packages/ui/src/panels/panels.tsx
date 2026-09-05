@@ -244,14 +244,14 @@ export function ActivityPanel({
                   className="bg-ai-subtle border-ai text-ai-ink inline-flex size-6 shrink-0 items-center justify-center border"
                   aria-hidden="true"
                 >
-                  <RobotIcon size={14} weight="regular" />
+                  <RobotIcon size={16} weight="regular" />
                 </span>
               ) : (
                 <span
                   className="bg-processing-subtle border-processing text-processing-ink inline-flex size-6 shrink-0 items-center justify-center border"
                   aria-hidden="true"
                 >
-                  <ArrowsClockwiseIcon size={14} weight="regular" />
+                  <ArrowsClockwiseIcon size={16} weight="regular" />
                 </span>
               )}
               {!last ? <span className="bg-border w-px flex-1" aria-hidden="true" /> : null}
